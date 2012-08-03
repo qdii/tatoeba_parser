@@ -2,16 +2,22 @@
 #include <assert.h>
 #include <string.h> //memcmp
 #include <algorithm> // remove_if, find
+
+// __________________________________________________________________________ //
+
 selecter::selecter()
     :m_allowedCharacters( nullptr )
 {
     m_hasCountryCode[0] = 0;
 }
+// __________________________________________________________________________ //
 
 selecter::~selecter()
 {
     delete m_allowedCharacters;
 }
+
+// __________________________________________________________________________ //
 
 int selecter::canContainCharacters( const char * _characters )
 {
@@ -36,11 +42,15 @@ int selecter::canContainCharacters( const char * _characters )
     return ret;
 }
 
+// __________________________________________________________________________ //
+
 int selecter::hasCountryCode( const char _countryCode [5] )
 {
     memcpy( m_hasCountryCode, _countryCode, 5 );
     return 0;
 }
+
+// __________________________________________________________________________ //
 
 int selecter::matches( const sentence & _candidate )
 {
@@ -98,6 +108,8 @@ int selecter::matches( const sentence & _candidate )
 
     return ret;
 }
+
+// __________________________________________________________________________ //
 
 int selecter::setMustContainCharacters( const char * _characters )
 {

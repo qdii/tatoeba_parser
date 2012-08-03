@@ -23,11 +23,15 @@ private:
     friend cout_warning & operator<<( cout_warning & _cout, const T & _ostr );
 };
 
+// __________________________________________________________________________ //
+
 inline
 cout_warning::cout_warning()
     :m_isMuted( false )
 {
 }
+
+// __________________________________________________________________________ //
 
 inline
 int cout_warning::mute()
@@ -35,6 +39,8 @@ int cout_warning::mute()
     m_isMuted = true;
     return 0;
 }
+
+// __________________________________________________________________________ //
 
 template<typename T>
 cout_warning & operator<<( cout_warning & _cout, const T & _ostr )
@@ -45,7 +51,11 @@ cout_warning & operator<<( cout_warning & _cout, const T & _ostr )
     return _cout;
 }
 
+// __________________________________________________________________________ //
+
 extern cout_warning * gs_coutWarning;
+
+// __________________________________________________________________________ //
 
 static
 inline cout_warning & getCoutWarning()
@@ -53,6 +63,8 @@ inline cout_warning & getCoutWarning()
     ASSERT( gs_coutWarning );
     return * gs_coutWarning;
 }
+
+// __________________________________________________________________________ //
 
 #define WARN getCoutWarning()
 

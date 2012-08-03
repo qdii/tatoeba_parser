@@ -54,7 +54,7 @@ int main( int argc, char * argv[] )
     const int parseSuccess = tatoeba_parser.start();
 
     if( parseSuccess == -1 )
-        std::cerr << "[EE] parser returned false" << std::endl;
+        std::cerr << "Unable to open \"sentences.csv\"" << std::endl;
     else
     {
         WARN << "OK, parsed " << allSentences.size() << " sentences\n";

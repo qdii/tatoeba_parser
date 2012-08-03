@@ -37,6 +37,8 @@ private:
 	std::string	    m_country;
 };
 
+// __________________________________________________________________________ //
+
 inline
 const char * sentence::getCountryCode() const
 {
@@ -44,17 +46,23 @@ const char * sentence::getCountryCode() const
     return m_country.c_str();
 }
 
+// __________________________________________________________________________ //
+
 inline
 const UnicodeString & sentence::text() const
 {
     return m_text;
 }
 
+// __________________________________________________________________________ //
+
 inline
 const UChar * sentence::textRaw() const
 {
     return const_cast<UnicodeString&>(text()).getTerminatedBuffer();
 }
+
+// __________________________________________________________________________ //
 
 inline
 sentence::id  sentence::getId() const

@@ -64,6 +64,8 @@ private:
     char            m_hasCountryCode[5]; //the country code to match
 };
 
+// __________________________________________________________________________ //
+
 inline
 int selecter::setMustContainCharacters(const std::string & _characters)
 {

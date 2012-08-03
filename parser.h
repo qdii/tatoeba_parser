@@ -31,7 +31,9 @@ struct parser
 	int setOutput ( dataset & _output );
 
 	/**@brief Starts parsing the file
-	 * @return 0 on success
+	 * @return This function will return:
+     * 0 on success
+     * -1 if the file cannot be opened
 	 *
 	 * Parsing the file means going line by line and creating a sentence object
 	 * for whichever fits the regular expression (has a correct id, a decent

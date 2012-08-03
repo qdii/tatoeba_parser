@@ -16,17 +16,23 @@
 static const char CSV_REGULAR_EXPRESSION[] =
     "^([[:digit:]]+)[[:space:]]+([[:lower:]]+|\\\\N)[[:space:]]+(.*)$";
 
+// __________________________________________________________________________ //
+
 parser::parser( const std::string & _file )
     :m_file( _file )
     ,m_output( nullptr )
 {
 }
 
+// __________________________________________________________________________ //
+
 int parser::setOutput( dataset & _output )
 {
     m_output = &_output;
     return 0;
 }
+
+// __________________________________________________________________________ //
 
 int parser::start()
 {
