@@ -67,5 +67,6 @@ inline cout_warning & getCoutWarning()
 // __________________________________________________________________________ //
 
 #define WARN getCoutWarning()
+#define ERR std::cerr
 
 #endif //OUTPUT_H
