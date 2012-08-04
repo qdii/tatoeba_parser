@@ -42,7 +42,6 @@ private:
 inline
 const char * sentence::getCountryCode() const
 {
-    assert(m_country[4] == 0 || m_country[5] == 0);
     return m_country.c_str();
 }
 
