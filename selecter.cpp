@@ -7,6 +7,7 @@
 
 selecter::selecter()
     :m_allowedCharacters( nullptr )
+    ,m_regularExpression( nullptr )
 {
     m_hasCountryCode[0] = 0;
 }
@@ -14,6 +15,7 @@ selecter::selecter()
 
 selecter::~selecter()
 {
+    delete m_regularExpression;
     delete m_allowedCharacters;
 }
 
@@ -106,6 +108,15 @@ int selecter::matches( const sentence & _candidate )
         }
     }
 
+    // checking regular expression
+    if( m_regularExpression && ret == 0 )
+    {
+        m_regularExpression->reset( _candidate.text() );
+
+        if( !m_regularExpression->find() )
+            ret = -1;
+    }
+
     return ret;
 }
 
@@ -115,4 +126,25 @@ int selecter::setMustContainCharacters( const char * _characters )
 {
     m_compulsoryCharacters = _characters;
     return 0;
+}
+
+// __________________________________________________________________________ //
+
+int selecter::matchRegularExpression( const std::string & _regex )
+{
+    int ret = 0;
+
+    if( !m_regularExpression )
+    {
+        UErrorCode     status   = U_ZERO_ERROR;
+        m_regularExpression     = new RegexMatcher( _regex.c_str(), 0, status );
+
+        if( U_FAILURE( status ) )
+            ret = -1;
+    }
+
+    if( !m_regularExpression && ret == 0 )
+        ret = -2;
+
+    return ret;
 }

@@ -19,13 +19,14 @@ int main( int argc, char * argv[] )
     // command line parameters
     po::options_description desc( "Allowed options" );
     desc.add_options()
-    ( "help", "produce help message" )
+    ( "help,h", "produce help message" )
     ( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence" )
     ( "optional,o", po::value<std::string>(), "The characters that may compose the sentence" )
     ( "line-numbers,n", "The characters that may compose the sentence" )
     ( "language,l", po::value<std::string>(), "Restrict the languages to a given one" )
     ( "display-ids,i", "Displays the sentence ids" )
-    ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'")
+    ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
+    ( "regex,r", po::value<std::string>(), "A regular expression that the sentence should match entirely" )
     ( "verbose,v", "Displays warnings" )
     ;
 
@@ -54,7 +55,7 @@ int main( int argc, char * argv[] )
     const int parseSuccess = tatoeba_parser.start();
 
     if( parseSuccess == -1 )
-        std::cerr << "Unable to open \"sentences.csv\"" << std::endl;
+        ERR << "Unable to open \"sentences.csv\"\n";
     else
     {
         WARN << "OK, parsed " << allSentences.size() << " sentences\n";
@@ -65,6 +66,30 @@ int main( int argc, char * argv[] )
 
         if( vm.count( "compulsory" ) )
             VERIFY_EQ( sel.setMustContainCharacters( vm["compulsory"].as<std::string>() ), 0 );
+
+        if( vm.count( "regex" ) )
+        {
+            const int regex_result =
+                sel.matchRegularExpression( vm["regex"].as<std::string>() );
+
+            switch( regex_result )
+            {
+            case -1:
+                ERR << "Invalid regular expression\n";
+                break;
+
+            case -2:
+                ERR << "Out of memory\n";
+                break;
+
+            default:
+                break;
+            }
+
+            if( regex_result != 0 )
+                return 1;
+
+        }
 
         std::string language;
         language.reserve( 5 );

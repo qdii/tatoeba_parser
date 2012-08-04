@@ -1,10 +1,10 @@
 CC=g++
 CFLAGS=-Wall -Wextra -O3 -pedantic -std=c++0x
-EXEC="parser"
+EXEC=parser
 SRC= $(wildcard *.cpp)
 OBJ= $(SRC:.cpp=.o)
 INCLUDES=-I/usr/include/unicode
-LIBS=-lboost_regex -licuuc -lboost_program_options
+LIBS=-lboost_regex -licuuc -lboost_program_options -licutu
 all: $(EXEC)
 
 $(EXEC): $(OBJ)

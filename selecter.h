@@ -3,6 +3,7 @@
 
 #include "sentence.h"
 #include <string>
+#include <unicode/regex.h>
 
 
 /**@struct selecter
@@ -54,6 +55,11 @@ struct selecter
      * @param[in] _countryCode The country code to match */
     int hasCountryCode(const char _countryCode[5]);
     
+    /**@brief Checks whether the sentence matches a given regular expression 
+     * @param[in] _regex The regular expression
+     * @return 0 on success, -1 if the regular expression is not valid, -2 if there is no memory */
+    int matchRegularExpression(const std::string & _regex);
+    
     /**@brief The string to check 
      * @return 0 if the string matches, -1 if it does not, -2 on error */
     int matches(const sentence & _stringToCheck);
@@ -62,6 +68,7 @@ private:
     UnicodeString   m_compulsoryCharacters; // characters that HAVE to be in the sentence
     UnicodeString * m_allowedCharacters; //characters that may appear in the sentence
     char            m_hasCountryCode[5]; //the country code to match
+    RegexMatcher  * m_regularExpression;
 };
 
 // __________________________________________________________________________ //
