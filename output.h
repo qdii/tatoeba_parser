@@ -47,7 +47,7 @@ cout_warning & operator<<( cout_warning & _cout, const T & _ostr )
 {
     if( !_cout.m_isMuted )
         std::cout << _ostr;
-        
+
     return _cout;
 }
 

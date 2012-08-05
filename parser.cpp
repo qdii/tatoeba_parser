@@ -74,8 +74,8 @@ int parser::start()
             // parsing the sentence data
             std::string sentenceText( results[3].first, results[3].second );
 
-            m_output->push_back( 
-                sentence( sentenceId, std::move( sentenceText ), sentenceCountry ) 
+            m_output->push_back(
+                sentence( sentenceId, std::move( sentenceText ), sentenceCountry )
             );
         }
         else
@@ -86,5 +86,3 @@ int parser::start()
 
     return 0;
 }
-
-

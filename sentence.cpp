@@ -25,7 +25,7 @@ sentence::sentence( id _id, std::string && _text, char _country[5] )
 
 // __________________________________________________________________________ //
 
-std::ostream& operator << ( std::ostream& _ostr, const sentence& _sentence )
+std::ostream & operator << ( std::ostream & _ostr, const sentence & _sentence )
 {
     // here we will convert the  UTF-16 encoded text into some printable UTF-8
     const UnicodeString & utf16text = _sentence.text();
