@@ -19,15 +19,15 @@ int main( int argc, char * argv[] )
     // command line parameters
     po::options_description desc( "Allowed options" );
     desc.add_options()
-    ( "help,h", "produce help message" )
-    ( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence" )
-    ( "optional,o", po::value<std::string>(), "The characters that may compose the sentence" )
-    ( "line-numbers,n", "The characters that may compose the sentence" )
-    ( "language,l", po::value<std::string>(), "Restrict the languages to a given one" )
-    ( "display-ids,i", "Displays the sentence ids" )
-    ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
-    ( "regex,r", po::value<std::string>(), "A regular expression that the sentence should match entirely" )
-    ( "verbose,v", "Displays warnings" )
+        ( "help,h", "produce help message" )
+        ( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence" )
+        ( "optional,o", po::value<std::string>(), "The characters that may compose the sentence" )
+        ( "line-numbers,n", "Display the indexes of the lines" )
+        ( "language,l", po::value<std::string>(), "Restrict the languages to a given one" )
+        ( "display-ids,i", "Displays the sentence ids" )
+        ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
+        ( "regex,r", po::value<std::string>(), "A regular expression that the sentence should match entirely" )
+        ( "verbose,v", "Displays warnings" )
     ;
 
     po::variables_map vm;
