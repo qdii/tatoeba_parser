@@ -49,8 +49,6 @@ int main( int argc, char * argv[] )
     if( !vm.count( "verbose" ) )
         VERIFY_EQ( gs_coutWarning->mute(), 0 );
 
-    std::string compulsory, optional;
-
     // parse the file
     const std::string filename( "sentences.csv" );
     parser tatoeba_parser( filename );
