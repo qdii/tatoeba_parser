@@ -4,6 +4,8 @@
 #include <iostream>
 #include "prec.h"
 
+NAMESPACE_START
+
 /**@struct cout_warning
  * @brief A structure much like cout, but that can be shut off easily */
 struct cout_warning
@@ -68,5 +70,7 @@ inline cout_warning & getCoutWarning()
 
 #define WARN getCoutWarning()
 #define ERR std::cerr
+
+NAMESPACE_END
 
 #endif //OUTPUT_H

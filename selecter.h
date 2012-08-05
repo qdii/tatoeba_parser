@@ -5,6 +5,7 @@
 #include <string>
 #include <unicode/regex.h>
 
+NAMESPACE_START
 
 /**@struct selecter
  * @brief Tells if a sentence match a set of criterions.
@@ -78,4 +79,7 @@ int selecter::setMustContainCharacters( const std::string & _characters )
 {
     return setMustContainCharacters( _characters.c_str() );
 }
+
+NAMESPACE_END
+
 #endif //SELECTER_H

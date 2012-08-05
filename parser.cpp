@@ -8,6 +8,8 @@
 #include <string>
 #include <sstream>
 
+NAMESPACE_START
+
 // ex:
 //		1		fra		Bonjour les amis!
 //
@@ -86,3 +88,6 @@ int parser::start()
 
     return 0;
 }
+
+
+NAMESPACE_END

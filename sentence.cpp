@@ -3,6 +3,8 @@
 #include <string.h>
 #include <assert.h>
 
+NAMESPACE_START
+
 sentence::sentence( id _id, std::string & _text, char _country[5] )
     :m_id( _id )
     ,m_text( UnicodeString::fromUTF8( _text ) )
@@ -46,3 +48,5 @@ std::ostream & operator << ( std::ostream & _ostr, const sentence & _sentence )
 
     return _ostr;
 }
+
+NAMESPACE_END

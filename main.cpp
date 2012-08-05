@@ -6,9 +6,15 @@
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <iostream>
+
 namespace po = boost::program_options;
 
+NAMESPACE_START
+
 cout_warning * gs_coutWarning;
+
+NAMESPACE_END
+USING_NAMESPACE
 
 int main( int argc, char * argv[] )
 {

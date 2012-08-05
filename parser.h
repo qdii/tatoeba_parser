@@ -4,6 +4,8 @@
 #include <string>
 #include "dataset.h"
 
+NAMESPACE_START
+
 /**@struct parser
  * @brief Parse a file to create a data set of sentences
  *
@@ -45,5 +47,7 @@ private:
     dataset  *	m_output;	// the dataset where we will put the parsed sentences
 
 };
+
+NAMESPACE_END
 
 #endif //PARSER_H

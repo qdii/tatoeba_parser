@@ -1,7 +1,10 @@
+#include "prec.h"
 #include "selecter.h"
 #include <assert.h>
 #include <string.h> //memcmp
 #include <algorithm> // remove_if, find
+
+NAMESPACE_START
 
 // __________________________________________________________________________ //
 
@@ -148,3 +151,5 @@ int selecter::matchRegularExpression( const std::string & _regex )
 
     return ret;
 }
+
+NAMESPACE_END

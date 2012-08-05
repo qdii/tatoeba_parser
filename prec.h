@@ -1,10 +1,24 @@
 #ifndef PREC_H
 #define PREC_H
+
+// ___________________________ NAMESPACE _______________________________________
+
+#ifdef NAMESPACE
+#   define NAMESPACE_START namespace NAMESPACE {
+#   define NAMESPACE_END }
+#   define USING_NAMESPACE using namespace NAMESPACE;
+#else
+#   define NAMESPACE_START
+#   define NAMESPACE_END
+#   define USING_NAMESPACE
+#endif
+
 //_________________________ COMMON INCLUDES __________________________________
 
 #include <cstdint>
 #include <assert.h>
 
+NAMESPACE_START
 // ___________________________ TYPEDEFS ______________________________________
 
 typedef int_fast32_t        ux;
@@ -23,6 +37,8 @@ typedef uint_fast32_t       ix;
 #   define VERIFY(X) (X)
 #   define VERIFY_EQ(X,Y)  (X)
 #endif
+
+NAMESPACE_END
 
 #include "output.h"
 

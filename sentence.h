@@ -7,6 +7,8 @@
 #include <unistr.h>
 #include <umachine.h>
 
+NAMESPACE_START
+
 /**@brief A sentence
  * @desc A sentence, according to tatoeba has not only text but also a country code */
 struct sentence
@@ -68,4 +70,7 @@ sentence::id  sentence::getId() const
 {
     return m_id;
 }
+
+NAMESPACE_END
+
 #endif //SENTENCE_H
