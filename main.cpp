@@ -47,14 +47,14 @@ int main( int argc, char * argv[] )
     }
 
     if( !vm.count( "verbose" ) )
-        VERIFY_EQ( gs_coutWarning->mute(), 0 );
+        VERIFY_EQ( gs_coutWarning->mute(), SUCCESS );
 
     // parse the file
     const std::string filename( "sentences.csv" );
     parser tatoeba_parser( filename );
 
     dataset allSentences;
-    VERIFY_EQ( tatoeba_parser.setOutput( allSentences ),    0 );
+    VERIFY_EQ( tatoeba_parser.setOutput( allSentences ),    SUCCESS );
 
     const int parseSuccess = tatoeba_parser.start();
 
@@ -66,10 +66,10 @@ int main( int argc, char * argv[] )
         selecter sel;
 
         if( vm.count( "optional" ) )
-            VERIFY_EQ( sel.canContainCharacters( vm["optional"].as<std::string>().c_str() ), 0 );
+            VERIFY_EQ( sel.canContainCharacters( vm["optional"].as<std::string>().c_str() ), SUCCESS );
 
         if( vm.count( "compulsory" ) )
-            VERIFY_EQ( sel.setMustContainCharacters( vm["compulsory"].as<std::string>() ), 0 );
+            VERIFY_EQ( sel.setMustContainCharacters( vm["compulsory"].as<std::string>() ), SUCCESS );
 
         if( vm.count( "regex" ) )
         {
@@ -78,11 +78,11 @@ int main( int argc, char * argv[] )
 
             switch( regex_result )
             {
-            case -1:
+            case INVALID_ARG:
                 ERR << "Invalid regular expression\n";
                 break;
 
-            case -2:
+            case OUT_OF_MEMORY:
                 ERR << "Out of memory\n";
                 break;
 
@@ -90,7 +90,7 @@ int main( int argc, char * argv[] )
                 break;
             }
 
-            if( regex_result != 0 )
+            if( regex_result != SUCCESS )
                 return 1;
 
         }
@@ -101,7 +101,7 @@ int main( int argc, char * argv[] )
         if( vm.count( "language" ) )
         {
             language.assign( vm["language"].as<std::string>() );
-            VERIFY_EQ( sel.hasCountryCode( language.c_str() ), 0 );
+            VERIFY_EQ( sel.hasCountryCode( language.c_str() ), SUCCESS );
         }
 
         ux lineNumber = 0;

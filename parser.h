@@ -26,7 +26,7 @@ struct parser
 
     /**@brief Sets the dataset
      * @param[in] _output The output dataset
-     * @return 0 on success
+     * @return SUCCESS on success
      *
      * During the parsing, every sentences that can be recognized will be added
      * to the dataset */
@@ -34,8 +34,8 @@ struct parser
 
     /**@brief Starts parsing the file
      * @return This function will return:
-     * 0 on success
-     * -1 if the file cannot be opened
+     * SUCCESS              on success
+     * CANT_OPEN_FILE       if the file cannot be opened
      *
      * Parsing the file means going line by line and creating a sentence object
      * for whichever fits the regular expression (has a correct id, a decent

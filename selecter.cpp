@@ -26,7 +26,7 @@ selecter::~selecter()
 
 int selecter::canContainCharacters( const char * _characters )
 {
-    int ret = 0;
+    int ret = SUCCESS;
 
     if( _characters )
     {
@@ -36,7 +36,7 @@ int selecter::canContainCharacters( const char * _characters )
         if( m_allowedCharacters )
             *m_allowedCharacters = _characters;
         else
-            ret = -1;
+            ret = INVALID_ARG;
     }
     else
     {
@@ -52,18 +52,18 @@ int selecter::canContainCharacters( const char * _characters )
 int selecter::hasCountryCode( const char _countryCode [5] )
 {
     memcpy( m_hasCountryCode, _countryCode, 5 );
-    return 0;
+    return SUCCESS;
 }
 
 // __________________________________________________________________________ //
 
 int selecter::matches( const sentence & _candidate )
 {
-    int ret = 0;
+    int ret = SUCCESS;
 
     // checking country code
     if( m_hasCountryCode[0] && strncmp( _candidate.getCountryCode(), m_hasCountryCode, 5 ) != 0 )
-        ret = -1;
+        ret = DOES_NOT_MATCH;
 
     // checking compulsory character set (faster process if we sort the lists before)
     const UnicodeString & text = _candidate.text();
@@ -81,7 +81,7 @@ int selecter::matches( const sentence & _candidate )
         }
 
         if( !isContained )
-            ret = -1;
+            ret = DOES_NOT_MATCH;
     }
 
     // checking allowed character set
@@ -105,7 +105,7 @@ int selecter::matches( const sentence & _candidate )
             }
 
             if( !isAllowed )
-                ret = -1;
+                ret = DOES_NOT_MATCH;
 
             isAllowed = false;
         }
@@ -117,7 +117,7 @@ int selecter::matches( const sentence & _candidate )
         m_regularExpression->reset( _candidate.text() );
 
         if( !m_regularExpression->find() )
-            ret = -1;
+            ret = DOES_NOT_MATCH;
     }
 
     return ret;
@@ -128,26 +128,26 @@ int selecter::matches( const sentence & _candidate )
 int selecter::setMustContainCharacters( const char * _characters )
 {
     m_compulsoryCharacters = _characters;
-    return 0;
+    return SUCCESS;
 }
 
 // __________________________________________________________________________ //
 
 int selecter::matchRegularExpression( const std::string & _regex )
 {
-    int ret = 0;
+    int ret = SUCCESS;
 
     if( !m_regularExpression )
     {
         UErrorCode     status   = U_ZERO_ERROR;
         m_regularExpression     = new RegexMatcher( _regex.c_str(), 0, status );
 
-        if( U_FAILURE( status ) )
-            ret = -1;
+        if( m_regularExpression && U_FAILURE( status ) )
+            ret = INVALID_ARG;
     }
 
-    if( !m_regularExpression && ret == 0 )
-        ret = -2;
+    if( !m_regularExpression && ret == SUCCESS )
+        ret = OUT_OF_MEMORY;
 
     return ret;
 }

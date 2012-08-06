@@ -39,7 +39,7 @@ inline
 int cout_warning::mute()
 {
     m_isMuted = true;
-    return 0;
+    return SUCCESS;
 }
 
 // __________________________________________________________________________ //

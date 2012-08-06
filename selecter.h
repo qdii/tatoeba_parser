@@ -25,7 +25,7 @@ struct selecter
      * If a sentence does contain none of the characters passed here, then
      * the matches() member function will return false when called on it.
      *
-     * @return 0 on success, -1 if _characters is null.
+     * @return SUCCESS on success, INVALID_ARG if _characters is null.
      * @param[in] _characters A null-terminated set of characters that have to
      *            be present in the sentence.
      * @pre _characters != nullptr */
@@ -36,7 +36,7 @@ struct selecter
      * If a sentence does contain none of the characters passed here, then
      * the matches() member function will return false when called on it.
      *
-     * @return 0 on success, -1 if _characters is null.
+     * @return SUCCESS on success;
      * @param[in] _characters A string containing the characters that have to
      *            be present in the sentence.
      * @pre _characters != nullptr */
@@ -48,27 +48,28 @@ struct selecter
      * @param[in] _characters If nullptr is passed, any characters are allowed.
      *            if a null-terminated char array is passed, a sentence that
      *            contains any other character will be discarded.
-     *
+     * @return SUCCESS on success, INVALID_ARG if _characters is null.
      * */
     int canContainCharacters( const char * _characters );
 
     /**@brief Checks whether the sentence matches the country code
-     * @param[in] _countryCode The country code to match */
+     * @param[in] _countryCode The country code to match 
+     * @return SUCCESS on success */
     int hasCountryCode( const char _countryCode[5] );
 
     /**@brief Checks whether the sentence matches a given regular expression
      * @param[in] _regex The regular expression
-     * @return 0 on success, -1 if the regular expression is not valid, -2 if there is no memory */
+     * @return SUCCESS on success, INVALID_ARG if the regular expression is not valid, OUT_OF_MEMORY if there is no memory */
     int matchRegularExpression( const std::string & _regex );
 
     /**@brief The string to check
-     * @return 0 if the string matches, -1 if it does not, -2 on error */
+     * @return SUCCESS if the string matches, DOES_NOT_MATCH if it does not, INTERNAL_ERROR on error */
     int matches( const sentence & _stringToCheck );
 
 private:
     UnicodeString   m_compulsoryCharacters; // characters that HAVE to be in the sentence
     UnicodeString * m_allowedCharacters; //characters that may appear in the sentence
-    char            m_hasCountryCode[5]; //the country code to match
+    char            m_hasCountryCode[5]; //the country code to matchmo
     RegexMatcher  * m_regularExpression;
 };
 

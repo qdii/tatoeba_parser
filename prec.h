@@ -38,6 +38,15 @@ typedef uint_fast32_t       ix;
 #   define VERIFY_EQ(X,Y)  (X)
 #endif
 
+// _________________________ ERROR CODES  ____________________________________
+
+static const int    SUCCESS             = 0;
+static const int    CANT_OPEN_FILE      = -1;
+static const int    INVALID_ARG         = -2;
+static const int    OUT_OF_MEMORY       = -3;
+static const int    DOES_NOT_MATCH      = -4;
+static const int    INTERNAL_ERROR      = -5;
+
 NAMESPACE_END
 
 #include "output.h"

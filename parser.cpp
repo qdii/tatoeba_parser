@@ -31,7 +31,7 @@ parser::parser( const std::string & _file )
 int parser::setOutput( dataset & _output )
 {
     m_output = &_output;
-    return 0;
+    return SUCCESS;
 }
 
 // __________________________________________________________________________ //
@@ -44,7 +44,7 @@ int parser::start()
     std::ifstream file( m_file.c_str(), std::ios_base::binary|std::ios_base::in );
 
     if( !file.good() )
-        return -1;
+        return CANT_OPEN_FILE;
 
     const boost::regex 	lineRegex( CSV_REGULAR_EXPRESSION );
     boost::smatch 		results;
@@ -86,7 +86,7 @@ int parser::start()
         }
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 
