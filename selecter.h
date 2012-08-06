@@ -1,86 +1,59 @@
 #ifndef SELECTER_H
 #define SELECTER_H
 
+#include "prec.h"
 #include "sentence.h"
-#include <string>
-#include <unicode/regex.h>
+#include <vector>
 
 NAMESPACE_START
 
+struct Filter;
+
 /**@struct selecter
- * @brief Tells if a sentence match a set of criterions.
+ * @brief Tells if a sentence match a set of filters.
  *
  * Users should basically set their criterions using the different member
- * functions, then run matches(), passing it the right sentence. */
+ * functions, then run matches(), passing it the sentence to check. */
 struct selecter
 {
-    /**@brief Construct a selecter */
-    selecter();
+    /**@brief Add a filter to the list
+     * @param[in] _filter The filter to add
+     * @return SUCCESS */
+    int addFilter( Filter & _filter );
 
-    /**@brief Destructs a selecter */
-    ~selecter();
-
-    /**@brief Set the list of characters which must be present in the sentence
-     *
-     * If a sentence does contain none of the characters passed here, then
-     * the matches() member function will return false when called on it.
-     *
-     * @return SUCCESS on success, INVALID_ARG if _characters is null.
-     * @param[in] _characters A null-terminated set of characters that have to
-     *            be present in the sentence.
-     * @pre _characters != nullptr */
-    int setMustContainCharacters( const char * _characters );
-
-    /**@brief Set the list of characters which must be present in the sentence
-     *
-     * If a sentence does contain none of the characters passed here, then
-     * the matches() member function will return false when called on it.
-     *
-     * @return SUCCESS on success;
-     * @param[in] _characters A string containing the characters that have to
-     *            be present in the sentence.
-     * @pre _characters != nullptr */
-    int setMustContainCharacters( const std::string & _characters );
-
-    /**@brief Set the list of characters that can appear in the sentence
-     *
-     * Determines which characters are allowed to appear in the sentence.
-     * @param[in] _characters If nullptr is passed, any characters are allowed.
-     *            if a null-terminated char array is passed, a sentence that
-     *            contains any other character will be discarded.
-     * @return SUCCESS on success, INVALID_ARG if _characters is null.
-     * */
-    int canContainCharacters( const char * _characters );
-
-    /**@brief Checks whether the sentence matches the country code
-     * @param[in] _countryCode The country code to match 
-     * @return SUCCESS on success */
-    int hasCountryCode( const char _countryCode[5] );
-
-    /**@brief Checks whether the sentence matches a given regular expression
-     * @param[in] _regex The regular expression
-     * @return SUCCESS on success, INVALID_ARG if the regular expression is not valid, OUT_OF_MEMORY if there is no memory */
-    int matchRegularExpression( const std::string & _regex );
+    /**@brief Removes all the filters
+     * @return SUCCESS */
+    int clear();
 
     /**@brief The string to check
      * @return SUCCESS if the string matches, DOES_NOT_MATCH if it does not, INTERNAL_ERROR on error */
     int matches( const sentence & _stringToCheck );
 
 private:
-    UnicodeString   m_compulsoryCharacters; // characters that HAVE to be in the sentence
-    UnicodeString * m_allowedCharacters; //characters that may appear in the sentence
-    char            m_hasCountryCode[5]; //the country code to matchmo
-    RegexMatcher  * m_regularExpression;
+    typedef std::vector<Filter *> Filters;
+    Filters m_filters;
 };
+
+
+NAMESPACE_END
 
 // __________________________________________________________________________ //
 
 inline
-int selecter::setMustContainCharacters( const std::string & _characters )
+int selecter::addFilter( Filter & _filter )
 {
-    return setMustContainCharacters( _characters.c_str() );
+    m_filters.push_back( &_filter );
+    return SUCCESS; 
 }
 
-NAMESPACE_END
+// __________________________________________________________________________ //
+
+inline
+int selecter::clear()
+{
+    m_filters.clear();
+    return SUCCESS;
+}
+
 
 #endif //SELECTER_H
