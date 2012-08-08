@@ -15,6 +15,7 @@ struct FilterRegex : public Filter
 {
     FilterRegex( const std::string & _regex );
     FilterRegex( std::string && _regex );
+    ~FilterRegex();
         
     
     /**@brief Checks whether a given sentence matches a regular expression
