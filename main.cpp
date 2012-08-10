@@ -3,6 +3,7 @@
 #include "selecter.h"
 #include "filter_regex.h"
 #include "filter_language.h"
+#include "filter_translation.h"
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/cmdline.hpp>
@@ -30,13 +31,15 @@ int main( int argc, char * argv[] )
     po::options_description desc( "Allowed options" );
     desc.add_options()
     ( "help,h", "produce help message" )
-    ( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence" )
-    ( "optional,o", po::value<std::string>(), "The characters that may compose the sentence" )
-    ( "line-numbers,n", "Display the indexes of the lines" )
-    ( "language,l", po::value<std::string>(), "Restrict the languages to a given one" )
-    ( "display-ids,i", "Displays the sentence ids" )
+    ( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence." )
+    ( "optional,o", po::value<std::string>(), "The characters that may compose the sentence." )
+    ( "line-numbers,n", "Display the indexes of the lines." )
+    ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
+    ( "display-ids,i", "Displays the sentence ids." )
     ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
-    ( "regex,r", po::value<std::string>(), "A regular expression that the sentence should match entirely" )
+    ( "regex,r", po::value<std::string>(), "A regular expression that the sentence should match entirely." )
+    ( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
+    ( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
     ( "verbose,v", "Displays warnings" )
     ;
 
@@ -53,9 +56,10 @@ int main( int argc, char * argv[] )
     if( !vm.count( "verbose" ) )
         VERIFY_EQ( gs_coutWarning->mute(), SUCCESS );
 
-    // parse the file
-    const std::string filename( "sentences.csv" );
-    parser tatoeba_parser( filename );
+    // parse the files
+    const std::string sentencesFile( "sentences.csv" );
+    const std::string linksFile( "links.csv" );
+    parser tatoeba_parser( sentencesFile, linksFile );
 
     dataset allSentences;
     VERIFY_EQ( tatoeba_parser.setOutput( allSentences ),    SUCCESS );
@@ -127,21 +131,69 @@ int main( int argc, char * argv[] )
             return 1;
     }
 
+    // FILTERS ON TRANSLATIONS
+    if( vm.count( "translatable-in" ) || vm.count( "translation-contains-regex" ) )
+    {
+        FilterTranslation * const filterTranslation = new FilterTranslation;
+
+        if( filterTranslation )
+        {
+            filtersToDelete.push_back( filterTranslation );
+
+            // language
+            if( vm.count( "translatable-in" ) )
+            {
+                FilterLanguage * const filterLanguage = new FilterLanguage( std::move( vm["translatable-in"].as<std::string>() ) );
+
+                if( filterLanguage )
+                {
+                    filtersToDelete.push_back( filterLanguage );
+                    VERIFY_EQ( filterTranslation->addFilter( *filterLanguage ), 0 );
+                }
+                else
+                    ERR << "Out of memory.\n";
+            }
+
+
+            // regex
+            if( vm.count( "translation-contains-regex" ) )
+            {
+                Filter * filterRegex = nullptr;
+
+                if( addRegularExpressionFilter( std::string( vm["translation-contains-regex"].as<std::string>() ), filterRegex ) == SUCCESS )
+                {
+                    ASSERT(filterRegex);
+                    filtersToDelete.push_back( filterRegex );
+                    filterTranslation->addFilter( *filterRegex );
+                }
+            }
+
+            VERIFY_EQ( sel.addFilter( *filterTranslation ), SUCCESS );
+        }
+    }
+    else
+        ERR << "Out of memory.\n";
+
     // START PARSING
     const int parseSuccess = tatoeba_parser.start();
 
-    if( parseSuccess == -1 )
+    if( parseSuccess == CANT_OPEN_SENTENCES_CSV )
         ERR << "Unable to open \"sentences.csv\"\n";
     else
     {
         WARN << "OK, parsed " << allSentences.size() << " sentences\n";
 
+        if( parseSuccess == CANT_OPEN_LINKS_CSV )
+            WARN << "Unable to open \"links.csv\"\n";
+
         // ##### The actual parsing ####
         ux lineNumber = 0;
         const char separator = vm.count( "separator" ) ? vm["separator"].as<char>() : '\t';
 
-        for( auto sentence : allSentences )
+        for( auto entry : allSentences )
         {
+            const sentence & sentence = entry.second;
+            const sentence::id id = entry.first;
             const int matchResult = sel.matches( sentence );
 
             switch( matchResult )
@@ -151,7 +203,7 @@ int main( int argc, char * argv[] )
                     std::cout << lineNumber++ << separator;
 
                 if( vm.count( "display-ids" ) )
-                    std::cout << sentence.getId() << separator;
+                    std::cout << id << separator;
 
                 std::cout << sentence << "\n";
                 break;
@@ -165,7 +217,8 @@ int main( int argc, char * argv[] )
             }
         }
     }
-    // clean up
+
+    // clean up 
     for( auto filter : filtersToDelete )
     {
         delete filter;
@@ -173,6 +226,8 @@ int main( int argc, char * argv[] )
 
     return 0;
 }
+
+// __________________________________________________________________________ //
 
 int addRegularExpressionFilter( const std::string & _regex, Filter *& filter_ )
 {

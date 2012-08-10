@@ -1,7 +1,7 @@
 #include "prec.h"
 #include "sentence.h"
 #include <string.h>
-#include <assert.h>
+#include <algorithm>
 
 NAMESPACE_START
 
@@ -49,4 +49,30 @@ std::ostream & operator << ( std::ostream & _ostr, const sentence & _sentence )
     return _ostr;
 }
 
+// __________________________________________________________________________ //
+
+int sentence::addLink(sentence& _translation)
+{
+    m_links.push_back(&_translation);
+    
+    /* Here we could decide not to trust links.csv and check whether the links
+       are unique. I am both gullible and lazy. */
+    
+    return SUCCESS;
+}
+
+// __________________________________________________________________________ //
+
+bool sentence::isLinked(const sentence& _candidate) const
+{
+    const sentence::id candidateId = _candidate.getId();
+    return std::find_if(m_links.begin(), m_links.end(), 
+        [=](sentence * _sentence)
+        {
+            return _sentence->getId() == candidateId;
+        }) != m_links.end();
+}
+
+
 NAMESPACE_END
+

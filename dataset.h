@@ -1,12 +1,12 @@
 #ifndef DATASET_H
 #define DATASET_H
-#include <vector>
+#include <unordered_map>
 #include "sentence.h"
 
 NAMESPACE_START
 
 /**@brief a dataset is a sentence container */
-typedef std::vector<sentence> dataset;
+typedef std::unordered_map<sentence::id, sentence> dataset;
 
 NAMESPACE_END
 

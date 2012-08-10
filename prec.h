@@ -46,6 +46,8 @@ static const int    INVALID_ARG         = -2;
 static const int    OUT_OF_MEMORY       = -3;
 static const int    DOES_NOT_MATCH      = -4;
 static const int    INTERNAL_ERROR      = -5;
+static const int    CANT_OPEN_SENTENCES_CSV     = -6;
+static const int    CANT_OPEN_LINKS_CSV         = -7;
 
 NAMESPACE_END
 
