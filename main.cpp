@@ -30,23 +30,23 @@ int main( int argc, char * argv[] )
     // command line parameters
     po::options_description desc( "Allowed options" );
     desc.add_options()
-    ( "help,h", "produce help message" )
-    ( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence." )
-    ( "optional,o", po::value<std::string>(), "The characters that may compose the sentence." )
-    ( "line-numbers,n", "Display the indexes of the lines." )
-    ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
-    ( "display-ids,i", "Displays the sentence ids." )
-    ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
-    ( "regex,r", po::value<std::string>(), "A regular expression that the sentence should match entirely." )
-    ( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
-    ( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
-    ( "verbose,v", "Displays warnings" )
+        ( "help,h", "produce help message" )
+        ( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence." )
+        ( "optional,o", po::value<std::string>(), "The characters that may compose the sentence." )
+        ( "line-numbers,n", "Display the indexes of the lines." )
+        ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
+        ( "display-ids,i", "Displays the sentence ids." )
+        ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
+        ( "regex,r", po::value<std::string>(), "A regular expression that the sentence should match entirely." )
+        ( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
+        ( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
+        ( "verbose,v", "Displays warnings" )
     ;
 
     po::variables_map vm;
     po::store( po::parse_command_line( argc, argv, desc ), vm );
     po::notify( vm );
-
+    
     if( vm.count( "help" ) )
     {
         std::cout << desc << "\n";
@@ -171,8 +171,6 @@ int main( int argc, char * argv[] )
             VERIFY_EQ( sel.addFilter( *filterTranslation ), SUCCESS );
         }
     }
-    else
-        ERR << "Out of memory.\n";
 
     // START PARSING
     const int parseSuccess = tatoeba_parser.start();
