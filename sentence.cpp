@@ -5,6 +5,8 @@
 
 NAMESPACE_START
 
+std::hash<std::string> sentence::m_hasher;
+
 sentence::sentence( id _id, std::string & _text, char _country[5] )
     :m_id( _id )
     ,m_text( UnicodeString::fromUTF8( _text ) )
@@ -73,6 +75,27 @@ bool sentence::isLinked(const sentence& _candidate) const
         }) != m_links.end();
 }
 
+// __________________________________________________________________________ //
+
+int sentence::addTag(const std::string & _tagName)
+{   
+    const tag hashedName = getHashFromName(_tagName);
+    return addTag(hashedName);
+}
+
+int sentence::addTag( sentence::tag _tag )
+{    
+    m_tags.push_back(_tag);
+    
+    return SUCCESS;
+}
+
+// __________________________________________________________________________ //
+
+int sentence::hasTag( sentence::tag _tag ) const
+{
+    return (std::find( m_tags.begin(), m_tags.end(), _tag ) != m_tags.end()) ? SUCCESS : NO_SUCH_TAG;
+}
 
 NAMESPACE_END
 

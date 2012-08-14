@@ -48,7 +48,8 @@ static const int    DOES_NOT_MATCH      = -4;
 static const int    INTERNAL_ERROR      = -5;
 static const int    CANT_OPEN_SENTENCES_CSV     = -6;
 static const int    CANT_OPEN_LINKS_CSV         = -7;
-
+static const int    NO_SUCH_TAG         = -8;
+static const int    CANT_OPEN_TAGS_CSV  = -9;
 NAMESPACE_END
 
 #include "output.h"

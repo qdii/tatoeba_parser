@@ -4,6 +4,7 @@
 #include "filter_regex.h"
 #include "filter_language.h"
 #include "filter_translation.h"
+#include "filter_tag.h"
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/cmdline.hpp>
@@ -41,6 +42,7 @@ int main( int argc, char * argv[] )
         ( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
         ( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
         ( "verbose,v", "Displays warnings" )
+        ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag" )
     ;
 
     po::variables_map vm;
@@ -53,20 +55,23 @@ int main( int argc, char * argv[] )
         return 1;
     }
 
+    // do not output the error messages if the user does not want that
     if( !vm.count( "verbose" ) )
         VERIFY_EQ( gs_coutWarning->mute(), SUCCESS );
 
     // parse the files
+    const bool areLinksNecessary = vm.count("translatable-in") || vm.count("translation-contains-regex");
     const std::string sentencesFile( "sentences.csv" );
-    const std::string linksFile( "links.csv" );
-    parser tatoeba_parser( sentencesFile, linksFile );
+    const std::string linksFile( areLinksNecessary ? "links.csv" : "");
+    const std::string tagsFile( vm.count("has-tag") ? "tags.csv" : "");
+    parser tatoeba_parser( sentencesFile, linksFile, tagsFile );
 
-    dataset allSentences;
+    dataset allSentences; // the structure that will contain all the sentences
     VERIFY_EQ( tatoeba_parser.setOutput( allSentences ),    SUCCESS );
 
     // ###### SET UP THE FILTERS #####
     selecter sel;
-    std::vector< Filter * > filtersToDelete;
+    std::vector< Filter * > filtersToDelete; // we keep the filter pointers that need to be deleted here
 
     // LANGUAGE FILTER
     if( vm.count( "language" ) )
@@ -84,12 +89,31 @@ int main( int argc, char * argv[] )
             return 1;
         }
     }
+    
+    // TAG FILTER
+    if (vm.count("has-tag"))
+    {
+        FilterTag * const filter = new FilterTag( std::move( vm["has-tag"].as<std::string>() ));
+        if (filter)
+        {
+            filtersToDelete.push_back( filter);
+            VERIFY_EQ( sel.addFilter(*filter), SUCCESS);
+        }
+        else
+        {
+            ERR << "Out of memory\n";
+            return 1;
+        }
+    }
 
     // OPTIONAL CHARACTERS
     if( vm.count( "optional" ) )
     {
         Filter * filter = nullptr;
 
+        /* The user passes a list of characters that he wants in the regex. If
+         * the list is "abcd", we construct the regex "[abcd]*", so that
+         * the sentence has to be composed using those characters only */
         if( addRegularExpressionFilter( std::string( "[" + vm["optional"].as<std::string>() + "]*" ), filter ) == SUCCESS )
         {
             ASSERT( filter != nullptr );
@@ -105,6 +129,9 @@ int main( int argc, char * argv[] )
     {
         Filter * filter = nullptr;
 
+        /* we expect a list of characters to be passed by the user. If the list 
+         * is "abcd", we build the regex ".*[abcd]+.*" so that it has to contain
+         * at least one of those characters */
         if( addRegularExpressionFilter( std::string( ".*[" + vm["compulsory"].as<std::string>() + "]+.*" ), filter ) == SUCCESS )
         {
             ASSERT( filter != nullptr );
@@ -177,11 +204,13 @@ int main( int argc, char * argv[] )
 
     if( parseSuccess == CANT_OPEN_SENTENCES_CSV )
         ERR << "Unable to open \"sentences.csv\"\n";
+    else if ( parseSuccess == CANT_OPEN_TAGS_CSV )
+        ERR << "Unable to open \"tags.csv\"\n";
     else
     {
         WARN << "OK, parsed " << allSentences.size() << " sentences\n";
 
-        if( parseSuccess == CANT_OPEN_LINKS_CSV )
+        if( parseSuccess == CANT_OPEN_LINKS_CSV && ( vm.count( "translatable-in" ) || vm.count( "translation-contains-regex" ) ) )
             WARN << "Unable to open \"links.csv\"\n";
 
         // ##### The actual parsing ####

@@ -20,10 +20,11 @@ struct parser
     /**@brief Creates a parser
      * @param[in] _sentences A tatoeba sentences.csv file
      * @param[in] _links A tatoeba links.csv file, or ""
+     * @param[in] _links A tatoeba tags.csv file, or ""
      *
      * Creates a parser which will be linked to the file passed as a parameter
      */
-    parser( const std::string & _sentences, const std::string & _links );
+    parser( const std::string & _sentences, const std::string & _links, const std::string & _tags );
 
     /**@brief Sets the dataset
      * @param[in] _output The output dataset
@@ -44,7 +45,7 @@ struct parser
     int start();
 
 private:
-    std::string m_sentences, m_links;		// the path to sentences.csv and file.csv
+    std::string m_sentences, m_links, m_tags;// the path to sentences.csv, file.csv, and tags.csv files
     dataset  *	m_output;	// the dataset where we will put the parsed sentences
 
 private:
@@ -55,6 +56,10 @@ private:
     /**@brief Parses the links.csv file
      * @return SUCCESS on success */
     int parseLinks(std::ifstream &);
+    
+    /**@brief Parses the tags.csv file
+     * @return SUCCESS on success */
+    int parseTags(std::ifstream &);
     
 };
 

@@ -29,9 +29,19 @@ static const char LINKS_CSV_REGULAR_EXPRESSION[] =
 
 // __________________________________________________________________________ //
 
-parser::parser( const std::string & _sentences, const std::string & _links )
+// ex:
+//		10223   less than 5 characters
+//
+// a digit, followed by some spaces, then a tag name
+static const char TAGS_CSV_REGULAR_EXPRESSION[] =
+    "^([[:digit:]]+)[[:space:]]+(.*)$";
+    
+// __________________________________________________________________________ //
+
+parser::parser( const std::string & _sentences, const std::string & _links, const std::string & _tags )
     :m_sentences( _sentences )
     ,m_links( _links )
+    ,m_tags( _tags )
     ,m_output( nullptr )
 {
 }
@@ -193,10 +203,83 @@ int parser::start()
                 file.close();
             }
         }
+         
+        if (ret == SUCCESS && m_tags != "")
+        {
+            // parsing tags.csv
+            file.open( m_tags.c_str(), std::ios_base::binary|std::ios_base::in );
+            
+            if ( !file.good() )
+                ret = CANT_OPEN_TAGS_CSV;
+            else
+            {
+                ret = parseTags( file );
+                file.close();
+            }
+        }
     }
 
     return ret;
 }
 
+// __________________________________________________________________________ //
+
+int parser::parseTags( std::ifstream & _file )
+{
+    int ret = SUCCESS;
+    
+    const boost::regex 	lineRegex( TAGS_CSV_REGULAR_EXPRESSION );
+    boost::smatch 		results;
+    std::string         line;	// will contain the line currently treated
+    std::istringstream  transform; 	// helps transforming a string into an int
+    sentence::id        sentenceId = 0; // the id of the sentence
+    std::string         tagName; // a temporary variable that will contain 
+    tagName.reserve(50);         // the string of the tag before it is hashed
+    
+    // treating the file
+    std::unordered_map<sentence::id, std::vector<sentence::tag> > allTags; // this map will associate an id to a vector of hashes
+    while( std::getline( _file, line, '\n' ).good() && !_file.eof() )
+    {
+        if( regex_match( line, results, lineRegex ) )
+        {
+            // parsing the first id
+            transform.clear();
+            std::string && idString = transform.str();
+            idString.assign( results[1].first, results[1].second ); // TODO, make it robust
+            transform.str( idString );
+            transform >> sentenceId;
+            
+            // parsing the sentence data
+            tagName.assign( results[2].first, results[2].second );
+            const sentence::tag sentenceTag = sentence::getHashFromName( tagName );
+            
+            allTags[sentenceId].push_back( sentenceTag );
+        }
+        else
+        {
+            WARN << "[**] line could not be parsed: " << line << "\n";
+        }
+    }
+    
+    // inserting the tags
+    for ( auto sentenceTag : allTags )
+    {
+        sentenceId = sentenceTag.first;
+        const std::vector<sentence::tag> & tags = sentenceTag.second;
+        
+        try {
+            sentence & sentence = m_output->at(sentenceId);
+            for ( auto tag : tags )
+                sentence.addTag( tag );
+        }
+        catch (std::out_of_range & oor)
+        {
+            WARN << "[**] Invalid tag for sentence of id: " << sentenceId << "\n";
+        }    
+    }
+    
+    
+    return ret;
+}
 
 NAMESPACE_END
