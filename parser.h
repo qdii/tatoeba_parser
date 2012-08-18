@@ -2,6 +2,8 @@
 #define PARSER_H
 
 #include <string>
+#include <mutex>
+#include <future>
 #include "dataset.h"
 
 NAMESPACE_START
@@ -45,22 +47,25 @@ struct parser
     int start();
 
 private:
-    std::string m_sentences, m_links, m_tags;// the path to sentences.csv, file.csv, and tags.csv files
-    dataset  *	m_output;	// the dataset where we will put the parsed sentences
+    std::string     m_sentences, m_links, m_tags;// the path to sentences.csv, file.csv, and tags.csv files
+    dataset  *	    m_output;	// the dataset where we will put the parsed sentences
+    std::mutex      m_dataMutex;    // ensures that dataset is accessed by only one thread at a time
 
 private:
     /**@brief Parses the sentences.csv file
        @return SUCCESS on success */
-    int parseSentences(std::ifstream &);
+    int parseSentences();
+    std::promise<int> m_promiseParseSentence;
     
     /**@brief Parses the links.csv file
      * @return SUCCESS on success */
-    int parseLinks(std::ifstream &);
+    int parseLinks();
+    std::promise<int> m_promiseParseLinks;
     
     /**@brief Parses the tags.csv file
      * @return SUCCESS on success */
-    int parseTags(std::ifstream &);
-    
+    int parseTags();
+    std::promise<int> m_promiseParseTags;
 };
 
 NAMESPACE_END

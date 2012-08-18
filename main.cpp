@@ -204,7 +204,7 @@ int main( int argc, char * argv[] )
 
     if( parseSuccess == CANT_OPEN_SENTENCES_CSV )
         ERR << "Unable to open \"sentences.csv\"\n";
-    else if ( parseSuccess == CANT_OPEN_TAGS_CSV )
+    else if ( tagsFile != "" && parseSuccess == CANT_OPEN_TAGS_CSV )
         ERR << "Unable to open \"tags.csv\"\n";
     else
     {
