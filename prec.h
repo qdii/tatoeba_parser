@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <assert.h>
+#include <map>
 
 NAMESPACE_START
 // ___________________________ TYPEDEFS ______________________________________
