@@ -126,6 +126,7 @@ int parser::parseLinks()
             }
             catch( std::out_of_range & oor )
             {
+                m_dataMutex.unlock();
                 WARN << "Invalid link (" << firstId << "," << secondId << ")\n";
             }
         }
@@ -158,7 +159,11 @@ int parser::parseSentences( )
         std::string countryCode;
         char sentenceCountry[5];
 
-        m_dataMutex.lock();
+        /* we want to protect the database of sentences while sentences.csv is
+         * parsed. As tags.csv and links.csv might be parsed simultaneously,
+         * they could try to fetch sentences that have not yet been parsed from
+         * sentences.csv */
+        m_dataMutex.lock();                    
 
         while( std::getline( file, line, '\n' ).good() && !file.eof() )
         {
