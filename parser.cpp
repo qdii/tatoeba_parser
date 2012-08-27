@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <functional> //std::mem_fn
+#include <unordered_map>
 
 NAMESPACE_START
 
@@ -209,21 +210,20 @@ int parser::start()
 {
     int ret = SUCCESS;
     ASSERT( m_output != nullptr );
-    static parser * thisParserInstance = this;
     
     // parsing files
-    std::future<int> parseSentence = std::async(std::launch::async, []() { return thisParserInstance->parseSentences(); } );
-    std::future<int> parseLinksResult = std::async(std::launch::async, []() { return thisParserInstance->parseLinks(); } );
-    std::future<int> parseTagsResult = std::async(std::launch::async, []() { return thisParserInstance->parseTags(); } );
+    std::future<int> parseSentence = std::async(std::launch::async, [this]() { return this->parseSentences(); } );
+    std::future<int> parseLinksResult = std::async(std::launch::async, [this]() { return this->parseLinks(); } );
+    std::future<int> parseTagsResult = std::async(std::launch::async, [this]() { return this->parseTags(); } );
 
+    // retrieving the results
     ret = parseSentence.get();
-    if (ret == SUCCESS)
-    {
-        ret = parseLinksResult.get();
-        if (ret == SUCCESS)
-            ret = parseTagsResult.get();
-    }
+    const int linksResult = parseLinksResult.get();
+    const int tagsResult = parseTagsResult.get();
     
+    if (ret == SUCCESS)
+        ret = linksResult == SUCCESS ? tagsResult : linksResult;
+ 
     return ret;
 }
 

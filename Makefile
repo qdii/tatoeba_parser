@@ -4,7 +4,7 @@ EXEC=parser
 SRC= $(wildcard *.cpp)
 OBJ= $(SRC:.cpp=.o)
 INCLUDES=-I/usr/include/unicode
-LIBS=-lboost_regex -licuuc -lboost_program_options -licutu
+LIBS=-lboost_regex -licuuc -lboost_program_options -licutu -lpthread
 all: $(EXEC)
 
 $(EXEC): $(OBJ)
