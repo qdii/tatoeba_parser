@@ -12,6 +12,13 @@
 
 NAMESPACE_START
 
+// The number of different links that links.csv contains (i.e. the number of 
+// lines in the file
+static const ux MAX_NUMBER_OF_LINK = 4000000;
+
+// The maximum number of tags that a sentence can have
+static const ux MAX_NUMBER_OF_TAGS = 10;
+
 // ex:
 //		1		fra		Bonjour les amis!
 //
@@ -77,6 +84,7 @@ int parser::parseLinks()
         // parsed values
         sentence::id firstId = 0, secondId = 0;
         std::vector< std::pair<sentence::id, sentence::id> > links;
+        links.reserve(MAX_NUMBER_OF_LINK);
 
         while( std::getline( file, line, '\n' ).good() && !file.eof() )
         {
@@ -248,7 +256,8 @@ int parser::parseTags( )
         tagName.reserve( 50 );       // the string of the tag before it is hashed
 
         // treating the file
-        std::unordered_map<sentence::id, std::vector<sentence::tag> > allTags; // this map will associate an id to a vector of hashes
+        typedef std::vector<sentence::tag> tag_container;
+        std::map<sentence::id, tag_container> allTags; // this map will associate an id to a vector of hashes
 
         while( std::getline( _file, line, '\n' ).good() && !_file.eof() )
         {
@@ -261,11 +270,13 @@ int parser::parseTags( )
                 transform.str( idString );
                 transform >> sentenceId;
 
-                // parsing the sentence data
+                // parsing the tag
                 tagName.assign( results[2].first, results[2].second );
                 const sentence::tag sentenceTag = sentence::getHashFromName( tagName );
 
-                allTags[sentenceId].push_back( sentenceTag );
+                tag_container & currentSentenceTags = allTags[sentenceId];
+                currentSentenceTags.reserve(MAX_NUMBER_OF_TAGS);
+                currentSentenceTags.push_back(sentenceTag);
             }
             else
             {
@@ -277,7 +288,7 @@ int parser::parseTags( )
         for( auto sentenceTag : allTags )
         {
             sentenceId = sentenceTag.first;
-            const std::vector<sentence::tag> & tags = sentenceTag.second;
+            const tag_container & tags = sentenceTag.second;
 
             try
             {

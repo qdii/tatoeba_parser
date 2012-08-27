@@ -5,6 +5,7 @@
 #include "filter_language.h"
 #include "filter_translation.h"
 #include "filter_tag.h"
+#include "filter_id.h"
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/cmdline.hpp>
@@ -43,6 +44,7 @@ int main( int argc, char * argv[] )
         ( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
         ( "verbose,v", "Displays warnings" )
         ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag" )
+        ( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
     ;
 
     po::variables_map vm;
@@ -60,10 +62,10 @@ int main( int argc, char * argv[] )
         VERIFY_EQ( gs_coutWarning->mute(), SUCCESS );
 
     // parse the files
-    const bool areLinksNecessary = vm.count("translatable-in") || vm.count("translation-contains-regex");
+    const bool areLinksNecessary = vm.count( "translatable-in" ) || vm.count( "translation-contains-regex" ) || vm.count( "translates" );
     const std::string sentencesFile( "sentences.csv" );
-    const std::string linksFile( areLinksNecessary ? "links.csv" : "");
-    const std::string tagsFile( vm.count("has-tag") ? "tags.csv" : "");
+    const std::string linksFile( areLinksNecessary ? "links.csv" : "" );
+    const std::string tagsFile( vm.count( "has-tag" ) ? "tags.csv" : "" );
     parser tatoeba_parser( sentencesFile, linksFile, tagsFile );
 
     dataset allSentences; // the structure that will contain all the sentences
@@ -91,13 +93,14 @@ int main( int argc, char * argv[] )
     }
     
     // TAG FILTER
-    if (vm.count("has-tag"))
+    if( vm.count( "has-tag" ) )
     {
-        FilterTag * const filter = new FilterTag( std::move( vm["has-tag"].as<std::string>() ));
-        if (filter)
+        FilterTag * const filter = new FilterTag( std::move( vm["has-tag"].as<std::string>() ) );
+
+        if( filter )
         {
-            filtersToDelete.push_back( filter);
-            VERIFY_EQ( sel.addFilter(*filter), SUCCESS);
+            filtersToDelete.push_back( filter );
+            VERIFY_EQ( sel.addFilter( *filter ), SUCCESS );
         }
         else
         {
@@ -129,7 +132,7 @@ int main( int argc, char * argv[] )
     {
         Filter * filter = nullptr;
 
-        /* we expect a list of characters to be passed by the user. If the list 
+        /* we expect a list of characters to be passed by the user. If the list
          * is "abcd", we build the regex ".*[abcd]+.*" so that it has to contain
          * at least one of those characters */
         if( addRegularExpressionFilter( std::string( ".*[" + vm["compulsory"].as<std::string>() + "]+.*" ), filter ) == SUCCESS )
@@ -159,7 +162,7 @@ int main( int argc, char * argv[] )
     }
 
     // FILTERS ON TRANSLATIONS
-    if( vm.count( "translatable-in" ) || vm.count( "translation-contains-regex" ) )
+    if( areLinksNecessary )
     {
         FilterTranslation * const filterTranslation = new FilterTranslation;
 
@@ -189,10 +192,24 @@ int main( int argc, char * argv[] )
 
                 if( addRegularExpressionFilter( std::string( vm["translation-contains-regex"].as<std::string>() ), filterRegex ) == SUCCESS )
                 {
-                    ASSERT(filterRegex);
+                    ASSERT( filterRegex );
                     filtersToDelete.push_back( filterRegex );
                     filterTranslation->addFilter( *filterRegex );
                 }
+            }
+
+            // translates
+            if( vm.count( "translates" ) )
+            {
+                Filter * const filterTranslate = new FilterId( vm["translates"].as<sentence::id>() );
+
+                if( filterTranslate )
+                {
+                    filtersToDelete.push_back( filterTranslate );
+                    filterTranslation->addFilter( * filterTranslate );
+                }
+                else
+                    ERR << "Out of memory.\n";
             }
 
             VERIFY_EQ( sel.addFilter( *filterTranslation ), SUCCESS );
@@ -204,7 +221,7 @@ int main( int argc, char * argv[] )
 
     if( parseSuccess == CANT_OPEN_SENTENCES_CSV )
         ERR << "Unable to open \"sentences.csv\"\n";
-    else if ( tagsFile != "" && parseSuccess == CANT_OPEN_TAGS_CSV )
+    else if( tagsFile != "" && parseSuccess == CANT_OPEN_TAGS_CSV )
         ERR << "Unable to open \"tags.csv\"\n";
     else
     {
@@ -245,7 +262,7 @@ int main( int argc, char * argv[] )
         }
     }
 
-    // clean up 
+    // clean up
     for( auto filter : filtersToDelete )
     {
         delete filter;
