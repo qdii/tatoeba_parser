@@ -210,7 +210,7 @@ int main( int argc, char * argv[] )
     {
         WARN << "OK, parsed " << allSentences.size() << " sentences\n";
 
-        if( parseSuccess == CANT_OPEN_LINKS_CSV && ( vm.count( "translatable-in" ) || vm.count( "translation-contains-regex" ) ) )
+        if( parseSuccess == CANT_OPEN_LINKS_CSV && areLinksNecessary )
             WARN << "Unable to open \"links.csv\"\n";
 
         // ##### The actual parsing ####
