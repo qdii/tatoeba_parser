@@ -10,8 +10,7 @@ NAMESPACE_START
 
 struct FilterTag : public Filter
 {
-    FilterTag( const std::string & _tag );
-
+    int setTag( sentence::tag _tag );
     /**
      * @brief Filters sentences that are not tagged appropriately
      * @param _sentence The sentence to check
@@ -22,6 +21,16 @@ struct FilterTag : public Filter
 private:
     sentence::tag m_tag;
 };
+
+// -------------------------------------------------------------------------- //
+
+inline
+int FilterTag::setTag( sentence::tag _tag )
+{
+    m_tag = _tag;
+    return SUCCESS;
+}
+
 
 NAMESPACE_END
 

@@ -13,10 +13,10 @@ NAMESPACE_START
  */
 struct FilterRegex : public Filter
 {
-    FilterRegex( const std::string & _regex );
-    FilterRegex( std::string && _regex );
+    FilterRegex();
     ~FilterRegex();
         
+    int setRegex( const std::string & _regex );
     
     /**@brief Checks whether a given sentence matches a regular expression
      * @param[in] _sentence The sentence to check
@@ -44,6 +44,7 @@ bool FilterRegex::isRegexValid() const
 {
     return !U_FAILURE( m_status );
 }
+
 
 NAMESPACE_END
 

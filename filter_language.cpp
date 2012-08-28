@@ -4,18 +4,6 @@
 
 NAMESPACE_START
 
-FilterLanguage::FilterLanguage( const std::string & _countryCode )
-    :m_countryCode( _countryCode )
-{
-}
-
-// __________________________________________________________________________ //
-
-FilterLanguage::FilterLanguage( std::string && _countryCode )
-    :m_countryCode( _countryCode )
-{
-}
-
 // __________________________________________________________________________ //
 
 int FilterLanguage::filter( const sentence & _sentence )

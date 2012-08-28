@@ -12,8 +12,10 @@ struct FilterId : public Filter
 {
     /**@brief Constructs a FilterId 
      * @param[in] _id The id of the sentence you want to filter in */
-    FilterId(sentence::id _id) : m_id(_id) { }
+    FilterId() : m_id(sentence::INVALID_ID) { }
 
+    int setId( sentence::id _id );
+    
     int filter( const sentence & _sentence ) override;
     
 private:
@@ -28,6 +30,14 @@ int FilterId::filter( const sentence & _sentence )
     return _sentence.getId() == m_id ? SUCCESS : DOES_NOT_MATCH;
 }
 
+// -------------------------------------------------------------------------- //
+
+inline
+int FilterId::setId( sentence::id _id )
+{
+    m_id = _id;
+    return SUCCESS;
+}
 NAMESPACE_END
 
 #endif // FILTER_ID_H

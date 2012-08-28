@@ -3,11 +3,6 @@
 
 NAMESPACE_START
 
-FilterTag::FilterTag( const std::string & _tag )
-    :m_tag( sentence::getHashFromName( _tag ) )
-{
-}
-
 // __________________________________________________________________________ //
 
 int FilterTag::filter( const sentence & _sentence )

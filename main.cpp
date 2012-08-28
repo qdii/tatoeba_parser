@@ -6,6 +6,7 @@
 #include "filter_translation.h"
 #include "filter_tag.h"
 #include "filter_id.h"
+#include "filter_dependent.h"
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/cmdline.hpp>
@@ -22,7 +23,30 @@ cout_warning * gs_coutWarning;
 NAMESPACE_END
 USING_NAMESPACE
 
-int addRegularExpressionFilter( const std::string & _regex, Filter * & filter_ );
+//------------------------------------------------------------
+
+template<typename T>
+T * createFilter( bool _condition, std::vector<Filter *> & _filtersToDelete, selecter * _selecter )
+{
+    T * filter = nullptr;
+
+    if( _condition )
+    {
+        filter = new T;
+
+        if( filter )
+        {
+            _filtersToDelete.push_back( filter );
+
+            if( _selecter )
+                _selecter->addFilter( *filter );
+        }
+    }
+
+    return filter;
+}
+
+//------------------------------------------------------------
 
 int main( int argc, char * argv[] )
 {
@@ -41,17 +65,19 @@ int main( int argc, char * argv[] )
         ( "display-ids,i", "Displays the sentence ids." )
         ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
         ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
+        ( "depedent-regex,d",  po::value<std::vector<std::string> >()->composing(), "A set of regular expressions which have to be all matched." )
         ( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
         ( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
         ( "verbose,v", "Displays warnings" )
-        ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag" )
+        ( "has-tag,g", po::value<sentence::tag>(), "Checks if the sentence has a given tag" )
         ( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
+        ( "translation-matches-dependent-regex,p", po::value<std::vector<std::string> >()->composing(), "A set of regular expressions that one of the translation of the sentence has to match all." )
     ;
 
     po::variables_map vm;
     po::store( po::parse_command_line( argc, argv, desc ), vm );
     po::notify( vm );
-    
+
     if( vm.count( "help" ) )
     {
         std::cout << desc << "\n";
@@ -63,7 +89,11 @@ int main( int argc, char * argv[] )
         VERIFY_EQ( gs_coutWarning->mute(), SUCCESS );
 
     // parse the files
-    const bool areLinksNecessary = vm.count( "translatable-in" ) || vm.count( "translation-contains-regex" ) || vm.count( "translates" );
+    const bool areLinksNecessary =
+        vm.count( "translatable-in" )
+        ||  vm.count( "translation-contains-regex" )
+        ||  vm.count( "translates" )
+        ||  vm.count( "translation-matches-dependent-regex" );
     const std::string sentencesFile( "sentences.csv" );
     const std::string linksFile( areLinksNecessary ? "links.csv" : "" );
     const std::string tagsFile( vm.count( "has-tag" ) ? "tags.csv" : "" );
@@ -77,148 +107,123 @@ int main( int argc, char * argv[] )
     std::vector< Filter * > filtersToDelete; // we keep the filter pointers that need to be deleted here
 
     // LANGUAGE FILTER
-    if( vm.count( "language" ) )
-    {
-        FilterLanguage * const filter = new FilterLanguage( std::move( vm["language"].as<std::string>() ) );
+    FilterLanguage * const languageFilter =
+        createFilter<FilterLanguage>( vm.count( "language" ), filtersToDelete, &sel );
 
-        if( filter )
-        {
-            filtersToDelete.push_back( filter );
-            VERIFY_EQ( sel.addFilter( *filter ), SUCCESS );
-        }
-        else
-        {
-            ERR << "Out of memory\n";
-            return 1;
-        }
-    }
-    
+    if( languageFilter )
+        languageFilter->setCountryCode( vm["language"].as<std::string>() );
+
     // TAG FILTER
-    if( vm.count( "has-tag" ) )
-    {
-        FilterTag * const filter = new FilterTag( std::move( vm["has-tag"].as<std::string>() ) );
+    FilterTag * const languageTag =
+        createFilter<FilterTag>( vm.count( "has-tag" ), filtersToDelete, &sel );
 
-        if( filter )
-        {
-            filtersToDelete.push_back( filter );
-            VERIFY_EQ( sel.addFilter( *filter ), SUCCESS );
-        }
-        else
-        {
-            ERR << "Out of memory\n";
-            return 1;
-        }
-    }
+    if( languageTag )
+        languageTag->setTag( vm["has-tag"].as<sentence::tag>() );
 
     // OPTIONAL CHARACTERS
-    if( vm.count( "optional" ) )
-    {
-        Filter * filter = nullptr;
+    FilterRegex * const optionalRegexFilter =
+        createFilter<FilterRegex>( vm.count( "optional" ), filtersToDelete, &sel );
 
-        /* The user passes a list of characters that he wants in the regex. If
-         * the list is "abcd", we construct the regex "[abcd]*", so that
-         * the sentence has to be composed using those characters only */
-        if( addRegularExpressionFilter( std::string( "[" + vm["optional"].as<std::string>() + "]*" ), filter ) == SUCCESS )
-        {
-            ASSERT( filter != nullptr );
-            filtersToDelete.push_back( filter );
-            VERIFY_EQ( sel.addFilter( *filter ), SUCCESS );
-        }
-        else
-            return 1;
-    }
+    if( optionalRegexFilter )
+        optionalRegexFilter->setRegex( std::string( "[" + vm["optional"].as<std::string>() + "]*" ) );
+
 
     // MANDATORY CHARACTERS
-    if( vm.count( "compulsory" ) )
-    {
-        Filter * filter = nullptr;
+    FilterRegex * const compulsoryRegexFilter =
+        createFilter<FilterRegex>( vm.count( "compulsory" ), filtersToDelete, &sel );
 
-        /* we expect a list of characters to be passed by the user. If the list
-         * is "abcd", we build the regex ".*[abcd]+.*" so that it has to contain
-         * at least one of those characters */
-        if( addRegularExpressionFilter( std::string( ".*[" + vm["compulsory"].as<std::string>() + "]+.*" ), filter ) == SUCCESS )
-        {
-            ASSERT( filter != nullptr );
-            filtersToDelete.push_back( filter );
-            VERIFY_EQ( sel.addFilter( *filter ), SUCCESS );
-        }
-        else
-            return 1;
-    }
+    if( compulsoryRegexFilter )
+        compulsoryRegexFilter->setRegex( std::string( ".*[" + vm["compulsory"].as<std::string>() + "]+.*" ) );
 
 
     // USER DEFINED REGEX
     if( vm.count( "regex" ) )
     {
-        const std::vector<std::string> && userRegexList = std::move(vm["regex"].as<std::vector<std::string> >());
-        for (auto regularExpression : userRegexList)
-        {
-            Filter * filter = nullptr;
+        const std::vector<std::string> && userRegexList = std::move( vm["regex"].as<std::vector<std::string> >() );
 
-            if( addRegularExpressionFilter( regularExpression, filter ) == SUCCESS )
+        for( auto regularExpression : userRegexList )
+        {
+            FilterRegex * const userRegexFilter =
+                createFilter<FilterRegex>( true, filtersToDelete, &sel );
+
+            if( userRegexFilter )
+                userRegexFilter->setRegex( regularExpression );
+        }
+    }
+
+    // DEPENDENT REGEX
+    FilterDependent * const dependentRegexFilter =
+        createFilter<FilterDependent>( vm.count( "depedent-regex" ), filtersToDelete, &sel );
+
+    if( dependentRegexFilter )
+    {
+        const std::vector<std::string> && userRegexList = std::move( vm["depedent-regex"].as<std::vector<std::string> >() );
+
+        for( auto regularExpression : userRegexList )
+        {
+            FilterRegex * const userRegexFilter =
+                createFilter<FilterRegex>( true, filtersToDelete, nullptr );
+
+            if( userRegexFilter )
             {
-                WARN << "[**] adding user regular expression: " << regularExpression << "\n";
-                ASSERT( filter != nullptr );
-                filtersToDelete.push_back( filter );
-                VERIFY_EQ( sel.addFilter( *filter ), SUCCESS );
+                userRegexFilter->setRegex( regularExpression );
+                dependentRegexFilter->addFilter( *userRegexFilter );
             }
-            else
-                return 1;
         }
     }
 
     // FILTERS ON TRANSLATIONS
-    if( areLinksNecessary )
+    FilterTranslation * const translationFilter =
+        createFilter<FilterTranslation>( areLinksNecessary, filtersToDelete, &sel );
+
+    if( translationFilter )
     {
-        FilterTranslation * const filterTranslation = new FilterTranslation;
+        // language
+        FilterLanguage * const langFilter =
+            createFilter<FilterLanguage>( vm.count( "translatable-in" ), filtersToDelete, nullptr );
 
-        if( filterTranslation )
+        if( langFilter )
         {
-            filtersToDelete.push_back( filterTranslation );
+            langFilter->setCountryCode( vm["translatable-in"].as<std::string>() );
+            translationFilter->addFilter( *langFilter );
+        }
 
-            // language
-            if( vm.count( "translatable-in" ) )
+        // regex
+        FilterRegex * const regexFilter =
+            createFilter<FilterRegex>( vm.count( "translation-contains-regex" ), filtersToDelete, nullptr );
+
+        if( regexFilter )
+        {
+            regexFilter->setRegex( vm["translation-contains-regex"].as<std::string>() );
+            translationFilter->addFilter( *regexFilter );
+        }
+
+        // id
+        FilterId * const idFilter =
+            createFilter<FilterId>( vm.count( "translates" ), filtersToDelete, nullptr );
+
+        if( idFilter )
+        {
+            idFilter->setId( vm["translates"].as<sentence::id>() );
+            translationFilter->addFilter( *idFilter );
+        }
+
+        FilterDependent * const dependentFilter =
+            createFilter<FilterDependent>( vm.count( "translation-matches-dependent-regex" ), filtersToDelete, nullptr );
+        if (dependentFilter)
+        {
+            const std::vector<std::string> && userRegexList = 
+                std::move( vm["translation-matches-dependent-regex"].as<std::vector<std::string> >() );
+            for( auto regularExpression : userRegexList )
             {
-                FilterLanguage * const filterLanguage = new FilterLanguage( std::move( vm["translatable-in"].as<std::string>() ) );
-
-                if( filterLanguage )
-                {
-                    filtersToDelete.push_back( filterLanguage );
-                    VERIFY_EQ( filterTranslation->addFilter( *filterLanguage ), 0 );
-                }
-                else
-                    ERR << "Out of memory.\n";
+                Filter * const regexDepFilter = 
+                    createFilter<FilterRegex>( userRegexList.size() > 0, filtersToDelete, nullptr );
+                
+                if (regexDepFilter)
+                    dependentFilter->addFilter( *regexDepFilter );
             }
 
-
-            // regex
-            if( vm.count( "translation-contains-regex" ) )
-            {
-                Filter * filterRegex = nullptr;
-
-                if( addRegularExpressionFilter( std::string( vm["translation-contains-regex"].as<std::string>() ), filterRegex ) == SUCCESS )
-                {
-                    ASSERT( filterRegex );
-                    filtersToDelete.push_back( filterRegex );
-                    filterTranslation->addFilter( *filterRegex );
-                }
-            }
-
-            // translates
-            if( vm.count( "translates" ) )
-            {
-                Filter * const filterTranslate = new FilterId( vm["translates"].as<sentence::id>() );
-
-                if( filterTranslate )
-                {
-                    filtersToDelete.push_back( filterTranslate );
-                    filterTranslation->addFilter( * filterTranslate );
-                }
-                else
-                    ERR << "Out of memory.\n";
-            }
-
-            VERIFY_EQ( sel.addFilter( *filterTranslation ), SUCCESS );
+            VERIFY_EQ( translationFilter->addFilter( *dependentFilter ), SUCCESS );
         }
     }
 
@@ -275,31 +280,4 @@ int main( int argc, char * argv[] )
     }
 
     return 0;
-}
-
-// __________________________________________________________________________ //
-
-int addRegularExpressionFilter( const std::string & _regex, Filter *& filter_ )
-{
-    int ret = SUCCESS;
-
-    FilterRegex * const regex = new FilterRegex( _regex );
-
-    if( regex != nullptr )
-    {
-        if( !regex->isRegexValid() )
-        {
-            ERR << "Invalid regular expression\n";
-            ret = INVALID_ARG;
-        }
-        else
-            filter_ = regex;
-    }
-    else
-    {
-        ERR << "Out of memory\n";
-        ret = OUT_OF_MEMORY;
-    }
-
-    return ret;
 }

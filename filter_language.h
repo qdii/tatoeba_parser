@@ -13,15 +13,21 @@ struct sentence;
  * @brief Checks whether a sentence is in a given language */
 struct FilterLanguage : public Filter
 {
-    FilterLanguage(const std::string & _countryCode);
-    FilterLanguage(std::string && _countryCode);
-    
-    int filter(const sentence &) override;
-    
-    
+    int setCountryCode( const std::string & _countryCode );
+    int filter( const sentence & ) override;
+
 private:
     std::string m_countryCode;
 };
+
+// -------------------------------------------------------------------------- //
+
+inline
+int FilterLanguage::setCountryCode( const std::string & _countryCode )
+{
+    m_countryCode.assign( _countryCode );
+    return SUCCESS;
+}
 
 NAMESPACE_END
 

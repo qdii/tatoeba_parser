@@ -4,22 +4,10 @@
 
 NAMESPACE_START
 
-FilterRegex::FilterRegex( const std::string & _regex )
+FilterRegex::FilterRegex( )
     :m_regex( nullptr )
     ,m_status( U_ZERO_ERROR )
 {
-    computeRegex( _regex );
-    ASSERT( m_regex != nullptr );
-}
-
-// __________________________________________________________________________ //
-
-FilterRegex::FilterRegex( std::string && _regex )
-    :m_regex( nullptr )
-    ,m_status( U_ZERO_ERROR )
-{
-    computeRegex( _regex );
-    ASSERT( m_regex != nullptr );
 }
 
 // __________________________________________________________________________ //
@@ -54,6 +42,7 @@ int FilterRegex::filter( const sentence & _candidate )
 
 int FilterRegex::computeRegex( const std::string & _regex )
 {
+    ASSERT_EQ( m_regex, nullptr );
     //allocate and compute the regex
     m_regex = new RegexMatcher( _regex.c_str(), 0, m_status );
 
@@ -65,5 +54,15 @@ int FilterRegex::computeRegex( const std::string & _regex )
 FilterRegex::~FilterRegex()
 {
     delete m_regex;
+}
+
+// __________________________________________________________________________ //
+
+int FilterRegex::setRegex( const std::string & _regex )
+{
+    computeRegex( _regex );
+    ASSERT( m_regex != nullptr );
+    
+    return SUCCESS;
 }
 NAMESPACE_END

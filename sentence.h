@@ -17,6 +17,7 @@ struct sentence
 {
     typedef unsigned long id;
     typedef std::hash<std::string>::result_type tag;
+    static const id INVALID_ID = static_cast<id>(0);
 
     sentence( id _id, std::string &	_text, char _country[5] );
     sentence( id _id, std::string && _text, char _country[5] );
