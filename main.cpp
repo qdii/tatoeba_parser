@@ -216,11 +216,14 @@ int main( int argc, char * argv[] )
                 std::move( vm["translation-matches-dependent-regex"].as<std::vector<std::string> >() );
             for( auto regularExpression : userRegexList )
             {
-                Filter * const regexDepFilter = 
+                FilterRegex * const regexDepFilter = 
                     createFilter<FilterRegex>( userRegexList.size() > 0, filtersToDelete, nullptr );
                 
                 if (regexDepFilter)
+                {
+                    regexDepFilter->setRegex( regularExpression );
                     dependentFilter->addFilter( *regexDepFilter );
+                }
             }
 
             VERIFY_EQ( translationFilter->addFilter( *dependentFilter ), SUCCESS );

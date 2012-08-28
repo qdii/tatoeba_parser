@@ -28,16 +28,17 @@ int FilterTranslation::filter(const sentence & _sentence)
     for (; ret == DOES_NOT_MATCH && iter != end; ++iter)
     {
         const sentence * translation = *iter;
-        bool passesAllFilters = true;
+        int passesAllFilters = SUCCESS;
 
         // going through each filter
         std::vector<Filter*>::const_iterator filter = m_filters.begin();
-        for (; passesAllFilters && filter != endFilter; ++filter)
+        for (; passesAllFilters == SUCCESS && filter != endFilter; ++filter)
         {
             passesAllFilters = (*filter)->filter( *translation );
+            ASSERT(passesAllFilters == SUCCESS || passesAllFilters == DOES_NOT_MATCH);
         }
-        
-        ret = passesAllFilters == SUCCESS ? SUCCESS : DOES_NOT_MATCH;
+            
+        ret = passesAllFilters;
     }
     
     return ret;
