@@ -11,6 +11,7 @@
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <iostream>
+#include <vector>
 
 namespace po = boost::program_options;
 
@@ -39,7 +40,7 @@ int main( int argc, char * argv[] )
         ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
         ( "display-ids,i", "Displays the sentence ids." )
         ( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
-        ( "regex,r", po::value<std::string>(), "A regular expression that the sentence should match entirely." )
+        ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
         ( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
         ( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
         ( "verbose,v", "Displays warnings" )
@@ -149,16 +150,21 @@ int main( int argc, char * argv[] )
     // USER DEFINED REGEX
     if( vm.count( "regex" ) )
     {
-        Filter * filter = nullptr;
-
-        if( addRegularExpressionFilter( std::string( vm["regex"].as<std::string>() ), filter ) == SUCCESS )
+        const std::vector<std::string> && userRegexList = std::move(vm["regex"].as<std::vector<std::string> >());
+        for (auto regularExpression : userRegexList)
         {
-            ASSERT( filter != nullptr );
-            filtersToDelete.push_back( filter );
-            VERIFY_EQ( sel.addFilter( *filter ), SUCCESS );
+            Filter * filter = nullptr;
+
+            if( addRegularExpressionFilter( regularExpression, filter ) == SUCCESS )
+            {
+                WARN << "[**] adding user regular expression: " << regularExpression << "\n";
+                ASSERT( filter != nullptr );
+                filtersToDelete.push_back( filter );
+                VERIFY_EQ( sel.addFilter( *filter ), SUCCESS );
+            }
+            else
+                return 1;
         }
-        else
-            return 1;
     }
 
     // FILTERS ON TRANSLATIONS
