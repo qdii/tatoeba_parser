@@ -13,34 +13,19 @@
 #   define USING_NAMESPACE
 #endif
 
-//_________________________ COMMON INCLUDES __________________________________
+// __________________________ LOGGING ________________________________________
 
-#include <cstdint>
-#include <assert.h>
-#include <map>
+#define QDIILOG_NAMESPACE qlog
+#define QDIILOG_NAME_LOGGER_DEBUG debug
+#define QDIILOG_NAME_LOGGER_TRACE trace
+#define QDIILOG_NAME_LOGGER_INFO info
+#define QDIILOG_NAME_LOGGER_WARNING warning
+#define QDIILOG_NAME_LOGGER_ERROR error
+#include "qdiilog.hpp"
+
+// __________________________ERROR CODES________________________________________
 
 NAMESPACE_START
-// ___________________________ TYPEDEFS ______________________________________
-
-typedef int_fast32_t        ux;
-typedef uint_fast32_t       ix;
-
-// ____________________________ DEBUG  _______________________________________
-
-#ifndef NDEBUG
-#   define ASSERT(X) assert(X)
-#   define ASSERT_EQ(X, Y) assert((X) == (Y))
-#   define VERIFY(X) ASSERT(X)
-#   define VERIFY_EQ(X, Y) ASSERT_EQ(X,Y)
-#else
-#   define ASSERT(X)
-#   define ASSERT_EQ(X,Y) ASSERT(X)
-#   define VERIFY(X) (X)
-#   define VERIFY_EQ(X,Y)  (X)
-#endif
-
-// _________________________ ERROR CODES  ____________________________________
-
 static const int    SUCCESS             = 0;
 static const int    CANT_OPEN_FILE      = -1;
 static const int    INVALID_ARG         = -2;
@@ -53,6 +38,39 @@ static const int    NO_SUCH_TAG         = -8;
 static const int    CANT_OPEN_TAGS_CSV  = -9;
 NAMESPACE_END
 
-#include "output.h"
+// __________________________ HANDY METRICS ____________________________________
 
-#endif //PREC_H
+#include <chrono> 
+#define TIME_ME TimeThisFunction<decltype(qlog::info)> timeMe(qlog::info, __func__);
+#define TIME_ME_COUT TimeThisFunction<decltype(std::cout)> timeMe(std::cout, __func__);
+template<typename T>
+struct TimeThisFunction
+{
+    TimeThisFunction(T & _output, const std::string & _func)
+        :m_start(std::chrono::high_resolution_clock::now())
+        ,m_output(_output)
+        ,m_functionName( _func )
+    {
+    }
+
+    ~TimeThisFunction()
+    {
+        using namespace std::chrono;
+        const time_point<high_resolution_clock> finish =
+            high_resolution_clock::now();
+
+        const duration<double> timeSpent =
+            duration_cast<duration<double>>(finish - m_start);
+
+        m_output << m_functionName << " lasted "
+                 << timeSpent.count() << " seconds.\n";
+    }
+
+private:
+    const std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
+    T & m_output;
+    std::string m_functionName;
+};
+
+
+#endif // PREC_H

@@ -1,51 +1,24 @@
 #ifndef FILTER_REGEX
 #define FILTER_REGEX
 
-#include "prec.h"
+#include <boost/regex.hpp>
 #include "filter.h"
-#include <string>
-#include <unicode/regex.h>
 
 NAMESPACE_START
 
-/**@struct FilterRegex
- * @brief Checks whether a sentence matches a regular expression
- */
-struct FilterRegex : public Filter
+struct filterRegex : public filter
 {
-    FilterRegex();
-    ~FilterRegex();
-        
-    int setRegex( const std::string & _regex );
+    filterRegex(const std::string & _regex) :m_compiledRegex(_regex) { }
     
-    /**@brief Checks whether a given sentence matches a regular expression
-     * @param[in] _sentence The sentence to check
-     * @return This function may return
-     * SUCCESS on success,
-     * DOES_NOT_MATCH if the sentence does not match the regex,
-     * INVALID_ARG if the regex is invalid */
-    virtual int filter( const sentence & _sentence ) override;
-    
-    /**@brief Returns true if the regex was accepted */
-    bool isRegexValid() const;
+    bool parse(const sentence & _sentence) throw() override
+    {
+        return boost::regex_match( _sentence.str(), m_compiledRegex );
+    }
 
 private:
-    int computeRegex( const std::string & );
-
-private:
-    RegexMatcher * m_regex;
-    UErrorCode     m_status;
+    boost::regex m_compiledRegex;
 };
-
-// __________________________________________________________________________ //
-
-inline
-bool FilterRegex::isRegexValid() const
-{
-    return !U_FAILURE( m_status );
-}
-
 
 NAMESPACE_END
 
-#endif
+#endif // FILTER_REGEX
