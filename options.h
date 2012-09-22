@@ -20,6 +20,8 @@ struct userOptions
     bool isItNecessaryToParseLinksFile() const;
     bool isVerbose() const;
     bool isHelpRequested() const;
+    bool displayLineNumbers() const;
+    bool displayIds() const;
     
     void printHelp();
 
@@ -45,6 +47,19 @@ inline
 bool userOptions::isHelpRequested() const
 {
     return m_vm.count("help");
+}
+
+inline
+bool userOptions::displayLineNumbers() const
+{
+    return m_vm.count("display-line-numbers");
+}
+
+
+inline
+bool userOptions::displayIds() const
+{
+    return m_vm.count("display-ids");
 }
 
 inline

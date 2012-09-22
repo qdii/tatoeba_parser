@@ -61,6 +61,7 @@ int main( int argc, char * argv[] )
 
     auto itr = data.begin();
     auto endFilter = allFilters.end();
+    unsigned printedLineNumber = 0;
 
     for( int i = 0; i < nbLines; ++i )
     {
@@ -73,7 +74,14 @@ int main( int argc, char * argv[] )
         }
 
         if( shouldDisplay )
+        {
+            if (options.displayLineNumbers())
+                std::cout << ++printedLineNumber << '\t';
+            if (options.displayIds())
+                std::cout << sentence.getId() << '\t';
+                
             std::cout << sentence.str() << '\n';
+        }
     }
 
     return 0;
