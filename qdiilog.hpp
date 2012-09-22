@@ -1,0 +1,1 @@
+/home/qdii/Documents/Geek/C++/Vrac/qdiilog/qdiilog.hpp
