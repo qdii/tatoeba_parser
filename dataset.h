@@ -122,13 +122,11 @@ void dataset::prepare()
     fastAccessArray * __restrict fastArray = new fastAccessArray;
     auto it = m_allSentences->begin();
     auto endSentence = m_allSentences->end();
-    unsigned i=0;
-
+    
     while( it != endSentence && it->getId() != sentence::INVALID_ID )
     {
         (*fastArray)[it->getId()] = &*it;
         ++it;
-        ++i;
     }
     
     m_fastAccess = fastArray;
