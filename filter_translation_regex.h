@@ -12,11 +12,11 @@ struct filterTranslationRegex : public filter
 {
     filterTranslationRegex( dataset & _dataset, const std::string & _regex )
         :m_dataset( _dataset )
-        ,m_regex( _regex )
+        ,m_regex( boost::make_u32regex( _regex ) )
     {
     }
 
-    bool parse( const sentence & _sentence ) __restrict throw() override 
+    bool parse( const sentence & _sentence ) __restrict throw() override
     {
         bool ret = false;
         const std::vector<sentence::id> & links = m_dataset.getLinksOf( _sentence.getId() );
@@ -29,7 +29,7 @@ struct filterTranslationRegex : public filter
             {
                 try
                 {
-                    ret = boost::regex_match( link->str(), m_regex );
+                    ret = boost::u32regex_match( link->str(), m_regex );
                 }
                 catch( std::runtime_error & err )
                 {
@@ -43,7 +43,7 @@ struct filterTranslationRegex : public filter
 
 private:
     dataset & m_dataset;
-    boost::regex m_regex;
+    boost::u32regex m_regex;
 };
 
 NAMESPACE_END
