@@ -16,14 +16,14 @@ USAGE
         
     2. I want to have all the chinese sentences that are formed by a combination of the characters 你好吗
         
-        parser_r --lang cmn --optional 你好吗 
+        parser_r --lang cmn --regex '^[你好吗]*$'
     
     3. I want to get all the sentences which translations contain the word "foo"
     
-        parser_r --translation-contains-regex '^.*foo.*$'
+        parser_r --translation-regex '^.*foo.*$'
         
     4. I want to get all the Spanish translation tagged as "OK"
-    
+
         parser_r --lang spa --has-tag "OK"
         
     5. I want to have a list of the French sentences which have no space before their ? character
