@@ -14,7 +14,7 @@ struct filterTranslationRegex : public filter
         :m_dataset( _dataset )
         ,m_allRegex()
     {
-        for ( auto regex : _regexList )
+        for( auto regex : _regexList )
             m_allRegex.push_back( boost::make_u32regex( regex ) );
     }
 
@@ -42,18 +42,20 @@ struct filterTranslationRegex : public filter
 
         return ret;
     }
-    
+
     bool matchAllRegex( const sentence & _sentence )
     {
         auto endRegexList = m_allRegex.end();
         bool match = true;
-        for ( auto regex = m_allRegex.begin(); match && regex != endRegexList; ++regex )
+
+        for( auto regex = m_allRegex.begin(); match && regex != endRegexList; ++regex )
         {
             match &= boost::u32regex_match( _sentence.str(), *regex );
         }
+
         return match;
     }
-    
+
 
 private:
     dataset & m_dataset;

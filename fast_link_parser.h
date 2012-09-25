@@ -7,8 +7,8 @@ NAMESPACE_START
 
 struct fastLinkParser : parser
 {
-    fastLinkParser( const fileMapper & _linkMap ): parser(_linkMap) { }
-    
+    fastLinkParser( char * _begin, char * _end ): parser( _begin, _end ) { }
+
     int start() throw() override;
 };
 

@@ -12,8 +12,8 @@ struct dataset
 
 private:
     static const size_t NB_MAX_SENTENCES = 800000;
-    static const size_t NB_MAX_LINKS = 300;
-    static const size_t HIGHER_ID = 3500370;
+    static const size_t NB_MAX_LINKS = 150;
+    static const size_t HIGHER_ID = 2500370;
     typedef std::array<sentence, NB_MAX_SENTENCES> containerType;
     typedef typename containerType::iterator iterator;
     typedef typename containerType::const_iterator const_iterator;
@@ -27,12 +27,13 @@ public:
     dataset()
         :m_allSentences( new containerType )
         ,m_allLinks( new linksContainer )
-        ,m_fastAccess(nullptr)
+        ,m_fastAccess( nullptr )
     {
         linksContainer::iterator endLinksContainer = m_allLinks->end();
-        for (linksContainer::iterator sentenceIterator = m_allLinks->begin(); sentenceIterator != endLinksContainer; ++sentenceIterator)
+
+        for( linksContainer::iterator sentenceIterator = m_allLinks->begin(); sentenceIterator != endLinksContainer; ++sentenceIterator )
         {
-            *(sentenceIterator->begin()) = sentence::INVALID_ID;
+            *( sentenceIterator->begin() ) = sentence::INVALID_ID;
         }
     }
 
@@ -79,7 +80,7 @@ sentence * dataset::operator[]( sentence::id _id )
     sentence * ret = nullptr;
 
     if( m_fastAccess )
-        ret = (*m_fastAccess)[_id];
+        ret = ( *m_fastAccess )[_id];
     else
     {
         qlog::warning << "dataset::prepare() was not called before operator[].\n";
@@ -106,8 +107,10 @@ void dataset::addLink( sentence::id _a, sentence::id _b )
 {
     linksVector & __restrict vectorLinks = ( *m_allLinks )[_a];
     size_t i = 0;
-    while (vectorLinks[i++] != sentence::INVALID_ID)
+
+    while( vectorLinks[i++] != sentence::INVALID_ID )
         ;
+
     vectorLinks[i--] = sentence::INVALID_ID;
     vectorLinks[i] = _b;
 }
@@ -117,17 +120,18 @@ void dataset::addLink( sentence::id _a, sentence::id _b )
 inline
 bool dataset::areLinked( sentence::id _a, sentence::id _b ) const __restrict
 {
-    for (auto it = (*m_allLinks)[_a].begin() ; it != (*m_allLinks)[_a].end(); ++it)
+    for( auto it = ( *m_allLinks )[_a].begin() ; it != ( *m_allLinks )[_a].end(); ++it )
     {
-        if ((*it != _b) && (*it != sentence::INVALID_ID))
+        if( ( *it != _b ) && ( *it != sentence::INVALID_ID ) )
             continue;
-        else if (*it == _b)
+        else if( *it == _b )
             return true;
         else
             return false;
 
     }
-    assert(0);
+
+    assert( 0 );
     return false;
 }
 
@@ -136,7 +140,7 @@ bool dataset::areLinked( sentence::id _a, sentence::id _b ) const __restrict
 inline
 const dataset::linksVector & dataset::getLinksOf( sentence::id _sentence ) const
 {
-    return (*m_allLinks)[_sentence];
+    return ( *m_allLinks )[_sentence];
 }
 
 // -------------------------------------------------------------------------- //
@@ -150,7 +154,7 @@ void dataset::prepare()
 
     while( it != endSentence && it->getId() != sentence::INVALID_ID )
     {
-        (*fastArray)[it->getId()] = &*it;
+        ( *fastArray )[it->getId()] = &*it;
         ++it;
     }
 

@@ -7,7 +7,7 @@ NAMESPACE_START
 
 struct fastSentenceParser : public parser
 {
-    fastSentenceParser( const fileMapper & _sentenceFileMap );
+    fastSentenceParser( char * _begin, char * _end );
     int start() throw () override;
 };
 

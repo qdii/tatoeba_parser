@@ -33,9 +33,9 @@ userOptions::userOptions( dataset & _dataset )
     //( "has-tag,g", po::value<sentence::tag>(), "Checks if the sentence has a given tag" )
     //( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
     ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
-        "Filters only sentences which translations match this regex. If many "
-        "regular expressons are provided, a sentence will match if any of its "
-        "translations matches them all"     )
+      "Filters only sentences which translations match this regex. If many "
+      "regular expressons are provided, a sentence will match if any of its "
+      "translations matches them all" )
     ;
 }
 
@@ -79,12 +79,12 @@ void userOptions::getFilters( FilterVector & allFilters_ )
             )
         );
     }
-    
-    if (m_vm.count( "translation-regex" ))
+
+    if( m_vm.count( "translation-regex" ) )
     {
         allFilters_.push_back(
             std::shared_ptr<filter>(
-                new filterTranslationRegex( m_dataset, m_vm["translation-regex"].as<std::vector<std::string>>())
+                new filterTranslationRegex( m_dataset, m_vm["translation-regex"].as<std::vector<std::string>>() )
             )
         );
     }

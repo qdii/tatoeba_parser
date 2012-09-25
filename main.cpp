@@ -22,14 +22,14 @@ int main( int argc, char * argv[] )
     userOptions options( data );
     options.treatCommandLine( argc, argv );
     startLog(options.isVerbose());
-    
-    try 
+
+    try
     {
         options.getFilters( allFilters );
     }
-    catch (const boost::regex_error & err) 
+    catch (const boost::regex_error & err)
     {
-        qlog::error << "Invalid regular expression\n" 
+        qlog::error << "Invalid regular expression\n"
                     << qlog::setBashColor() << err.what() << '\n';
         return 0;
     }
@@ -40,10 +40,10 @@ int main( int argc, char * argv[] )
         return 0;
     }
 
-    
+
     // parsing sentences.csv
     fileMapper sentenceMap( "sentences.csv" );
-    fastSentenceParser sentenceParser( sentenceMap );
+    fastSentenceParser sentenceParser( sentenceMap.getRegion(), sentenceMap.getRegion() + sentenceMap.getSize() );
     const int nbLines = parseFile( sentenceParser, data );
 
     if( nbLines == 0 )
@@ -53,10 +53,10 @@ int main( int argc, char * argv[] )
     if( options.isItNecessaryToParseLinksFile() )
     {
         fileMapper linksMap( "links.csv" );
-        fastLinkParser linksParser( linksMap );
+        fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
         parseFile( linksParser, data );
     }
-    
+
     data.prepare();
 
     auto itr = data.begin();
@@ -79,7 +79,7 @@ int main( int argc, char * argv[] )
                 std::cout << ++printedLineNumber << '\t';
             if (options.displayIds())
                 std::cout << sentence.getId() << '\t';
-                
+
             std::cout << sentence.str() << '\n';
         }
     }

@@ -8,13 +8,13 @@ NAMESPACE_START
 
 struct filterId : public filter
 {
-    filterId( sentence::id _id ): m_filteredId(_id) { }
+    filterId( sentence::id _id ): m_filteredId( _id ) { }
     virtual ~filterId() { }
-    virtual bool parse(const sentence & _sentence) override
+    virtual bool parse( const sentence & _sentence ) override
     {
         return _sentence.getId() == m_filteredId;
     }
-    
+
 private:
     sentence::id m_filteredId;
 };

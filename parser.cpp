@@ -2,9 +2,10 @@
 #include "parser.h"
 NAMESPACE_START
 
-parser::parser( const fileMapper & _map )
-    :m_fileMap( _map )
-    ,m_dataset( nullptr )
+parser::parser( char * _begin, char * _end )
+    :m_dataset( nullptr )
+    ,m_mapBegin( _begin )
+    ,m_mapEnd( _end )
 {
     qlog::trace << "parser::parser(const std::string&)\n";
 }

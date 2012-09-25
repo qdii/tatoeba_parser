@@ -10,8 +10,8 @@ NAMESPACE_START
 struct filterRegex : public filter
 {
     filterRegex( const std::string & _regex ) :m_compiledRegex( boost::make_u32regex( _regex ) ) { }
-    
-    bool parse(const sentence & _sentence) throw() override
+
+    bool parse( const sentence & _sentence ) throw() override
     {
         return boost::u32regex_match( _sentence.str(), m_compiledRegex );
     }

@@ -40,15 +40,15 @@ NAMESPACE_END
 
 // __________________________ HANDY METRICS ____________________________________
 
-#include <chrono> 
+#include <chrono>
 #define TIME_ME TimeThisFunction<decltype(qlog::info)> timeMe(qlog::info, __func__);
 #define TIME_ME_COUT TimeThisFunction<decltype(std::cout)> timeMe(std::cout, __func__);
 template<typename T>
 struct TimeThisFunction
 {
-    TimeThisFunction(T & _output, const std::string & _func)
-        :m_start(std::chrono::high_resolution_clock::now())
-        ,m_output(_output)
+    TimeThisFunction( T & _output, const std::string & _func )
+        :m_start( std::chrono::high_resolution_clock::now() )
+        ,m_output( _output )
         ,m_functionName( _func )
     {
     }
@@ -60,7 +60,7 @@ struct TimeThisFunction
             high_resolution_clock::now();
 
         const duration<double> timeSpent =
-            duration_cast<duration<double>>(finish - m_start);
+            duration_cast<duration<double>>( finish - m_start );
 
         m_output << m_functionName << " lasted "
                  << timeSpent.count() << " seconds.\n";

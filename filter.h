@@ -8,7 +8,7 @@ struct sentence;
 struct filter
 {
     virtual ~filter() { }
-    virtual bool parse(const sentence & _sentence) = 0;
+    virtual bool parse( const sentence & _sentence ) = 0;
 };
 
 typedef std::vector< std::shared_ptr< filter > > FilterVector ;

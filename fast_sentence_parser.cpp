@@ -4,17 +4,17 @@
 
 NAMESPACE_START
 
-fastSentenceParser::fastSentenceParser( const fileMapper & _sentenceFileMap )
-    :parser( _sentenceFileMap )
+fastSentenceParser::fastSentenceParser( char * _begin, char * _end )
+    :parser( _begin, _end )
 {
 }
 
 int fastSentenceParser::start() throw()
 {
-    register char * __restrict ptr = const_cast<char *>( getMap().getRegion() );
-    const size_t size = getMap().getSize();
+    register char * __restrict ptr = getMapBegin();
+    register char * const ptrEnd = getMapEnd();
 
-    if( ptr == 0 || size == 0 )
+    if( ptr == 0 || ptrEnd == ptr )
         return 0;
 
     static const int ID=0;
@@ -28,14 +28,13 @@ int fastSentenceParser::start() throw()
     sentence * currentSentence = nullptr;
     char * lang = nullptr;
     char * data = nullptr;
-    char * const end = ptr + size;
     char c = '\0';
     int state = ID;
     unsigned id = sentence::INVALID_ID;
     unsigned nbSentences = 0;
     auto iter = getDataset()->begin();
 
-    for( ; ptr != end; ++ptr )
+    for( ; ptr != ptrEnd; ++ptr )
     {
         c = *ptr;
 

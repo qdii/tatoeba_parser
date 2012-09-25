@@ -6,19 +6,19 @@ NAMESPACE_START
 
 int fastLinkParser::start() throw()
 {
-    register const char * __restrict ptr = getMap().getRegion();
+    register const char * __restrict ptr = getMapBegin();
+    const char * ptrEnd = getMapEnd();
     dataset & __restrict data = *getDataset();
-    register size_t size = getMap().getSize();
 
-    if( size == 0 || ptr == nullptr )
+    if( ptr == nullptr || ptr == ptrEnd )
         return 0;
 
     sentence::id firstId = 0;
     sentence::id id = 0;
     int nbLinks = 0;
     register char c;
-    
-    while( 1 != --size )
+
+    while( ptr != ptrEnd )
     {
         c = *ptr++;
 
@@ -41,9 +41,9 @@ int fastLinkParser::start() throw()
             id = 0;
         }
     }
-    
+
     qlog::info << "parsed " << nbLinks << " links\n";
-    
+
     return nbLinks;
 }
 

@@ -26,7 +26,7 @@ sentence & sentence::operator=( const sentence & _sentence )
     m_id = _sentence.m_id;
     m_lang = _sentence.m_lang;
     m_data = _sentence.m_data;
-    
+
     return *this;
 }
 
