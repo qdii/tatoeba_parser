@@ -50,9 +50,9 @@ int main( int argc, char * argv[] )
         return 0;
 
     // parsing links.csv
-    fileMapper linksMap( "links.csv" );
     if( options.isItNecessaryToParseLinksFile() )
     {
+        fileMapper linksMap( "links.csv" );
         fastLinkParser linksParser( linksMap );
         parseFile( linksParser, data );
     }
@@ -83,7 +83,6 @@ int main( int argc, char * argv[] )
             std::cout << sentence.str() << '\n';
         }
     }
-
     return 0;
 }
 

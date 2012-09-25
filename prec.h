@@ -72,5 +72,10 @@ private:
     std::string m_functionName;
 };
 
+// ______________________________ VALGRIND ___________________________________
+
+#ifdef USE_VALGRIND
+#   include <valgrind/valgrind.h>
+#endif
 
 #endif // PREC_H

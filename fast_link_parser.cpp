@@ -13,7 +13,7 @@ int fastLinkParser::start() throw()
     if( size == 0 || ptr == nullptr )
         return 0;
 
-    sentence::id firstId;
+    sentence::id firstId = 0;
     sentence::id id = 0;
     int nbLinks = 0;
     register char c;

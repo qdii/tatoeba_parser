@@ -10,18 +10,20 @@ NAMESPACE_START
 
 struct filterTranslationRegex : public filter
 {
-    filterTranslationRegex( dataset & _dataset, const std::string & _regex )
+    filterTranslationRegex( dataset & _dataset, const std::vector<std::string> & _regexList )
         :m_dataset( _dataset )
-        ,m_regex( boost::make_u32regex( _regex ) )
+        ,m_allRegex()
     {
+        for ( auto regex : _regexList )
+            m_allRegex.push_back( boost::make_u32regex( regex ) );
     }
 
     bool parse( const sentence & _sentence ) __restrict throw() override
     {
         bool ret = false;
-        const std::vector<sentence::id> & links = m_dataset.getLinksOf( _sentence.getId() );
+        const dataset::linksVector & links = m_dataset.getLinksOf( _sentence.getId() );
 
-        for( auto linkId = links.begin(); !ret && linkId != links.end(); ++linkId )
+        for( auto linkId = links.begin(); !ret && *linkId != sentence::INVALID_ID; ++linkId )
         {
             sentence * link = m_dataset[*linkId];
 
@@ -29,7 +31,7 @@ struct filterTranslationRegex : public filter
             {
                 try
                 {
-                    ret = boost::u32regex_match( link->str(), m_regex );
+                    ret = matchAllRegex( *link );
                 }
                 catch( std::runtime_error & err )
                 {
@@ -40,10 +42,22 @@ struct filterTranslationRegex : public filter
 
         return ret;
     }
+    
+    bool matchAllRegex( const sentence & _sentence )
+    {
+        auto endRegexList = m_allRegex.end();
+        bool match = true;
+        for ( auto regex = m_allRegex.begin(); match && regex != endRegexList; ++regex )
+        {
+            match &= boost::u32regex_match( _sentence.str(), *regex );
+        }
+        return match;
+    }
+    
 
 private:
     dataset & m_dataset;
-    boost::u32regex m_regex;
+    std::vector<boost::u32regex> m_allRegex;
 };
 
 NAMESPACE_END
