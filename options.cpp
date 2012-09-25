@@ -49,17 +49,13 @@ void userOptions::getFilters( FilterVector & allFilters_ )
 {
     qlog::warning( allFilters_.size() ) << "allFilters.size() > 0\n";
 
-    if( m_vm.count( "regex" ) )
+    if( m_vm.count( "language" ) )
     {
-        // for each regex, we create a filter
-        const std::vector< std::string > & allRegex = m_vm["regex"].as<std::vector<std::string>>();
-
-        for( auto regex : allRegex )
-        {
-            std::shared_ptr<filter> newFilter =
-                std::shared_ptr<filter>( new filterRegex( regex ) );
-            allFilters_.push_back( newFilter );
-        }
+        allFilters_.push_back(
+            std::shared_ptr<filter>(
+                new filterLang( m_vm["language"].as<std::string>() )
+            )
+        );
     }
 
     if( m_vm.count( "is-linked-to" ) )
@@ -71,13 +67,17 @@ void userOptions::getFilters( FilterVector & allFilters_ )
         );
     }
 
-    if( m_vm.count( "language" ) )
+    if( m_vm.count( "regex" ) )
     {
-        allFilters_.push_back(
-            std::shared_ptr<filter>(
-                new filterLang( m_vm["language"].as<std::string>() )
-            )
-        );
+        // for each regex, we create a filter
+        const std::vector< std::string > & allRegex = m_vm["regex"].as<std::vector<std::string>>();
+
+        for( auto regex : allRegex )
+        {
+            std::shared_ptr<filter> newFilter =
+                std::shared_ptr<filter>( new filterRegex( regex ) );
+            allFilters_.push_back( newFilter );
+        }
     }
 
     if( m_vm.count( "translation-regex" ) )
