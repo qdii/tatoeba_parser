@@ -1,6 +1,8 @@
 #ifndef FILE_MAPPER_H
 #define FILE_MAPPER_H
 
+NAMESPACE_START
+
 /**@struct invalid_file
  * @brief An exception thrown if the file cannot be mapped */
 struct invalid_file
@@ -34,5 +36,7 @@ private:
     fileMapper( const fileMapper & ) = delete;
     fileMapper & operator=( const fileMapper & ) = delete;
 };
+
+NAMESPACE_END
 
 #endif // FILE_MAPPER_H

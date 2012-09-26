@@ -1,9 +1,10 @@
 #ifndef FAST_SENTENCE_PARSER_H
 #define FAST_SENTENCE_PARSER_H
-NAMESPACE_START
 
 #include "parser.h"
 #include "file_mapper.h"
+
+NAMESPACE_START
 
 struct fastSentenceParser : public parser
 {

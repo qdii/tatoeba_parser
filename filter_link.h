@@ -4,6 +4,8 @@
 #include "filter.h"
 #include "dataset.h"
 
+NAMESPACE_START
+
 /**@struct filterLink
  * @brief Checks that a sentence is linked to another */
 struct filterLink : public filter
@@ -13,7 +15,7 @@ struct filterLink : public filter
         ,m_id(_id)
     {
     }
-    
+
     bool parse(const sentence & _sentence) throw () override
     {
         return m_dataset.areLinked( _sentence.getId(), m_id);
@@ -22,4 +24,7 @@ private:
     dataset & m_dataset;
     sentence::id m_id;
 };
+
+NAMESPACE_END
+
 #endif // FILTER_LINK_H

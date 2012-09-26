@@ -7,6 +7,8 @@
 #include "fast_link_parser.h"
 #include <iostream>
 
+USING_NAMESPACE
+
 void startLog(bool _verbose);
 bool areUserOptionsValid();
 int treatUserOptions( FilterVector & _allFilters );
