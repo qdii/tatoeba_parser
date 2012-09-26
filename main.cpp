@@ -9,27 +9,39 @@
 
 USING_NAMESPACE
 
-void startLog(bool _verbose);
-bool areUserOptionsValid();
-int treatUserOptions( FilterVector & _allFilters );
+static const char SENTENCES_FILENAME[] = "sentences.csv";
+static const char LINKS_FILENAME[] = "links.csv";
+void startLog( bool _verbose );
 int parseFile( parser & _parser, dataset & data_ );
+
+/** @brief parse the sentences.csv file and returns the nb of lines */
+int parseSentenceFile();
+
+/// How does it work?
+///
+/// Basically, we check the options the user set through the different program
+/// parameters (like "--language fra"), then we parse the different csv files,
+/// we create a list of filters and we filter all the sentences based on
+/// those filters.
+
 int main( int argc, char * argv[] )
 {
-    // reserving data for the sentences
-    dataset data;
+    dataset data; ///< data will contain the sentences and how they are linked
 
-    // creating the filters from command line
-    FilterVector allFilters;
+    FilterVector allFilters; ///< the filter list
+    ///< to select sentences based on the user options)
+
+    // create the filters with respect to the user options
     allFilters.reserve( 5 );
     userOptions options( data );
     options.treatCommandLine( argc, argv );
-    startLog(options.isVerbose());
+    startLog( options.isVerbose() );
 
     try
     {
         options.getFilters( allFilters );
     }
-    catch (const boost::regex_error & err)
+    catch( const boost::regex_error & err )
     {
         qlog::error << "Invalid regular expression\n"
                     << qlog::setBashColor() << err.what() << '\n';
@@ -43,9 +55,31 @@ int main( int argc, char * argv[] )
     }
 
 
-    // parsing sentences.csv
-    fileMapper sentenceMap( "sentences.csv" );
-    fastSentenceParser sentenceParser( sentenceMap.getRegion(), sentenceMap.getRegion() + sentenceMap.getSize() );
+    // parsing sentences file
+    fileMapper * sentenceMap = nullptr;
+
+    try
+    {
+        sentenceMap = new fileMapper( SENTENCES_FILENAME );
+    }
+    catch( const invalid_file & exception )
+    {
+        qlog::error << "Cannot open " << SENTENCES_FILENAME << '\n';
+        return 0;
+    }
+    catch( const map_failed & exception )
+    {
+        qlog::error << "Failed to map " << SENTENCES_FILENAME << '\n';
+        return 0;
+    }
+
+    assert( sentenceMap );
+    assert( sentenceMap->getregion() );
+
+    fastSentenceParser sentenceParser(
+        sentenceMap->getRegion(),
+        sentenceMap->getRegion() + sentenceMap->getSize()
+    );
     const int nbLines = parseFile( sentenceParser, data );
 
     if( nbLines == 0 )
@@ -54,13 +88,28 @@ int main( int argc, char * argv[] )
     // parsing links.csv
     if( options.isItNecessaryToParseLinksFile() )
     {
-        fileMapper linksMap( "links.csv" );
-        fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
-        parseFile( linksParser, data );
+        try
+        {
+            fileMapper linksMap( LINKS_FILENAME );
+            fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
+            parseFile( linksParser, data );
+        }
+        catch( const invalid_file & exception )
+        {
+            qlog::error << "Cannot open " << LINKS_FILENAME << '\n';
+            return 0;
+        }
+        catch( const map_failed & exception )
+        {
+            qlog::error << "Failed to map " << LINKS_FILENAME << '\n';
+            return 0;
+        }
     }
 
+    // create an container to retrieve sentences from id in a very fast manner
     data.prepare();
 
+    // go through every sentence and see if it matches the filter
     auto itr = data.begin();
     auto endFilter = allFilters.end();
     unsigned printedLineNumber = 0;
@@ -77,14 +126,16 @@ int main( int argc, char * argv[] )
 
         if( shouldDisplay )
         {
-            if (options.displayLineNumbers())
+            if( options.displayLineNumbers() )
                 std::cout << ++printedLineNumber << '\t';
-            if (options.displayIds())
+
+            if( options.displayIds() )
                 std::cout << sentence.getId() << '\t';
 
             std::cout << sentence.str() << '\n';
         }
     }
+
     return 0;
 }
 
@@ -95,7 +146,7 @@ int parseFile( parser & _parser, dataset & data_ )
     return _parser.start();
 }
 
-void startLog(bool verbose)
+void startLog( bool verbose )
 {
     qlog::setLogLevel( verbose ? qlog::Loglevel::info : qlog::Loglevel::error );
     qlog::setPrependedTextQdiiFlavourBashColors();
