@@ -11,7 +11,7 @@ struct dataset
 {
 
 private:
-    static const size_t NB_MAX_SENTENCES = 800000;
+    static const size_t NB_MAX_SENTENCES = 2000000;
     static const size_t NB_MAX_LINKS = 150;
     static const size_t HIGHER_ID = 2500370;
     typedef std::array<sentence, NB_MAX_SENTENCES> containerType;
