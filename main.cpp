@@ -74,7 +74,7 @@ int main( int argc, char * argv[] )
     }
 
     assert( sentenceMap );
-    assert( sentenceMap->getregion() );
+    assert( sentenceMap->getRegion() );
 
     fastSentenceParser sentenceParser(
         sentenceMap->getRegion(),
@@ -84,6 +84,10 @@ int main( int argc, char * argv[] )
 
     if( nbLines == 0 )
         return 0;
+
+    qlog::info << "higher id: " << (std::max_element(
+        data.begin(), data.end(),
+        [](const sentence & _a, const sentence & _b) { return _a.getId() < _b.getId(); }))->getId() << '\n';
 
     // parsing links.csv
     if( options.isItNecessaryToParseLinksFile() )
