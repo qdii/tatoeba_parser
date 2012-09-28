@@ -21,11 +21,11 @@ struct filterTranslationRegex : public filter
     bool parse( const sentence & _sentence ) __restrict throw() override
     {
         bool ret = false;
-        const dataset::linksVector & links = m_dataset.getLinksOf( _sentence.getId() );
+        dataset::linksArray links = m_dataset.getLinksOf( _sentence.getId() );
 
-        for( auto linkId = links.begin(); !ret && *linkId != sentence::INVALID_ID; ++linkId )
+        for ( sentence::id linkId = *links; linkId != sentence::INVALID_ID; linkId = *++links)
         {
-            sentence * link = m_dataset[*linkId];
+            sentence * link = m_dataset[linkId];
 
             if( link )
             {
@@ -35,7 +35,7 @@ struct filterTranslationRegex : public filter
                 }
                 catch( std::runtime_error & err )
                 {
-                    qlog::warning << "Cannot match sentence " << *linkId << " with the regex.\n";
+                    qlog::warning << "Cannot match sentence " << linkId << " with the regex.\n";
                 }
             }
         }

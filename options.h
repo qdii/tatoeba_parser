@@ -13,53 +13,52 @@ namespace po = boost::program_options;
 struct dataset;
 struct userOptions
 {
-    userOptions(dataset & _dataset);
+    userOptions();
     void treatCommandLine( int argc, char * argv[] );
-    void getFilters( FilterVector & );
-    
+    void getFilters( dataset &, FilterVector & );
+
     bool isItNecessaryToParseLinksFile() const;
     bool isVerbose() const;
     bool isHelpRequested() const;
     bool displayLineNumbers() const;
     bool displayIds() const;
-    
+
     void printHelp();
 
 private:
     po::options_description m_desc;
     po::variables_map       m_vm;
-    dataset &               m_dataset;
 };
 
 inline
 bool userOptions::isItNecessaryToParseLinksFile() const
 {
-    return m_vm.count("is-linked-to") || m_vm.count( "translation-regex" );
+    return m_vm.count( "is-linked-to" ) || m_vm.count( "translation-regex" );
 }
 
 inline
 bool userOptions::isVerbose() const
 {
-    return m_vm.count("verbose");
+    return m_vm.count( "verbose" );
 }
 
 inline
 bool userOptions::isHelpRequested() const
 {
-    return m_vm.count("help");
+    return m_vm.count( "help" );
 }
 
 inline
 bool userOptions::displayLineNumbers() const
 {
-    return m_vm.count("display-line-numbers");
+    return m_vm.count( "display-line-numbers" );
 }
 
 
 inline
 bool userOptions::displayIds() const
 {
-    return m_vm.count("display-ids");
+    return m_vm.count( "display-ids" );
 }
 
 inline

@@ -26,20 +26,20 @@ int parseSentenceFile();
 
 int main( int argc, char * argv[] )
 {
-    dataset data; ///< data will contain the sentences and how they are linked
-
     FilterVector allFilters; ///< the filter list
     ///< to select sentences based on the user options)
 
     // create the filters with respect to the user options
     allFilters.reserve( 5 );
-    userOptions options( data );
+    userOptions options;
     options.treatCommandLine( argc, argv );
     startLog( options.isVerbose() );
 
+    dataset data; ///< data will contain the sentences and how they are linked
+
     try
     {
-        options.getFilters( allFilters );
+        options.getFilters( data, allFilters );
     }
     catch( const boost::regex_error & err )
     {
@@ -53,7 +53,6 @@ int main( int argc, char * argv[] )
         options.printHelp();
         return 0;
     }
-
 
     // parsing sentences file
     fileMapper * sentenceMap = nullptr;
@@ -82,7 +81,7 @@ int main( int argc, char * argv[] )
     );
     const int nbLines = parseFile( sentenceParser, data );
 
-    if( nbLines == 0 )
+    if( nbLines < 0 )
         return 0;
 
     qlog::info << "higher id: " << (std::max_element(
@@ -95,6 +94,8 @@ int main( int argc, char * argv[] )
         try
         {
             fileMapper linksMap( LINKS_FILENAME );
+            const size_t nbLinks = std::count ( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
+            data.allocateMemoryForLinks( nbLines, nbLinks );
             fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
             parseFile( linksParser, data );
         }

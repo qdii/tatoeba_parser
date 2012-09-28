@@ -13,6 +13,7 @@ int fastSentenceParser::start() throw()
 {
     register char * __restrict ptr = getMapBegin();
     register char * const ptrEnd = getMapEnd();
+    dataset * __restrict sentenceDataset = getDataset();
 
     if( ptr == 0 || ptrEnd == ptr )
         return 0;
@@ -25,14 +26,12 @@ int fastSentenceParser::start() throw()
     static const int DATA_WAIT_FOR_EOL=7;
 
     // parse it
-    sentence * currentSentence = nullptr;
     char * lang = nullptr;
     char * data = nullptr;
     char c = '\0';
     int state = ID;
-    unsigned id = sentence::INVALID_ID;
+    sentence::id id = sentence::INVALID_ID;
     unsigned nbSentences = 0;
-    auto iter = getDataset()->begin();
 
     for( ; ptr != ptrEnd; ++ptr )
     {
@@ -44,7 +43,7 @@ int fastSentenceParser::start() throw()
         case DATA_WAIT_FOR_EOL:
             if( __builtin_expect( c == '\n', false ) )
             {
-                new( currentSentence ) sentence( id, lang, data );
+                sentenceDataset->addSentence(id, lang, data);
                 assert( id != sentence::INVALID_ID );
                 assert( lang != nullptr );
                 assert( data != nullptr );
@@ -70,7 +69,6 @@ int fastSentenceParser::start() throw()
 
         case ID:
             id = 0;
-            currentSentence = &*iter++;
             state = ID_WAIT_FOR_TAB;
             //break;
 

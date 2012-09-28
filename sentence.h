@@ -1,11 +1,14 @@
 #ifndef TATO_PARSER_SENTENCE_H
 #define TATO_PARSER_SENTENCE_H
+
+#include <cstdint>
+
 NAMESPACE_START
 
 struct sentence
 {
     /**@brief A number that identifies the sentence uniquely */
-    typedef unsigned int id;
+    typedef int32_t id;
     static const id INVALID_ID = 0;
 
     /**@brief Constructs a sentence
@@ -33,10 +36,10 @@ struct sentence
     /**@brief Returns an unique identifier identifying the sentence
      * @return A number that identify uniquely this sentence */
     id getId() const;
-    
+
     /**@brief Returns a pointer to the data */
     const char * str() const { return m_data; }
-    
+
     /**@brief Returns a pointer to a character string representing the language */
     const char * lang() const { return m_lang; }
 

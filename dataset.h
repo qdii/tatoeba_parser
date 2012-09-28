@@ -4,38 +4,32 @@
 #include <array>
 #include <vector>
 #include "sentence.h"
-
+#include "linkset.h"
 NAMESPACE_START
 
+/**@struct dataset
+ * @brief A structure that stores all the sentences and the links */
 struct dataset
 {
-
-private:
     static const size_t NB_MAX_SENTENCES = 2000000;
-    static const size_t NB_MAX_LINKS = 150;
-    static const size_t HIGHER_ID = 2500370;
+    static const size_t NB_MAX_LINKS     = 100;
+    static const size_t HIGHER_ID        = 2500370;
     typedef std::array<sentence, NB_MAX_SENTENCES> containerType;
 
 public:
     typedef typename containerType::iterator iterator;
     typedef typename containerType::const_iterator const_iterator;
 
-    typedef std::array< sentence::id, NB_MAX_LINKS > linksVector;
+    typedef const sentence::id * linksArray;
     typedef std::array< std::array< sentence::id, NB_MAX_LINKS >, HIGHER_ID > linksContainer;
     typedef std::array<sentence *, HIGHER_ID> fastAccessArray;
 
 public:
     dataset()
         :m_allSentences( new containerType )
-        ,m_allLinks( new linksContainer )
+        ,m_allLinks( nullptr )
         ,m_fastAccess( nullptr )
     {
-        linksContainer::iterator endLinksContainer = m_allLinks->end();
-
-        for( linksContainer::iterator sentenceIterator = m_allLinks->begin(); sentenceIterator != endLinksContainer; ++sentenceIterator )
-        {
-            *( sentenceIterator->begin() ) = sentence::INVALID_ID;
-        }
     }
 
     ~dataset()
@@ -45,16 +39,19 @@ public:
         delete m_fastAccess;
     }
 
+    void allocateMemoryForLinks(size_t _nbSentences, size_t _nbLinks)
+    {
+        m_allLinks = new linkset(_nbSentences, _nbLinks);
+    }
+
 public:
     iterator begin() { return m_allSentences->begin(); }
     const_iterator begin() const { return m_allSentences->begin(); }
 
     iterator end() { return m_allSentences->end(); }
     const_iterator end() const { return m_allSentences->end(); }
-
-    void addLink( sentence::id _a, sentence::id _b );
-    bool areLinked( sentence::id _a, sentence::id _b ) const;
-    const linksVector & getLinksOf( sentence::id _sentence ) const;
+    dataset::linksArray getLinksOf( sentence::id _sentence ) const;
+    void addSentence( sentence::id _a, const char * _lang, const char * _data );
 
 public:
     sentence * operator[]( sentence::id );
@@ -63,13 +60,17 @@ public:
      */
     void prepare();
 
+public:
+    void addLink( sentence::id _a, sentence::id _b ) { m_allLinks->addLink(_a,_b); }
+    bool areLinked( sentence::id _a, sentence::id _b ) const { return m_allLinks->areLinked(_a, _b); }
+
 private:
     dataset( const dataset & ) = delete;
     dataset & operator=( const dataset & ) = delete;
 
 private:
-    containerType  * m_allSentences;
-    linksContainer * m_allLinks;
+    containerType   * m_allSentences;
+    linkset         * m_allLinks;
     fastAccessArray * m_fastAccess;
 };
 
@@ -89,9 +90,9 @@ sentence * dataset::operator[]( sentence::id _id )
             std::find_if(
                 begin(), end(),
                 [_id]( sentence& _candidate )
-                {
-                    return _candidate.getId() == _id;
-                }
+        {
+            return _candidate.getId() == _id;
+        }
             );
 
         if( it != end() )
@@ -104,44 +105,9 @@ sentence * dataset::operator[]( sentence::id _id )
 // -------------------------------------------------------------------------- //
 
 inline
-void dataset::addLink( sentence::id _a, sentence::id _b )
+dataset::linksArray dataset::getLinksOf( sentence::id _sentence ) const
 {
-    linksVector & __restrict vectorLinks = ( *m_allLinks )[_a];
-    size_t i = 0;
-
-    while( vectorLinks[i++] != sentence::INVALID_ID )
-        ;
-
-    vectorLinks[i--] = sentence::INVALID_ID;
-    vectorLinks[i] = _b;
-}
-
-// -------------------------------------------------------------------------- //
-
-inline
-bool dataset::areLinked( sentence::id _a, sentence::id _b ) const __restrict
-{
-    for( auto it = ( *m_allLinks )[_a].begin() ; it != ( *m_allLinks )[_a].end(); ++it )
-    {
-        if( ( *it != _b ) && ( *it != sentence::INVALID_ID ) )
-            continue;
-        else if( *it == _b )
-            return true;
-        else
-            return false;
-
-    }
-
-    assert( 0 );
-    return false;
-}
-
-// -------------------------------------------------------------------------- //
-
-inline
-const dataset::linksVector & dataset::getLinksOf( sentence::id _sentence ) const
-{
-    return ( *m_allLinks )[_sentence];
+    return m_allLinks->getLinksOf(_sentence);
 }
 
 // -------------------------------------------------------------------------- //
@@ -160,6 +126,16 @@ void dataset::prepare()
     }
 
     m_fastAccess = fastArray;
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+void dataset::addSentence(sentence::id _id, const char * _lang, const char * _data)
+{
+    static size_t sentenceNumber = 0;
+    new (&(*m_allSentences)[sentenceNumber++]) sentence(_id, _lang, _data);
+
 }
 
 NAMESPACE_END

@@ -11,10 +11,9 @@
 
 NAMESPACE_START
 
-userOptions::userOptions( dataset & _dataset )
+userOptions::userOptions()
     :m_desc( "Allowed options" )
     ,m_vm()
-    ,m_dataset( _dataset )
 {
     m_desc.add_options()
     ( "help,h", "produce help message" )
@@ -45,7 +44,7 @@ void userOptions::treatCommandLine( int argc, char * argv[] )
     po::notify( m_vm );
 }
 
-void userOptions::getFilters( FilterVector & allFilters_ )
+void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
 {
     qlog::warning( allFilters_.size() ) << "allFilters.size() > 0\n";
 
@@ -62,7 +61,7 @@ void userOptions::getFilters( FilterVector & allFilters_ )
     {
         allFilters_.push_back(
             std::shared_ptr<filter>(
-                new filterLink( m_dataset, m_vm["is-linked-to"].as<sentence::id>() )
+                new filterLink( _dataset, m_vm["is-linked-to"].as<sentence::id>() )
             )
         );
     }
@@ -84,7 +83,7 @@ void userOptions::getFilters( FilterVector & allFilters_ )
     {
         allFilters_.push_back(
             std::shared_ptr<filter>(
-                new filterTranslationRegex( m_dataset, m_vm["translation-regex"].as<std::vector<std::string>>() )
+                new filterTranslationRegex( _dataset, m_vm["translation-regex"].as<std::vector<std::string>>() )
             )
         );
     }
