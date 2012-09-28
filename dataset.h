@@ -12,21 +12,18 @@ NAMESPACE_START
 struct dataset
 {
     static const size_t NB_MAX_SENTENCES = 2000000;
-    static const size_t NB_MAX_LINKS     = 100;
     static const size_t HIGHER_ID        = 2500370;
-    typedef std::array<sentence, NB_MAX_SENTENCES> containerType;
+    typedef std::vector<sentence> containerType;
 
-public:
+    typedef const sentence::id * linksArray;
     typedef typename containerType::iterator iterator;
     typedef typename containerType::const_iterator const_iterator;
 
-    typedef const sentence::id * linksArray;
-    typedef std::array< std::array< sentence::id, NB_MAX_LINKS >, HIGHER_ID > linksContainer;
     typedef std::array<sentence *, HIGHER_ID> fastAccessArray;
 
 public:
     dataset()
-        :m_allSentences( new containerType )
+        :m_allSentences( nullptr )
         ,m_allLinks( nullptr )
         ,m_fastAccess( nullptr )
     {
@@ -39,9 +36,18 @@ public:
         delete m_fastAccess;
     }
 
-    void allocateMemoryForLinks(size_t _nbSentences, size_t _nbLinks)
+    void allocateMemoryForLinks( size_t _nbLinks )
     {
-        m_allLinks = new linkset(_nbSentences, _nbLinks);
+        m_allLinks = new linkset( m_nbSentences, _nbLinks );
+    }
+
+    void allocateMemoryForSentences( size_t _nbSentences )
+    {
+        m_nbSentences = _nbSentences;
+        m_allSentences = new containerType;
+        m_allSentences->reserve( _nbSentences );
+
+        qlog::info << "Allocated " << (m_allSentences->capacity() * sizeof(sentence))/ (1024*1024)<< " MB for sentences.\n";
     }
 
 public:
@@ -61,17 +67,18 @@ public:
     void prepare();
 
 public:
-    void addLink( sentence::id _a, sentence::id _b ) { m_allLinks->addLink(_a,_b); }
-    bool areLinked( sentence::id _a, sentence::id _b ) const { return m_allLinks->areLinked(_a, _b); }
+    void addLink( sentence::id _a, sentence::id _b ) { m_allLinks->addLink( _a,_b ); }
+    bool areLinked( sentence::id _a, sentence::id _b ) const { return m_allLinks->areLinked( _a, _b ); }
 
 private:
     dataset( const dataset & ) = delete;
     dataset & operator=( const dataset & ) = delete;
 
 private:
-    containerType   * m_allSentences;
-    linkset         * m_allLinks;
+    containerType  *  m_allSentences;
+    linkset     *     m_allLinks;
     fastAccessArray * m_fastAccess;
+    size_t            m_nbSentences;
 };
 
 // -------------------------------------------------------------------------- //
@@ -90,9 +97,9 @@ sentence * dataset::operator[]( sentence::id _id )
             std::find_if(
                 begin(), end(),
                 [_id]( sentence& _candidate )
-        {
-            return _candidate.getId() == _id;
-        }
+                {
+                    return _candidate.getId() == _id;
+                }
             );
 
         if( it != end() )
@@ -107,7 +114,7 @@ sentence * dataset::operator[]( sentence::id _id )
 inline
 dataset::linksArray dataset::getLinksOf( sentence::id _sentence ) const
 {
-    return m_allLinks->getLinksOf(_sentence);
+    return m_allLinks->getLinksOf( _sentence );
 }
 
 // -------------------------------------------------------------------------- //
@@ -131,10 +138,10 @@ void dataset::prepare()
 // -------------------------------------------------------------------------- //
 
 inline
-void dataset::addSentence(sentence::id _id, const char * _lang, const char * _data)
+void dataset::addSentence( sentence::id _id, const char * _lang, const char * _data )
 {
     static size_t sentenceNumber = 0;
-    new (&(*m_allSentences)[sentenceNumber++]) sentence(_id, _lang, _data);
+    new( &( *m_allSentences )[sentenceNumber++] ) sentence( _id, _lang, _data );
 
 }
 

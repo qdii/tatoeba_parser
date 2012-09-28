@@ -75,6 +75,8 @@ int main( int argc, char * argv[] )
     assert( sentenceMap );
     assert( sentenceMap->getRegion() );
 
+    data.allocateMemoryForSentences( std::count(sentenceMap->getRegion(), sentenceMap->getRegion() + sentenceMap->getSize(), '\n') );
+
     fastSentenceParser sentenceParser(
         sentenceMap->getRegion(),
         sentenceMap->getRegion() + sentenceMap->getSize()
@@ -95,7 +97,7 @@ int main( int argc, char * argv[] )
         {
             fileMapper linksMap( LINKS_FILENAME );
             const size_t nbLinks = std::count ( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
-            data.allocateMemoryForLinks( nbLines, nbLinks );
+            data.allocateMemoryForLinks( nbLinks );
             fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
             parseFile( linksParser, data );
         }
