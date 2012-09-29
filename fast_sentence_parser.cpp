@@ -43,7 +43,8 @@ int fastSentenceParser::start() throw()
         case DATA_WAIT_FOR_EOL:
             if( __builtin_expect( c == '\n', false ) )
             {
-                sentenceDataset->addSentence(id, lang, data);
+                *ptr = '\0';
+                sentenceDataset->addSentence( id, lang, data );
                 assert( id != sentence::INVALID_ID );
                 assert( lang != nullptr );
                 assert( data != nullptr );
@@ -51,7 +52,6 @@ int fastSentenceParser::start() throw()
                 lang = nullptr;
                 id =  sentence::INVALID_ID;
 
-                *ptr = '\0';
                 state = ID;
                 ++nbSentences;
             }

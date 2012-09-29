@@ -18,10 +18,12 @@ struct userOptions
     void getFilters( dataset &, FilterVector & );
 
     bool isItNecessaryToParseLinksFile() const;
+    bool isItNecessaryToParseTagFile() const;
     bool isVerbose() const;
     bool isHelpRequested() const;
     bool displayLineNumbers() const;
     bool displayIds() const;
+    bool justParse() const;
 
     void printHelp();
 
@@ -34,6 +36,12 @@ inline
 bool userOptions::isItNecessaryToParseLinksFile() const
 {
     return m_vm.count( "is-linked-to" ) || m_vm.count( "translation-regex" );
+}
+
+inline
+bool userOptions::isItNecessaryToParseTagFile() const
+{
+    return m_vm.count( "has-tag" );
 }
 
 inline
@@ -59,6 +67,12 @@ inline
 bool userOptions::displayIds() const
 {
     return m_vm.count( "display-ids" );
+}
+
+inline
+bool userOptions::justParse() const
+{
+    return m_vm.count( "just-parse" );
 }
 
 inline

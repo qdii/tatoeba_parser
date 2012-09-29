@@ -5,6 +5,7 @@
 #include "filter_translation_regex.h"
 #include "filter_link.h"
 #include "filter_lang.h"
+#include "filter_tag.h"
 #include "dataset.h"
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -16,25 +17,26 @@ userOptions::userOptions()
     ,m_vm()
 {
     m_desc.add_options()
-    ( "help,h", "produce help message" )
-    //( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence." )
-    //( "optional,o", po::value<std::string>(), "The characters that may compose the sentence." )
-    ( "display-line-numbers,n", "Display the indexes of the lines." )
-    ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
-    ( "display-ids,i", "Displays the sentence ids." )
-    //( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
-    ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
-    ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
-    //( "depedent-regex,d",  po::value<std::vector<std::string> >()->composing(), "A set of regular expressions which have to be all matched." )
-    //( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
-    //( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
-    ( "verbose,v", "Displays more info" )
-    //( "has-tag,g", po::value<sentence::tag>(), "Checks if the sentence has a given tag" )
-    //( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
-    ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
-      "Filters only sentences which translations match this regex. If many "
-      "regular expressons are provided, a sentence will match if any of its "
-      "translations matches them all" )
+        ( "help,h", "produce help message" )
+        //( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence." )
+        //( "optional,o", po::value<std::string>(), "The characters that may compose the sentence." )
+        ( "display-line-numbers,n", "Display the indexes of the lines." )
+        ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
+        ( "display-ids,i", "Displays the sentence ids." )
+        //( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
+        ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
+        ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
+        //( "depedent-regex,d",  po::value<std::vector<std::string> >()->composing(), "A set of regular expressions which have to be all matched." )
+        //( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
+        //( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
+        ( "verbose,v", "Displays more info" )
+        ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag" )
+        //( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
+        ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
+          "Filters only sentences which translations match this regex. If many "
+          "regular expressons are provided, a sentence will match if any of its "
+          "translations matches them all" )
+        ( "just-parse", "Do not apply any filter and do not display anything (only useful for debugging purpose)." )
     ;
 }
 
@@ -62,6 +64,15 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
         allFilters_.push_back(
             std::shared_ptr<filter>(
                 new filterLink( _dataset, m_vm["is-linked-to"].as<sentence::id>() )
+            )
+        );
+    }
+
+    if( m_vm.count( "has-tag" ) )
+    {
+        allFilters_.push_back(
+            std::shared_ptr<filter>(
+                new filterTag( _dataset, m_vm["has-tag"].as<std::string>() )
             )
         );
     }

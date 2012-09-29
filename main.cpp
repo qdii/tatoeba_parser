@@ -5,17 +5,22 @@
 #include "filter_regex.h"
 #include "fast_sentence_parser.h"
 #include "fast_link_parser.h"
+#include "fast_tag_parser.h"
 #include <iostream>
 
 USING_NAMESPACE
 
 static const char SENTENCES_FILENAME[] = "sentences.csv";
 static const char LINKS_FILENAME[] = "links.csv";
+static const char TAG_FILENAME[] = "tags.csv";
+
 void startLog( bool _verbose );
 int parseFile( parser & _parser, dataset & data_ );
 
 /** @brief parse the sentences.csv file and returns the nb of lines */
 int parseSentenceFile();
+
+bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, dataset & _data );
 
 /// How does it work?
 ///
@@ -48,7 +53,7 @@ int main( int argc, char * argv[] )
         return 0;
     }
 
-    if( !allFilters.size() || options.isHelpRequested() )
+    if( ( !allFilters.size() && !options.justParse() ) || options.isHelpRequested() )
     {
         options.printHelp();
         return 0;
@@ -75,7 +80,7 @@ int main( int argc, char * argv[] )
     assert( sentenceMap );
     assert( sentenceMap->getRegion() );
 
-    data.allocateMemoryForSentences( std::count(sentenceMap->getRegion(), sentenceMap->getRegion() + sentenceMap->getSize(), '\n') );
+    data.allocateMemoryForSentences( std::count( sentenceMap->getRegion(), sentenceMap->getRegion() + sentenceMap->getSize(), '\n' ) );
 
     fastSentenceParser sentenceParser(
         sentenceMap->getRegion(),
@@ -86,9 +91,11 @@ int main( int argc, char * argv[] )
     if( nbLines < 0 )
         return 0;
 
-    qlog::info << "higher id: " << (std::max_element(
-        data.begin(), data.end(),
-        [](const sentence & _a, const sentence & _b) { return _a.getId() < _b.getId(); }))->getId() << '\n';
+    qlog::info << "higher id: " <<
+               ( std::max_element(
+                    data.begin(), data.end(),
+                    []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); } )
+               )->getId() << '\n';
 
     // parsing links.csv
     if( options.isItNecessaryToParseLinksFile() )
@@ -96,7 +103,7 @@ int main( int argc, char * argv[] )
         try
         {
             fileMapper linksMap( LINKS_FILENAME );
-            const size_t nbLinks = std::count ( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
+            const size_t nbLinks = std::count( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
             data.allocateMemoryForLinks( nbLinks );
             fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
             parseFile( linksParser, data );
@@ -113,38 +120,50 @@ int main( int argc, char * argv[] )
         }
     }
 
-    // create an container to retrieve sentences from id in a very fast manner
-    data.prepare();
+    // parsing tags.csv
+    fileMapper * tagFileMapping = nullptr;
 
-    // go through every sentence and see if it matches the filter
-    auto itr = data.begin();
-    auto endFilter = allFilters.end();
-    unsigned printedLineNumber = 0;
-
-    for( int i = 0; i < nbLines; ++i )
+    if( options.isItNecessaryToParseTagFile() )
     {
-        auto sentence = *itr++;
-        bool shouldDisplay = true;
+        if( !parseTagFile( tagFileMapping, TAG_FILENAME, data ) )
+            return 0;
+    }
 
-        for( auto filter = allFilters.begin(); shouldDisplay && filter != endFilter; ++filter )
+    if( !options.justParse() )
+    {
+        // create an container to retrieve sentences from id in a very fast manner
+        data.prepare();
+
+        // go through every sentence and see if it matches the filter
+        auto itr = data.begin();
+        auto endFilter = allFilters.end();
+        unsigned printedLineNumber = 0;
+
+        for( int i = 0; i < nbLines; ++i )
         {
-            shouldDisplay &= ( *filter )->parse( sentence );
-        }
+            auto sentence = *itr++;
+            bool shouldDisplay = true;
 
-        if( shouldDisplay )
-        {
-            if( options.displayLineNumbers() )
-                std::cout << ++printedLineNumber << '\t';
+            for( auto filter = allFilters.begin(); shouldDisplay && filter != endFilter; ++filter )
+            {
+                shouldDisplay &= ( *filter )->parse( sentence );
+            }
 
-            if( options.displayIds() )
-                std::cout << sentence.getId() << '\t';
+            if( shouldDisplay )
+            {
+                if( options.displayLineNumbers() )
+                    std::cout << ++printedLineNumber << '\t';
 
-            std::cout << sentence.str() << '\n';
+                if( options.displayIds() )
+                    std::cout << sentence.getId() << '\t';
+
+                std::cout << sentence.str() << '\n';
+            }
         }
     }
 
     delete sentenceMap;
-
+    delete tagFileMapping;
     return 0;
 }
 
@@ -160,4 +179,39 @@ void startLog( bool verbose )
     qlog::setLogLevel( verbose ? qlog::Loglevel::info : qlog::Loglevel::error );
     qlog::setPrependedTextQdiiFlavourBashColors();
     qlog::setOutput( std::cout );
+}
+
+bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, dataset & _data )
+{
+    try
+    {
+        _filemap = new fileMapper( _filename );
+        const size_t nbLines =
+            std::count(
+                _filemap->getRegion(),
+                _filemap->getRegion() + _filemap->getSize(),
+                '\n'
+            );
+        _data.allocateMemoryForTags( nbLines );
+        fastTagParser parser( _filemap->getRegion(), _filemap->getRegion() + _filemap->getSize() );
+        parser.setOutput( _data );
+        parser.start();
+    }
+    catch( const std::bad_alloc & exc )
+    {
+        qlog::error << "An error occurred while parsing file " << _filename << std::endl;
+        return false;
+    }
+    catch( const invalid_file & exception )
+    {
+        qlog::error << "Cannot open " << _filename << '\n';
+        return 0;
+    }
+    catch( const map_failed & exception )
+    {
+        qlog::error << "Failed to map " << _filename << '\n';
+        return 0;
+    }
+
+    return true;
 }

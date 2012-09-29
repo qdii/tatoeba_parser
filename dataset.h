@@ -5,6 +5,7 @@
 #include <vector>
 #include "sentence.h"
 #include "linkset.h"
+#include "tagset.h"
 NAMESPACE_START
 
 /**@struct dataset
@@ -34,6 +35,7 @@ public:
         delete m_allSentences;
         delete m_allLinks;
         delete m_fastAccess;
+        delete m_allTags;
     }
 
     void allocateMemoryForLinks( size_t _nbLinks )
@@ -47,7 +49,12 @@ public:
         m_allSentences = new containerType;
         m_allSentences->reserve( _nbSentences );
 
-        qlog::info << "Allocated " << (m_allSentences->capacity() * sizeof(sentence))/ (1024*1024)<< " MB for sentences.\n";
+        qlog::info << "Allocated " << ( m_allSentences->capacity() * sizeof( sentence ) )/ ( 1024*1024 )<< " MB for sentences.\n";
+    }
+
+    void allocateMemoryForTags( size_t _nbTags )
+    {
+        m_allTags = new tagset( m_nbSentences, _nbTags );
     }
 
 public:
@@ -58,6 +65,10 @@ public:
     const_iterator end() const { return m_allSentences->end(); }
     dataset::linksArray getLinksOf( sentence::id _sentence ) const;
     void addSentence( sentence::id _a, const char * _lang, const char * _data );
+    void addTag( sentence::id _sentenceId, const char * _tag ) { m_allTags->tagSentence( _sentenceId, _tag ); }
+
+    tagset::tagId getTagId( const std::string _name ) { return m_allTags->getTagId( _name ); }
+    bool hasTag( sentence::id _sentenceId, tagset::tagId _tag ) const { return m_allTags->isSentenceTagged( _sentenceId, _tag ); }
 
 public:
     sentence * operator[]( sentence::id );
@@ -77,6 +88,7 @@ private:
 private:
     containerType  *  m_allSentences;
     linkset     *     m_allLinks;
+    tagset      *     m_allTags;
     fastAccessArray * m_fastAccess;
     size_t            m_nbSentences;
 };
@@ -140,9 +152,7 @@ void dataset::prepare()
 inline
 void dataset::addSentence( sentence::id _id, const char * _lang, const char * _data )
 {
-    static size_t sentenceNumber = 0;
-    new( &( *m_allSentences )[sentenceNumber++] ) sentence( _id, _lang, _data );
-
+    m_allSentences->push_back( sentence( _id, _lang, _data ) );
 }
 
 NAMESPACE_END
