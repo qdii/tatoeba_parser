@@ -11,7 +11,7 @@ NAMESPACE_START
 struct linkset
 {
 public:
-    linkset(size_t _nbSentences, size_t _nbLinks);
+    linkset( size_t _nbSentences, size_t _nbLinks );
 
     static const size_t NB_MAX_LINKS = 5000000;
 
@@ -25,7 +25,7 @@ public:
 private:
     /// A first idea was to create a matrix of bits, each line representing a
     /// sentence A and each column representing a sentence B. If the intersection
-    /// of the line and the sentence is a 1, then they are linked, else they are
+    /// of the line and the column is a 1, then they are linked, else they are
     /// not. But that ends up taking at least NB_SENTENCES*NB_SENTENCES bits,
     /// which is some millions of gigabytes size.
 

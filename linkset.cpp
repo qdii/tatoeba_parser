@@ -6,12 +6,12 @@
 
 NAMESPACE_START
 
-linkset::linkset(size_t _nbSentences, size_t _nbLinks)
+linkset::linkset( size_t _nbSentences, size_t _nbLinks )
     :m_links()
     ,m_pointers()
 {
     // prepare link array
-    static const size_t LINK_ARRAY_SIZE = (_nbLinks + _nbLinks/100) * sizeof(sentence::id);
+    static const size_t LINK_ARRAY_SIZE = ( _nbLinks + _nbLinks/100 ) * sizeof( sentence::id );
     m_links.resize( LINK_ARRAY_SIZE, 0 );
 
     // prepare ptrs array
