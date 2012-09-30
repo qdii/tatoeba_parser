@@ -5,6 +5,15 @@
 
 #if HAVE_CONFIG_H
 #   include <config.h>
+
+#   if HAVE_FCNTL_H == 0
+#       error "The project cannot be build without <fcntl.h>"
+#   endif
+
+#   if HAVE_MEMORY_H == 0 || HAVE_MMAP == 0 || HAVE_MUNMAP == 0
+#       error "The project cannot be build without <memory.h> or mmap/munmap calls"
+#   endif
+
 #endif
 
 

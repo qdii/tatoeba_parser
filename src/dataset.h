@@ -26,7 +26,9 @@ public:
     dataset()
         :m_allSentences( nullptr )
         ,m_allLinks( nullptr )
+        ,m_allTags( nullptr )
         ,m_fastAccess( nullptr )
+        ,m_nbSentences( 0 )
     {
     }
 
@@ -109,9 +111,9 @@ sentence * dataset::operator[]( sentence::id _id )
             std::find_if(
                 begin(), end(),
                 [_id]( sentence& _candidate )
-                {
-                    return _candidate.getId() == _id;
-                }
+        {
+            return _candidate.getId() == _id;
+        }
             );
 
         if( it != end() )
