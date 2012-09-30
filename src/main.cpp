@@ -48,6 +48,12 @@ int main( int argc, char * argv[] )
         return 0;
     }
 
+    if( options.isVersionRequested() )
+    {
+        options.printVersion();
+        return 0;
+    }
+
     if( !allFilters.size() || options.isHelpRequested() )
     {
         options.printHelp();
@@ -75,7 +81,7 @@ int main( int argc, char * argv[] )
     assert( sentenceMap );
     assert( sentenceMap->getRegion() );
 
-    data.allocateMemoryForSentences( std::count(sentenceMap->getRegion(), sentenceMap->getRegion() + sentenceMap->getSize(), '\n') );
+    data.allocateMemoryForSentences( std::count( sentenceMap->getRegion(), sentenceMap->getRegion() + sentenceMap->getSize(), '\n' ) );
 
     fastSentenceParser sentenceParser(
         sentenceMap->getRegion(),
@@ -86,9 +92,9 @@ int main( int argc, char * argv[] )
     if( nbLines < 0 )
         return 0;
 
-    qlog::info << "higher id: " << (std::max_element(
-        data.begin(), data.end(),
-        [](const sentence & _a, const sentence & _b) { return _a.getId() < _b.getId(); }))->getId() << '\n';
+    qlog::info << "higher id: " << ( std::max_element(
+                                         data.begin(), data.end(),
+    []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); } ) )->getId() << '\n';
 
     // parsing links.csv
     if( options.isItNecessaryToParseLinksFile() )
@@ -96,7 +102,7 @@ int main( int argc, char * argv[] )
         try
         {
             fileMapper linksMap( LINKS_FILENAME );
-            const size_t nbLinks = std::count ( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
+            const size_t nbLinks = std::count( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
             data.allocateMemoryForLinks( nbLinks );
             fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
             parseFile( linksParser, data );

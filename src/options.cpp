@@ -12,7 +12,7 @@
 NAMESPACE_START
 
 userOptions::userOptions()
-    :m_desc( "Allowed options" )
+    :m_desc( "" )
     ,m_vm()
 {
     m_desc.add_options()
@@ -33,8 +33,9 @@ userOptions::userOptions()
     //( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
     ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
       "Filters only sentences which translations match this regex. If many "
-      "regular expressons are provided, a sentence will match if any of its "
+      "regular expressions are provided, a sentence will be kept if any of its "
       "translations matches them all" )
+    ( "version", "Displays the current version of the program")
     ;
 }
 
@@ -89,6 +90,12 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
     }
 
     qlog::info << "registered " << allFilters_.size() << " filters\n";
+}
+
+void userOptions::printVersion()
+{
+    std::cout   << PACKAGE_STRING << "\n"
+                << "Please report bugs to " << PACKAGE_BUGREPORT << "\n";
 }
 
 NAMESPACE_END

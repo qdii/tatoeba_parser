@@ -20,10 +20,12 @@ struct userOptions
     bool isItNecessaryToParseLinksFile() const;
     bool isVerbose() const;
     bool isHelpRequested() const;
+    bool isVersionRequested() const;
     bool displayLineNumbers() const;
     bool displayIds() const;
 
     void printHelp();
+    void printVersion();
 
 private:
     po::options_description m_desc;
@@ -54,7 +56,6 @@ bool userOptions::displayLineNumbers() const
     return m_vm.count( "display-line-numbers" );
 }
 
-
 inline
 bool userOptions::displayIds() const
 {
@@ -62,8 +63,15 @@ bool userOptions::displayIds() const
 }
 
 inline
+bool userOptions::isVersionRequested() const
+{
+    return m_vm.count( "version" );
+}
+
+inline
 void userOptions::printHelp()
 {
+    std::cout << "Usage: " << PACKAGE_NAME << " <OPTION>\nWhere OPTION can be any of:\n";
     std::cout << m_desc << std::endl;
 }
 NAMESPACE_END
