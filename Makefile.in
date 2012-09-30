@@ -1,0 +1,44 @@
+# @configure_input@
+
+package        = @PACKAGE_NAME@
+version        = @PACKAGE_VERSION@
+tarname        = @PACKAGE_TARNAME@
+distdir        = $(tarname)-$(version)
+
+prefix         = @prefix@
+exec_prefix    = @exec_prefix@
+bindir         = @bindir@
+
+# VPATH-related substitution variables
+srcdir         = @srcdir@
+VPATH          = @srcdir@
+
+all $(package) clean install uninstall:
+	$(MAKE) -C src $@
+
+dist: $(distdir).tar.gz
+
+$(distdir).tar.gz: FORCE $(distdir)
+	tar chof - $(distdir) | gzip -9 -c >$(distdir).tar.gz
+	rm -rf $(distdir)
+
+$(distdir):
+	mkdir -p $(distdir)/src/valgrind
+	cp $(srcdir)/configure $(distdir)
+	cp $(srcdir)/Makefile.in $(distdir)
+	cp $(srcdir)/src/Makefile.in $(distdir)/src
+	cp $(srcdir)/src/*.cpp $(distdir)/src
+	cp $(srcdir)/src/*.h $(distdir)/src
+	cp $(srcdir)/src/qdiilog.hpp $(distdir)/src
+	cp $(srcdir)/src/valgrind/valgrind.h $(distdir)/src/valgrind
+	cp $(srcdir)/install-sh $(distdir)
+	cp $(srcdir)/config.h.in $(distdir)
+
+
+Makefile: Makefile.in config.status
+	./config.status $@
+
+config.status: configure
+	./config.status --recheck
+
+.PHONY: FORCE all clean dist install uninstall

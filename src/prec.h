@@ -1,6 +1,15 @@
 #ifndef PREC_H
 #define PREC_H
 
+// ___________________________ AUTOCONF ________________________________________
+
+#if HAVE_CONFIG_H
+#   include <config.h>
+#endif
+
+
+
+
 // ___________________________ NAMESPACE _______________________________________
 
 #ifdef NAMESPACE
@@ -13,7 +22,7 @@
 #   define USING_NAMESPACE
 #endif
 
-// __________________________ LOGGING ________________________________________
+// __________________________ LOGGING __________________________________________
 
 #define QDIILOG_NAMESPACE qlog
 #define QDIILOG_NAME_LOGGER_DEBUG debug
