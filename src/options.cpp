@@ -5,6 +5,7 @@
 #include "filter_translation_regex.h"
 #include "filter_link.h"
 #include "filter_lang.h"
+#include "filter_tag.h"
 #include "dataset.h"
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -29,26 +30,35 @@ userOptions::userOptions()
     //( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
     //( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
     ( "verbose,v", "Displays more info" )
-    //( "has-tag,g", po::value<sentence::tag>(), "Checks if the sentence has a given tag" )
+    ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag" )
     //( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
     ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
       "Filters only sentences which translations match this regex. If many "
       "regular expressions are provided, a sentence will be kept if any of its "
       "translations matches them all" )
-    ( "version", "Displays the current version of the program")
+    ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
+    ( "version", "Displays the current version of the program" )
     ;
 }
 
+// -------------------------------------------------------------------------- //
+
+/**@brief let boost::program_options treat the user command line arguments */
 void userOptions::treatCommandLine( int argc, char * argv[] )
 {
     po::store( po::parse_command_line( argc, argv, m_desc ), m_vm );
     po::notify( m_vm );
 }
 
+// -------------------------------------------------------------------------- //
+
+/**@brief Populate the passed list of filters with certain filters */
 void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
 {
     qlog::warning( allFilters_.size() ) << "allFilters.size() > 0\n";
 
+    // The various filters will be applied in order. The language filter is
+    // very light so we want it first to discard as many sentences as possible
     if( m_vm.count( "language" ) )
     {
         allFilters_.push_back(
@@ -67,6 +77,19 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
         );
     }
 
+    if( m_vm.count( "has-tag" ) )
+    {
+        allFilters_.push_back(
+
+            std::shared_ptr<filter>(
+                new filterTag( _dataset, m_vm["has-tag"].as<std::string>() )
+
+            )
+        );
+    }
+
+    // regular expression filters are added last as each of those filters is
+    // relatively heavy.
     if( m_vm.count( "regex" ) )
     {
         // for each regex, we create a filter
@@ -92,6 +115,9 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
     qlog::info << "registered " << allFilters_.size() << " filters\n";
 }
 
+// -------------------------------------------------------------------------- //
+
+/**@brief Outputs the version (defined in config.h) */
 void userOptions::printVersion()
 {
     std::cout   << PACKAGE_STRING << "\n"

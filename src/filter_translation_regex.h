@@ -18,14 +18,14 @@ struct filterTranslationRegex : public filter
             m_allRegex.push_back( boost::make_u32regex( regex ) );
     }
 
-    bool parse( const sentence & _sentence ) __restrict throw() override
+    bool parse( const sentence & __restrict _sentence ) __restrict throw() override
     {
         bool ret = false;
         dataset::linksArray links = m_dataset.getLinksOf( _sentence.getId() );
 
         for ( sentence::id linkId = *links; linkId != sentence::INVALID_ID; linkId = *++links)
         {
-            sentence * link = m_dataset[linkId];
+            sentence * __restrict link = m_dataset[linkId];
 
             if( link )
             {

@@ -2,17 +2,22 @@
 #include "dataset.h"
 #include "options.h"
 #include "filter_id.h"
+#include "filter_tag.h"
 #include "filter_regex.h"
 #include "fast_sentence_parser.h"
 #include "fast_link_parser.h"
+#include "fast_tag_parser.h"
 #include <iostream>
 
 USING_NAMESPACE
 
 static const char SENTENCES_FILENAME[] = "sentences.csv";
 static const char LINKS_FILENAME[] = "links.csv";
+static const char TAG_FILENAME[] = "tags.csv";
+
 void startLog( bool _verbose );
 int parseFile( parser & _parser, dataset & data_ );
+bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, dataset & _data );
 
 /** @brief parse the sentences.csv file and returns the nb of lines */
 int parseSentenceFile();
@@ -35,6 +40,8 @@ int main( int argc, char * argv[] )
     options.treatCommandLine( argc, argv );
     startLog( options.isVerbose() );
 
+    const std::string csvPath = options.getCsvPath();
+
     dataset data; ///< data will contain the sentences and how they are linked
 
     try
@@ -54,7 +61,7 @@ int main( int argc, char * argv[] )
         return 0;
     }
 
-    if( !allFilters.size() || options.isHelpRequested() )
+    if( ( !allFilters.size() && !options.justParse() ) || options.isHelpRequested() )
     {
         options.printHelp();
         return 0;
@@ -62,19 +69,20 @@ int main( int argc, char * argv[] )
 
     // parsing sentences file
     fileMapper * sentenceMap = nullptr;
+    const std::string sentencesPath = csvPath + '/' + SENTENCES_FILENAME;
 
     try
     {
-        sentenceMap = new fileMapper( SENTENCES_FILENAME );
+        sentenceMap = new fileMapper( sentencesPath );
     }
     catch( const invalid_file & exception )
     {
-        qlog::error << "Cannot open " << SENTENCES_FILENAME << '\n';
+        qlog::error << "Cannot open " << sentencesPath << '\n';
         return 0;
     }
     catch( const map_failed & exception )
     {
-        qlog::error << "Failed to map " << SENTENCES_FILENAME << '\n';
+        qlog::error << "Failed to map " << sentencesPath << '\n';
         return 0;
     }
 
@@ -99,9 +107,11 @@ int main( int argc, char * argv[] )
     // parsing links.csv
     if( options.isItNecessaryToParseLinksFile() )
     {
+        const std::string linksPath = csvPath + '/' + LINKS_FILENAME;
+
         try
         {
-            fileMapper linksMap( LINKS_FILENAME );
+            fileMapper linksMap( linksPath );
             const size_t nbLinks = std::count( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
             data.allocateMemoryForLinks( nbLinks );
             fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
@@ -109,51 +119,104 @@ int main( int argc, char * argv[] )
         }
         catch( const invalid_file & exception )
         {
-            qlog::error << "Cannot open " << LINKS_FILENAME << '\n';
+            qlog::error << "Cannot open " << linksPath << '\n';
             return 0;
         }
         catch( const map_failed & exception )
         {
-            qlog::error << "Failed to map " << LINKS_FILENAME << '\n';
+            qlog::error << "Failed to map " << linksPath << '\n';
             return 0;
         }
     }
 
-    // create an container to retrieve sentences from id in a very fast manner
-    data.prepare();
 
-    // go through every sentence and see if it matches the filter
-    auto itr = data.begin();
-    auto endFilter = allFilters.end();
-    unsigned printedLineNumber = 0;
 
-    for( int i = 0; i < nbLines; ++i )
+    // parsing tags.csv
+    fileMapper * tagFileMapping = nullptr;
+
+    if( options.isItNecessaryToParseTagFile() )
     {
-        auto sentence = *itr++;
-        bool shouldDisplay = true;
-
-        for( auto filter = allFilters.begin(); shouldDisplay && filter != endFilter; ++filter )
-        {
-            shouldDisplay &= ( *filter )->parse( sentence );
-        }
-
-        if( shouldDisplay )
-        {
-            if( options.displayLineNumbers() )
-                std::cout << ++printedLineNumber << '\t';
-
-            if( options.displayIds() )
-                std::cout << sentence.getId() << '\t';
-
-            std::cout << sentence.str() << '\n';
-        }
+        const std::string tagsPath = csvPath + '/' + TAG_FILENAME;
+        if( !parseTagFile( tagFileMapping, tagsPath, data ) )
+            return 0;
     }
 
-    delete sentenceMap;
+    if( !options.justParse() )
+    {
+        // create an container to retrieve sentences from id in a very fast manner
+        data.prepare();
+
+        // go through every sentence and see if it matches the filter
+        auto itr = data.begin();
+        auto endFilter = allFilters.end();
+        unsigned printedLineNumber = 0;
+
+        for( int i = 0; i < nbLines; ++i )
+        {
+            auto sentence = *itr++;
+            bool shouldDisplay = true;
+
+            for( auto filter = allFilters.begin(); shouldDisplay && filter != endFilter; ++filter )
+            {
+                shouldDisplay &= ( *filter )->parse( sentence );
+            }
+
+            if( shouldDisplay )
+            {
+                if( options.displayLineNumbers() )
+                    std::cout << ++printedLineNumber << '\t';
+
+                if( options.displayIds() )
+                    std::cout << sentence.getId() << '\t';
+
+                std::cout << sentence.str() << '\n';
+            }
+        }
+
+        delete sentenceMap;
+
+    }
 
     return 0;
 }
 
+bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, dataset & _data )
+{
+    try
+    {
+        _filemap = new fileMapper( _filename );
+        const size_t nbLines =
+            std::count(
+                _filemap->getRegion(),
+                _filemap->getRegion() + _filemap->getSize(),
+                '\n'
+            );
+
+        _data.allocateMemoryForTags( nbLines );
+        fastTagParser parser( _filemap->getRegion(), _filemap->getRegion() + _filemap->getSize() );
+        parser.setOutput( _data );
+        parser.start();
+    }
+    catch( const std::bad_alloc & exc )
+    {
+        qlog::error << "An error occurred while parsing file " << _filename << std::endl;
+
+        return false;
+    }
+    catch( const invalid_file & exception )
+    {
+        qlog::error << "Cannot open " << _filename << '\n';
+        return 0;
+    }
+    catch( const map_failed & exception )
+    {
+        qlog::error << "Failed to map " << _filename << '\n';
+        return 0;
+
+    }
+
+    return true;
+}
 
 int parseFile( parser & _parser, dataset & data_ )
 {

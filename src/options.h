@@ -18,19 +18,29 @@ struct userOptions
     void getFilters( dataset &, FilterVector & );
 
     bool isItNecessaryToParseLinksFile() const;
+    bool isItNecessaryToParseTagFile() const;
     bool isVerbose() const;
     bool isHelpRequested() const;
     bool isVersionRequested() const;
     bool displayLineNumbers() const;
     bool displayIds() const;
+    bool justParse() const;
 
     void printHelp();
     void printVersion();
+
+    std::string getCsvPath() const;
 
 private:
     po::options_description m_desc;
     po::variables_map       m_vm;
 };
+
+inline
+bool userOptions::isItNecessaryToParseTagFile() const
+{
+    return m_vm.count( "has-tag" );
+}
 
 inline
 bool userOptions::isItNecessaryToParseLinksFile() const
@@ -73,6 +83,18 @@ void userOptions::printHelp()
 {
     std::cout << "Usage: " << PACKAGE_NAME << " <OPTION>\nWhere OPTION can be any of:\n";
     std::cout << m_desc << std::endl;
+}
+
+inline
+std::string userOptions::getCsvPath() const
+{
+    return m_vm.count( "csv-path" ) ? m_vm["csv-path"].as<std::string>() : ".";
+}
+
+inline
+bool userOptions::justParse() const
+{
+    return m_vm.count( "just-parse" );
 }
 NAMESPACE_END
 #endif //TATOPARSER_OPTIONS_H
