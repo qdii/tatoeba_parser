@@ -12,7 +12,8 @@ AC_PROG_INSTALL
 
 # Checks for libraries.
 AC_SEARCH_LIBS([_ZN5boost15program_options18option_descriptionC1Ev], [boost_program_options], , AC_MSG_ERROR([Unable to find Boost Program Options library]))
-AC_SEARCH_LIBS([_ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j], [boost_regex], , AC_MSG_ERROR([Unable to find Boost Regex compiled with ICU support]))
+AC_SEARCH_LIBS([_ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j], [boost_regex], , AC_MSG_ERROR([Unable to find Boost Regex]))
+AC_SEARCH_LIBS([u_tolower_49],[icuuc], , AC_MSG_ERROR([Unable to find icuuc]))
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h string.h unistd.h])
