@@ -45,7 +45,9 @@ bool userOptions::isItNecessaryToParseTagFile() const
 inline
 bool userOptions::isItNecessaryToParseLinksFile() const
 {
-    return m_vm.count( "is-linked-to" ) || m_vm.count( "translation-regex" );
+    return  m_vm.count( "is-linked-to" ) ||
+            m_vm.count( "translation-regex" ) ||
+            m_vm.count( "is-translatable-in" );
 }
 
 inline

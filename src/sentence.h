@@ -9,7 +9,7 @@ struct sentence
 {
     /**@brief A number that identifies the sentence uniquely */
     typedef int32_t id;
-    static const id INVALID_ID = 0;
+    static const int32_t INVALID_ID = 0;
 
     /**@brief Constructs a sentence
      * @param[in] _id   An unique identifier for the sentence
@@ -47,7 +47,7 @@ private:
     id           m_id;
     const char * m_lang;
     const char * m_data;
-} __attribute__((packed)) ;
+} __attribute__( ( packed ) ) ;
 
 // -------------------------------------------------------------------------- //
 

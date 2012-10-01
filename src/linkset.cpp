@@ -6,19 +6,21 @@
 
 NAMESPACE_START
 
-linkset::linkset( size_t _nbSentences, size_t _nbLinks )
+linkset::linkset( size_t, size_t _nbLinks, size_t _highestId )
     :m_links()
     ,m_pointers()
 {
     // prepare link array
-    static const size_t LINK_ARRAY_SIZE = ( _nbLinks + _nbLinks/100 ) * sizeof( sentence::id );
-    m_links.resize( LINK_ARRAY_SIZE, 0 );
+    m_links.resize( _nbLinks + _nbLinks/100, 0 );
 
     // prepare ptrs array
-    static const size_t POINTER_ARRAY_SIZE = _nbSentences * sizeof( sentence::id ) ;
-    m_pointers.resize( POINTER_ARRAY_SIZE, nullptr );
+    m_pointers.resize( _highestId+1, 0 );
 
-    qlog::info << "Allocated " << ( LINK_ARRAY_SIZE + POINTER_ARRAY_SIZE ) / ( 1024*1024 )<< " MB to store links\n";
+    qlog::info << "Allocated "
+        << ( m_links.capacity()*sizeof( sentence::id ) +
+             m_pointers.capacity()*sizeof( size_t ) ) / ( 1024*1024 )
+
+        << " MB to store links\n";
 }
 
 // -------------------------------------------------------------------------- //

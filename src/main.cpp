@@ -16,7 +16,7 @@ static const char LINKS_FILENAME[] = "links.csv";
 static const char TAG_FILENAME[] = "tags.csv";
 
 void startLog( bool _verbose );
-int parseFile( parser<char*> & _parser, dataset & data_ );
+int parseFile( parser<char *> & _parser, dataset & data_ );
 bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, dataset & _data );
 
 /** @brief parse the sentences.csv file and returns the nb of lines */
@@ -89,7 +89,12 @@ int main( int argc, char * argv[] )
     assert( sentenceMap );
     assert( sentenceMap->getRegion() );
 
-    data.allocateMemoryForSentences( std::count( sentenceMap->getRegion(), sentenceMap->getRegion() + sentenceMap->getSize(), '\n' ) );
+    data.allocateMemoryForSentences(
+        std::count(
+            sentenceMap->getRegion(),
+            sentenceMap->getRegion() + sentenceMap->getSize(), '\n'
+        )
+    );
 
     fastSentenceParser<char *> sentenceParser(
         sentenceMap->getRegion(),
@@ -100,9 +105,13 @@ int main( int argc, char * argv[] )
     if( nbLines < 0 )
         return 0;
 
-    qlog::info << "higher id: " << ( std::max_element(
-                                         data.begin(), data.end(),
-    []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); } ) )->getId() << '\n';
+    const sentence & sentenceOfHighestId =
+        *std::max_element(
+            data.begin(), data.end(),
+            []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+        );
+
+    qlog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
 
     // parsing links.csv
     if( options.isItNecessaryToParseLinksFile() )
@@ -112,8 +121,11 @@ int main( int argc, char * argv[] )
         try
         {
             fileMapper linksMap( linksPath );
-            const size_t nbLinks = std::count( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
-            data.allocateMemoryForLinks( nbLinks );
+            const size_t nbLinks = std::count(
+                                       linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(),
+                                       '\n'
+                                   );
+            data.allocateMemoryForLinks( nbLinks, sentenceOfHighestId.getId() );
             fastLinkParser<char *> linksParser(
                 linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize()
             );
@@ -131,14 +143,13 @@ int main( int argc, char * argv[] )
         }
     }
 
-
-
     // parsing tags.csv
     fileMapper * tagFileMapping = nullptr;
 
     if( options.isItNecessaryToParseTagFile() )
     {
         const std::string tagsPath = csvPath + '/' + TAG_FILENAME;
+
         if( !parseTagFile( tagFileMapping, tagsPath, data ) )
             return 0;
     }
@@ -182,6 +193,8 @@ int main( int argc, char * argv[] )
     return 0;
 }
 
+// -------------------------------------------------------------------------- //
+
 bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, dataset & _data )
 {
     try
@@ -195,7 +208,7 @@ bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, datase
             );
 
         _data.allocateMemoryForTags( nbLines );
-        fastTagParser<char*> parser(
+        fastTagParser<char *> parser(
             _filemap->getRegion(), _filemap->getRegion() + _filemap->getSize()
         );
         parser.setOutput( _data );
@@ -210,23 +223,27 @@ bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, datase
     catch( const invalid_file & exception )
     {
         qlog::error << "Cannot open " << _filename << '\n';
-        return 0;
+        return false;
     }
     catch( const map_failed & exception )
     {
         qlog::error << "Failed to map " << _filename << '\n';
-        return 0;
+        return false;
 
     }
 
     return true;
 }
 
-int parseFile( parser<char*> & _parser, dataset & data_ )
+// -------------------------------------------------------------------------- //
+
+int parseFile( parser<char *> & _parser, dataset & data_ )
 {
     _parser.setOutput( data_ );
     return _parser.start();
 }
+
+// -------------------------------------------------------------------------- //
 
 void startLog( bool verbose )
 {

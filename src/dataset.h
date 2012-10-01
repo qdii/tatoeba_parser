@@ -40,9 +40,9 @@ public:
         delete m_allTags;
     }
 
-    void allocateMemoryForLinks( size_t _nbLinks )
+    void allocateMemoryForLinks( size_t _nbLinks, size_t _highestId )
     {
-        m_allLinks = new linkset( m_nbSentences, _nbLinks );
+        m_allLinks = new linkset( m_nbSentences, _nbLinks, _highestId );
     }
 
     void allocateMemoryForSentences( size_t _nbSentences )
@@ -128,6 +128,7 @@ sentence * dataset::operator[]( sentence::id _id )
 inline
 dataset::linksArray dataset::getLinksOf( sentence::id _sentence ) const
 {
+    assert(m_allLinks);
     return m_allLinks->getLinksOf( _sentence );
 }
 

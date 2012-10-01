@@ -6,6 +6,7 @@
 #include "filter_link.h"
 #include "filter_lang.h"
 #include "filter_tag.h"
+#include "filter_translatable_in_language.h"
 #include "dataset.h"
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -17,7 +18,7 @@ userOptions::userOptions()
     ,m_vm()
 {
     m_desc.add_options()
-    ( "help,h", "produce help message" )
+    ( "help,h", "Produce help message." )
     //( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence." )
     //( "optional,o", po::value<std::string>(), "The characters that may compose the sentence." )
     ( "display-line-numbers,n", "Display the indexes of the lines." )
@@ -27,17 +28,17 @@ userOptions::userOptions()
     ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
     ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
     //( "depedent-regex,d",  po::value<std::vector<std::string> >()->composing(), "A set of regular expressions which have to be all matched." )
-    //( "translatable-in,t", po::value<std::string>(), "A language that the sentence can be translated into." )
+    ( "is-translatable-in", po::value<std::string>(), "Keep the sentence if it has a translation in a given language." )
     //( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
-    ( "verbose,v", "Displays more info" )
-    ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag" )
+    ( "verbose,v", "Displays more info." )
+    ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag." )
     //( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
     ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
       "Filters only sentences which translations match this regex. If many "
       "regular expressions are provided, a sentence will be kept if any of its "
-      "translations matches them all" )
+      "translations matches them all." )
     ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
-    ( "version", "Displays the current version of the program" )
+    ( "version", "Displays the current version of the program." )
     ;
 }
 
@@ -84,6 +85,15 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
             std::shared_ptr<filter>(
                 new filterTag( _dataset, m_vm["has-tag"].as<std::string>() )
 
+            )
+        );
+    }
+
+    if( m_vm.count( "is-translatable-in" ) )
+    {
+        allFilters_.push_back(
+            std::shared_ptr<filter>(
+                new filterTranslatableInLanguage( _dataset, m_vm["is-translatable-in"].as<std::string>() )
             )
         );
     }

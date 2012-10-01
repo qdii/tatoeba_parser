@@ -2,6 +2,7 @@
 #define LINKSET_H
 
 #include <vector>
+#include <stdexcept>
 #include "sentence.h"
 
 NAMESPACE_START
@@ -11,7 +12,7 @@ NAMESPACE_START
 struct linkset
 {
 public:
-    linkset( size_t _nbSentences, size_t _nbLinks );
+    linkset( size_t _nbSentences, size_t _nbLinks, size_t _highestId );
 
     static const size_t NB_MAX_LINKS = 5000000;
 
@@ -34,7 +35,7 @@ private:
     /// is terminated by INVALID_SENTENCE_ID. Each sentence id represents a link
     /// of the sentence.
     linksArray                    m_links;
-    std::vector< sentence::id * > m_pointers;
+    std::vector< size_t >         m_pointers;
 
 private:
     linkset( const linkset & );
@@ -46,16 +47,17 @@ private:
 inline
 void linkset::addLink( sentence::id _a, sentence::id _b ) __restrict
 {
-    static size_t indexInLinkArray = 0;
     static sentence::id lastIdValue = sentence::INVALID_ID;
 
     if( lastIdValue != _a )
     {
         lastIdValue = _a;
-        m_pointers[_a] = &m_links[++indexInLinkArray];
+        assert( _a < static_cast<sentence::id>( m_pointers.size() ) );
+        m_links.push_back( 0 );
+        m_pointers[_a] = m_links.size();
     }
 
-    m_links[indexInLinkArray++] = _b;
+    m_links.push_back( _b );
 }
 
 // -------------------------------------------------------------------------- //
@@ -63,7 +65,8 @@ void linkset::addLink( sentence::id _a, sentence::id _b ) __restrict
 inline
 bool linkset::areLinked( sentence::id _a, sentence::id _b ) const __restrict
 {
-    sentence::id * iter = m_pointers[_a];
+    /** @todo : recode with iterators */
+    const sentence::id * iter = &m_links[m_pointers[_a]];
 
     if( iter == nullptr )
         return false;
@@ -82,7 +85,8 @@ bool linkset::areLinked( sentence::id _a, sentence::id _b ) const __restrict
 inline
 const sentence::id * linkset::getLinksOf( sentence::id _a ) const
 {
-    return m_pointers[_a];
+    assert( _a < static_cast<sentence::id>( m_pointers.size() ) );
+    return &m_links[m_pointers[_a]];
 }
 
 NAMESPACE_END

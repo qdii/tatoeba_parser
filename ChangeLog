@@ -1,0 +1,8 @@
+v2.2
+	- Automake is now used as a build system
+	- Added --is-translatable-in switch, which keeps sentences that can be translated in a given language. 
+	- New switch --csv-path permits having the 3 main data files in a remote directory.
+	- Memory usage has been greatly reduced, from hundreds of MB to roughly 30 MB per data file.
+
+v2.1 
+	- First committed version. Tatoparser can filter sentences by language, regular expression and tags.
