@@ -16,9 +16,14 @@
 
 #endif
 
+// ___________________________ COMPATIBILITY ___________________________________
 
-
-
+#if __GNUC__ == 4 && (__GNUC_MINOR__ > 7 || \
+      (__GNUC_MINOR__ == 7 && __GNUC_PATCHLEVEL__ > 1))
+#   define TATO_OVERRIDE override
+#else
+#   define TATO_OVERRIDE
+#endif
 // ___________________________ NAMESPACE _______________________________________
 
 #ifdef NAMESPACE

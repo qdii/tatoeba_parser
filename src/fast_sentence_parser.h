@@ -10,7 +10,7 @@ template<typename iterator>
 struct fastSentenceParser : public parser<iterator>
 {
     fastSentenceParser( iterator _begin, iterator _end );
-    int start() throw () override;
+    int start() throw () TATO_OVERRIDE;
 };
 
 // -------------------------------------------------------------------------- //

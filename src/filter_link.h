@@ -16,7 +16,7 @@ struct filterLink : public filter
     {
     }
 
-    bool parse(const sentence & _sentence) throw () override
+    bool parse(const sentence & _sentence) throw () TATO_OVERRIDE
     {
         return m_dataset.areLinked( _sentence.getId(), m_id);
     }

@@ -10,7 +10,7 @@ struct filterLang : public filter
 {
     filterLang( const std::string & _lang ): m_lang( _lang ) { }
     virtual ~filterLang() { }
-    virtual bool parse( const sentence & _sentence ) override
+    virtual bool parse( const sentence & _sentence ) TATO_OVERRIDE
     {
         return m_lang == _sentence.lang();
     }

@@ -13,7 +13,7 @@ struct fastLinkParser : parser<iterator>
     {
     }
 
-    int start() throw() override;
+    int start() throw() TATO_OVERRIDE;
 };
 
 // -------------------------------------------------------------------------- //

@@ -12,7 +12,7 @@ struct fastTagParser : public parser<iterator>
         :parser<iterator>( _begin, _end )
     {
     }
-    int start() throw() override;
+    int start() throw() TATO_OVERRIDE;
 };
 
 // -------------------------------------------------------------------------- //

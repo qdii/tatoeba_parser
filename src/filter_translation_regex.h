@@ -18,7 +18,7 @@ struct filterTranslationRegex : public filter
             m_allRegex.push_back( boost::make_u32regex( regex ) );
     }
 
-    bool parse( const sentence & __restrict _sentence ) __restrict throw() override
+    bool parse( const sentence & __restrict _sentence ) __restrict throw() TATO_OVERRIDE
     {
         bool ret = false;
         dataset::linksArray links = m_dataset.getLinksOf( _sentence.getId() );

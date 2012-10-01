@@ -15,7 +15,7 @@ struct filterTranslatableInLanguage : public filter
     {
     }
 
-    bool parse( const sentence & __restrict _sentence ) __restrict throw() override
+    bool parse( const sentence & __restrict _sentence ) __restrict throw() TATO_OVERRIDE
     {
         // get the ids of the translations of this sentence
         const sentence::id * __restrict allLinksOfSentence =

@@ -15,7 +15,7 @@ struct filterTag  : public filter
     {
     }
 
-    bool parse( const sentence & _sentence ) throw() override
+    bool parse( const sentence & _sentence ) throw() TATO_OVERRIDE
     {
         if( m_tag == tagset::INVALID_TAGID )
             m_tag = m_data.getTagId( m_name );

@@ -10,7 +10,7 @@ struct filterId : public filter
 {
     filterId( sentence::id _id ): m_filteredId( _id ) { }
     virtual ~filterId() { }
-    virtual bool parse( const sentence & _sentence ) override
+    virtual bool parse( const sentence & _sentence ) TATO_OVERRIDE
     {
         return _sentence.getId() == m_filteredId;
     }
