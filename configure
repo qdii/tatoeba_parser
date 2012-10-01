@@ -3554,9 +3554,9 @@ else
   as_fn_error $? "Unable to find Boost Program Options library" "$LINENO" 5
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing _ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev" >&5
-$as_echo_n "checking for library containing _ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev... " >&6; }
-if ${ac_cv_search__ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev+:} false; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing _ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j" >&5
+$as_echo_n "checking for library containing _ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j... " >&6; }
+if ${ac_cv_search__ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_func_search_save_LIBS=$LIBS
@@ -3569,11 +3569,11 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char _ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev ();
+char _ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j ();
 int
 main ()
 {
-return _ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev ();
+return _ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j ();
   ;
   return 0;
 }
@@ -3586,25 +3586,25 @@ for ac_lib in '' boost_regex; do
     LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
   fi
   if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search__ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev=$ac_res
+  ac_cv_search__ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j=$ac_res
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext
-  if ${ac_cv_search__ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev+:} false; then :
+  if ${ac_cv_search__ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j+:} false; then :
   break
 fi
 done
-if ${ac_cv_search__ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev+:} false; then :
+if ${ac_cv_search__ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j+:} false; then :
 
 else
-  ac_cv_search__ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev=no
+  ac_cv_search__ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j=no
 fi
 rm conftest.$ac_ext
 LIBS=$ac_func_search_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search__ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev" >&5
-$as_echo "$ac_cv_search__ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev" >&6; }
-ac_res=$ac_cv_search__ZN5boost9re_detail18basic_regex_parserIiNS_16icu_regex_traitsEED2Ev
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search__ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j" >&5
+$as_echo "$ac_cv_search__ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j" >&6; }
+ac_res=$ac_cv_search__ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
