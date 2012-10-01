@@ -16,7 +16,7 @@ static const char LINKS_FILENAME[] = "links.csv";
 static const char TAG_FILENAME[] = "tags.csv";
 
 void startLog( bool _verbose );
-int parseFile( parser & _parser, dataset & data_ );
+int parseFile( parser<char*> & _parser, dataset & data_ );
 bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, dataset & _data );
 
 /** @brief parse the sentences.csv file and returns the nb of lines */
@@ -91,7 +91,7 @@ int main( int argc, char * argv[] )
 
     data.allocateMemoryForSentences( std::count( sentenceMap->getRegion(), sentenceMap->getRegion() + sentenceMap->getSize(), '\n' ) );
 
-    fastSentenceParser sentenceParser(
+    fastSentenceParser<char *> sentenceParser(
         sentenceMap->getRegion(),
         sentenceMap->getRegion() + sentenceMap->getSize()
     );
@@ -114,7 +114,9 @@ int main( int argc, char * argv[] )
             fileMapper linksMap( linksPath );
             const size_t nbLinks = std::count( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize(), '\n' );
             data.allocateMemoryForLinks( nbLinks );
-            fastLinkParser linksParser( linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize() );
+            fastLinkParser<char *> linksParser(
+                linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize()
+            );
             parseFile( linksParser, data );
         }
         catch( const invalid_file & exception )
@@ -193,7 +195,9 @@ bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, datase
             );
 
         _data.allocateMemoryForTags( nbLines );
-        fastTagParser parser( _filemap->getRegion(), _filemap->getRegion() + _filemap->getSize() );
+        fastTagParser<char*> parser(
+            _filemap->getRegion(), _filemap->getRegion() + _filemap->getSize()
+        );
         parser.setOutput( _data );
         parser.start();
     }
@@ -218,7 +222,7 @@ bool parseTagFile( fileMapper *& _filemap, const std::string & _filename, datase
     return true;
 }
 
-int parseFile( parser & _parser, dataset & data_ )
+int parseFile( parser<char*> & _parser, dataset & data_ )
 {
     _parser.setOutput( data_ );
     return _parser.start();

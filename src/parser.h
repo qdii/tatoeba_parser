@@ -4,6 +4,8 @@
 #include "dataset.h"
 
 NAMESPACE_START
+
+template<typename iterator>
 struct parser
 {
     /**@brief Construct a parser
@@ -11,7 +13,7 @@ struct parser
      * @param[in] _end A pointer to the character right after the last character
      *            of the buffer to parse */
     explicit
-    parser( char * _begin, char * _end );
+    parser( iterator _begin, iterator _end );
 
     virtual ~parser() { }
 
@@ -24,8 +26,8 @@ struct parser
 
 protected:
     dataset      *      getDataset();
-    char        *       getMapBegin()   { return m_mapBegin; }
-    char        *       getMapEnd()     { return m_mapEnd;   }
+    iterator            getMapBegin()   { return m_mapBegin; }
+    iterator            getMapEnd()     { return m_mapEnd;   }
 
 private:
     parser( const parser & ) = delete;
@@ -33,17 +35,29 @@ private:
 
 private:
     dataset      *      m_dataset;
-    char        *       m_mapBegin;
-    char        *       m_mapEnd;
+    iterator            m_mapBegin;
+    iterator            m_mapEnd;
 };
 
 // -------------------------------------------------------------------------- //
 
-inline
-dataset * parser::getDataset()
+template<typename iterator> inline
+dataset * parser<iterator>::getDataset()
 {
     return m_dataset;
 }
+
+// -------------------------------------------------------------------------- //
+
+template<typename iterator>
+parser<iterator>::parser( iterator _begin, iterator _end )
+    :m_dataset( nullptr )
+    ,m_mapBegin( _begin )
+    ,m_mapEnd( _end )
+{
+    qlog::trace << "parser::parser(const std::string&)\n";
+}
+
 NAMESPACE_END
 
 #endif //PARSER_H
