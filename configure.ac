@@ -33,6 +33,8 @@ char test_function() { return boost::u32regex_match( "abc", some_regex ) ? '1' :
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h string.h unistd.h])
+AC_CHECK_HEADERS([boost/program_options.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
+AC_CHECK_HEADERS([boost/regex.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex.hpp)])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL

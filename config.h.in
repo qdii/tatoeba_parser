@@ -1,5 +1,11 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have the <boost/program_options.hpp> header file. */
+#undef HAVE_BOOST_PROGRAM_OPTIONS_HPP
+
+/* Define to 1 if you have the <boost/regex.hpp> header file. */
+#undef HAVE_BOOST_REGEX_HPP
+
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 

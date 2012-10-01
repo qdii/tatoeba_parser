@@ -3484,6 +3484,30 @@ fi
 
 done
 
+for ac_header in boost/program_options.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/program_options.hpp" "ac_cv_header_boost_program_options_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_program_options_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_PROGRAM_OPTIONS_HPP 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in boost/regex.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/regex.hpp" "ac_cv_header_boost_regex_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_regex_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_REGEX_HPP 1
+_ACEOF
+
+fi
+
+done
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
