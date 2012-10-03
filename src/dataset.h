@@ -17,7 +17,7 @@ struct dataset
         ,m_fastAccess()
     {
     }
-    static const size_t HIGHER_ID = 2500370;
+
     typedef std::vector<sentence> containerType;
 
     typedef typename containerType::iterator iterator;
