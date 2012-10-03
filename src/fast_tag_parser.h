@@ -1,63 +1,73 @@
 #ifndef FAST_TAG_PARSER_H
 #define FAST_TAG_PARSER_H
 
-#include "parser.h"
-
 NAMESPACE_START
 
 template<typename iterator>
-struct fastTagParser : public parser<iterator>
+struct fastTagParser
 {
-    fastTagParser( char * _begin, char * _end )
-        :parser<iterator>( _begin, _end )
+    fastTagParser( iterator _begin, iterator _end )
+        :m_begin( _begin )
+        ,m_end( _end )
     {
     }
-    int start() throw() TATO_OVERRIDE;
+
+    int start( tagset & _tagset ) TATO_NO_THROW;
+    size_t countTags();
+
+private:
+    iterator m_begin, m_end;
 };
+
+// -------------------------------------------------------------------------- //
+
+template<typename iterator>
+size_t fastTagParser<iterator>::countTags()
+{
+    return std::count( m_begin, m_end, '\n' );
+}
 
 // -------------------------------------------------------------------------- //
 
 
 template<typename iterator>
-int fastTagParser<iterator>::start() throw()
+int fastTagParser<iterator>::start( tagset & __restrict _tagset ) TATO_NO_THROW
 {
-    qlog::trace << "parsing tags.\n";
-    dataset & __restrict data = * parser<iterator>::getDataset();
-    register iterator __restrict begin = parser<iterator>::getMapBegin();
-    register iterator const __restrict end = parser<iterator>::getMapEnd();
+    register iterator __restrict cursor = m_begin;
+    register iterator const __restrict end = m_end;
 
     sentence::id sentenceId = sentence::INVALID_ID;
     char * tagName = nullptr;
 
-    while( begin != end )
+    while( cursor != end )
     {
-        sentenceId = *begin++ - '0';
+        sentenceId = *cursor++ - '0';
 
         // parsing the sentence id
-        while( *begin != '\t' )
+        while( *cursor != '\t' )
         {
-            assert( *begin >= '0' && *begin <= '9' );
-            sentenceId = sentenceId * 10 + ( *begin++ - '0' );
+            assert( *cursor >= '0' && *cursor <= '9' );
+            sentenceId = sentenceId * 10 + ( *cursor++ - '0' );
         }
 
         // skip '\t'
-        ++begin;
-        assert( begin != end );
+        ++cursor;
+        assert( cursor != end );
 
         // record character string for tag name
-        tagName = begin;
+        tagName = cursor;
 
         // skip to the end of the string
-        while( *++begin != '\n' )
+        while( *++cursor != '\n' )
             ;
 
-        assert( begin < end );
+        assert( cursor < end );
 
         // replace the new line character with a NULL character to have a C string
-        *begin++ = '\0';
+        *cursor++ = '\0';
 
         // add an entry
-        data.addTag( sentenceId, tagName );
+        _tagset.tagSentence( sentenceId, tagName );
     }
 
     qlog::trace << "done parsing tags.\n";

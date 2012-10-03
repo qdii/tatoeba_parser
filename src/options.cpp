@@ -8,10 +8,14 @@
 #include "filter_tag.h"
 #include "filter_translatable_in_language.h"
 #include "dataset.h"
+#include "tagset.h"
+#include "linkset.h"
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
 
 NAMESPACE_START
+
+namespace po = boost::program_options;
 
 userOptions::userOptions()
     :m_desc( "" )
@@ -54,7 +58,7 @@ void userOptions::treatCommandLine( int argc, char * argv[] )
 // -------------------------------------------------------------------------- //
 
 /**@brief Populate the passed list of filters with certain filters */
-void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
+void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset, FilterVector & allFilters_ )
 {
     qlog::warning( allFilters_.size() ) << "allFilters.size() > 0\n";
 
@@ -73,7 +77,7 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
     {
         allFilters_.push_back(
             std::shared_ptr<filter>(
-                new filterLink( _dataset, m_vm["is-linked-to"].as<sentence::id>() )
+                new filterLink( _linkset, m_vm["is-linked-to"].as<sentence::id>() )
             )
         );
     }
@@ -83,7 +87,7 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
         allFilters_.push_back(
 
             std::shared_ptr<filter>(
-                new filterTag( _dataset, m_vm["has-tag"].as<std::string>() )
+                new filterTag( _tagset, m_vm["has-tag"].as<std::string>() )
 
             )
         );
@@ -93,7 +97,10 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
     {
         allFilters_.push_back(
             std::shared_ptr<filter>(
-                new filterTranslatableInLanguage( _dataset, m_vm["is-translatable-in"].as<std::string>() )
+                new filterTranslatableInLanguage(
+                    _dataset, _linkset,
+                    m_vm["is-translatable-in"].as<std::string>()
+                )
             )
         );
     }
@@ -117,7 +124,9 @@ void userOptions::getFilters( dataset & _dataset, FilterVector & allFilters_ )
     {
         allFilters_.push_back(
             std::shared_ptr<filter>(
-                new filterTranslationRegex( _dataset, m_vm["translation-regex"].as<std::vector<std::string>>() )
+                new filterTranslationRegex(
+                    _dataset, _linkset,
+                    m_vm["translation-regex"].as<std::vector<std::string>>() )
             )
         );
     }

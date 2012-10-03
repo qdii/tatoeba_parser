@@ -7,23 +7,40 @@
 
 NAMESPACE_START
 
+struct datainfo;
+
 /**@struct linkset
  * @brief A container that represents the links between the sentences */
 struct linkset
 {
 public:
-    linkset( size_t _nbSentences, size_t _nbLinks, size_t _highestId );
+    /**@brief Constructs a linkset object
+     * @throw std::bad_alloc */
+    linkset() ;
 
-    static const size_t NB_MAX_LINKS = 5000000;
+    /**@brief allocates memory to store the links in
+      *@param[in] _datainfo Informations about the number of links that will be stored
+      *@throw std::bad_alloc   */
+    void allocate(const datainfo & _datainfo );
 
-public:
+    /**@brief register a link between two sentences
+     * @param[in] _a The first sentence
+     * @param[in] _b The second sentence */
     void addLink( sentence::id _a, sentence::id _b );
+
+    /**@brief checks if two sentences are linked
+     * @param[in] _a The first sentence
+     * @param[in] _b The second sentence
+     * @return True if the two sentences are linked */
     bool areLinked( sentence::id _a, sentence::id _b ) const;
+
+    /**@brief retrieves all the ids of the sentences linked to a sentence
+     * @param[in] _a A sentence
+     * @return A pointer to a null terminated vector of ids */
     const sentence::id * getLinksOf( sentence::id _a ) const;
 
-    typedef std::vector<sentence::id> linksArray;
-
 private:
+    typedef std::vector<sentence::id> linksArray;
     /// A first idea was to create a matrix of bits, each line representing a
     /// sentence A and each column representing a sentence B. If the intersection
     /// of the line and the column is a 1, then they are linked, else they are

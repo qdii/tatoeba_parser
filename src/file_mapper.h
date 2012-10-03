@@ -11,6 +11,8 @@ struct invalid_file
     std::string m_filename;
 };
 
+/**@struct map_failed
+ * @brief An exception thrown when mapping the file fails */
 struct map_failed
 {
 };
@@ -19,16 +21,24 @@ struct map_failed
  * @brief Maps a file to memory */
 struct fileMapper
 {
-    fileMapper( const std::string & _fileName, bool _rdOnly = false )
-        throw( invalid_file, map_failed );
-    ~fileMapper();
+    /**@brief Constructs a fileMapper by setting up the mapping
+     * @throw invalid_file If the file can’t be opened, map_failed if mapping
+     * the file fails. */
+    fileMapper( const std::string & _fileName, bool _rdOnly = false );
 
+    /**@brief Unset a mapping */
+    ~fileMapper() TATO_NO_THROW;
+
+    /**@brief Returns a pointer to the first byte of the mapping */
     char * getRegion()  { return m_region; }
+
+    /**@brief Returns a const pointer to the first byte of the mapping */
     const char * getRegion() const { return m_region; }
+
+    /**@brief Returns the size of the mapping in bytes */
     size_t getSize() const { return m_size; }
 
 private:
-    int m_fd;
     size_t m_size;
     char * m_region;
 

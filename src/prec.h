@@ -21,8 +21,10 @@
 #if __GNUC__ == 4 && (__GNUC_MINOR__ > 7 || \
       (__GNUC_MINOR__ == 7 && __GNUC_PATCHLEVEL__ > 1))
 #   define TATO_OVERRIDE override
+#   define TATO_NO_THROW nothrow
 #else
 #   define TATO_OVERRIDE
+#   define TATO_NO_THROW throw()
 #endif
 // ___________________________ NAMESPACE _______________________________________
 

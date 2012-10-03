@@ -12,7 +12,7 @@ NAMESPACE_START
  * @brief Stores the tags associated to the sentences. */
 struct tagset
 {
-    tagset( size_t _nbSentences, size_t _nbTags );
+    tagset();
     ~tagset() { }
 
     // An unique identifier representing the tag of the sentence

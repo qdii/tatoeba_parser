@@ -3,24 +3,31 @@
 #include <string.h>
 #include "linkset.h"
 #include "dataset.h"
+#include "datainfo.h"
 
 NAMESPACE_START
 
-linkset::linkset( size_t, size_t _nbLinks, size_t _highestId )
+linkset::linkset()
     :m_links()
     ,m_pointers()
 {
+}
+
+// -------------------------------------------------------------------------- //
+
+void linkset::allocate( const datainfo & _datainfo )
+{
     // prepare link array
-    m_links.resize( _nbLinks + _nbLinks/100, 0 );
+    m_links.resize( _datainfo.m_nbLinks + _datainfo.m_nbLinks/100, 0 );
 
     // prepare ptrs array
-    m_pointers.resize( _highestId+1, 0 );
+    m_pointers.resize( _datainfo.m_highestId + 1, 0 );
 
     qlog::info << "Allocated "
-        << ( m_links.capacity()*sizeof( sentence::id ) +
-             m_pointers.capacity()*sizeof( size_t ) ) / ( 1024*1024 )
+               << ( m_links.capacity()*sizeof( sentence::id ) +
+                    m_pointers.capacity()*sizeof( size_t ) ) / ( 1024*1024 )
 
-        << " MB to store links\n";
+               << " MB to store links\n";
 }
 
 // -------------------------------------------------------------------------- //

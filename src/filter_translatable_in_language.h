@@ -9,17 +9,24 @@ NAMESPACE_START
  * @brief Keep sentences that are translatable in a given language */
 struct filterTranslatableInLanguage : public filter
 {
-    filterTranslatableInLanguage( dataset & _dataset, const std::string & _lang )
+    /**@brief Constructs a filterTranslatableInLanguage object
+     * @param[in] _dataset Contains the sentences
+     * @param[in] _linkset Contains the data about links
+     * @param[in] _lang The language in which the sentence should be translatable */
+    filterTranslatableInLanguage( dataset & _dataset, linkset & _linkset, const std::string & _lang )
         :m_dataset( _dataset )
+        ,m_linkset( _linkset )
         ,m_lang( _lang )
     {
     }
 
-    bool parse( const sentence & __restrict _sentence ) __restrict throw() TATO_OVERRIDE
+    /**@brief Checks that any of the translation of a sentence is in a given language
+     * @param[in] _sentence The sentence to check */
+    bool parse( const sentence & __restrict _sentence ) __restrict TATO_NO_THROW TATO_OVERRIDE
     {
         // get the ids of the translations of this sentence
         const sentence::id * __restrict allLinksOfSentence =
-            m_dataset.getLinksOf( _sentence.getId() );
+            m_linkset.getLinksOf( _sentence.getId() );
 
         if( allLinksOfSentence )
         {
@@ -42,10 +49,10 @@ struct filterTranslatableInLanguage : public filter
         return false;
     }
 
-
 private:
-    dataset  &  m_dataset;
-    std::string m_lang;
+    dataset  &  m_dataset; // contains info about the sentence (namely, its language)
+    linkset  &  m_linkset; // contains info about the translations of a sentenc
+    std::string m_lang;    // The language to check for
 };
 
 NAMESPACE_END

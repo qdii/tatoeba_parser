@@ -2,31 +2,39 @@
 #define FILTER_TAG_H
 
 #include <string>
-#include "dataset.h"
+#include "filter.h"
+#include "tagset.h"
 
 NAMESPACE_START
 
+/**@struct filterTag
+ * @brief Checks whether a sentence has a particular tag */
 struct filterTag  : public filter
 {
-    filterTag( dataset & _data, const std::string _name )
+    /**@brief Constructs a filterTag object
+     * @param[in] _allTags A container that stores all the tags
+     * @param[in] _name The name of the tag to check for */
+    filterTag( tagset & _allTags, const std::string & _name )
         :m_name( _name )
         ,m_tag( tagset::INVALID_TAGID )
-        ,m_data( _data )
+        ,m_allTags( _allTags )
     {
     }
 
-    bool parse( const sentence & _sentence ) throw() TATO_OVERRIDE
+    /**@brief Checks that a sentence has a given tag
+     * @param[in] _sentence The sentence to check       */
+    bool parse( const sentence & _sentence ) TATO_NO_THROW TATO_OVERRIDE
     {
-        if( m_tag == tagset::INVALID_TAGID )
-            m_tag = m_data.getTagId( m_name );
+        // if we didn’t check the tag id yet, we do it now
+        if( __builtin_expect(m_tag == tagset::INVALID_TAGID, false) )
+            m_tag = m_allTags.getTagId( m_name );
 
-        return m_data.hasTag( _sentence.getId(), m_tag );
+        return m_allTags.isSentenceTagged( _sentence.getId(), m_tag );
     }
-
 private:
-    std::string m_name;
-    tagset::tagId m_tag;
-    dataset & m_data;
+    std::string m_name;  // the name of the tag
+    tagset::tagId m_tag; // the id of the tag which name is m_name
+    tagset & m_allTags;  // this tells us the tags of a sentence
 };
 
 NAMESPACE_END

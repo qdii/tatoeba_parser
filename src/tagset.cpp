@@ -3,7 +3,7 @@
 
 NAMESPACE_START
 
-tagset::tagset( size_t /* _nbSentences */, size_t /* _nbTags */)
+tagset::tagset()
     :m_tagToSentences()
     ,m_nameToId()
 {
@@ -28,7 +28,5 @@ void tagset::tagSentence( sentence::id _id, tagset::tagId _newTag )
 {
     m_tagToSentences[ _newTag ].push_back(_id);
 }
-
-// -------------------------------------------------------------------------- //
 
 NAMESPACE_END
