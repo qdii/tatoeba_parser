@@ -47,6 +47,7 @@ userOptions::userOptions()
       "translations matches them all." )
     ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
     ( "version", "Displays the current version of the program." )
+    ( "just-parse", "Do not actually do anything but parsing. Useful for debug.")
 
 #ifdef TATO_MEM_DEBUG
     ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space.")
