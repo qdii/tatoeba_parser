@@ -1,7 +1,6 @@
 #ifndef DATASET_H
 #define DATASET_H
 
-#include <array>
 #include <vector>
 #include "sentence.h"
 #include "datainfo.h"

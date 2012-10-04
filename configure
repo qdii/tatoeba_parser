@@ -3492,6 +3492,8 @@ if test "x$ac_cv_header_boost_program_options_hpp" = xyes; then :
 #define HAVE_BOOST_PROGRAM_OPTIONS_HPP 1
 _ACEOF
 
+else
+  as_fn_error $? "Unable to find Boost Program Options header (boost/program_options.hpp)" "$LINENO" 5
 fi
 
 done
@@ -3504,6 +3506,8 @@ if test "x$ac_cv_header_boost_regex_hpp" = xyes; then :
 #define HAVE_BOOST_REGEX_HPP 1
 _ACEOF
 
+else
+  as_fn_error $? "Unable to find Boost Regex header (boost/regex.hpp)" "$LINENO" 5
 fi
 
 done

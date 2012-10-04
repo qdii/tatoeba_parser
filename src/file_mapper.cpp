@@ -37,7 +37,7 @@ fileMapper::fileMapper( const std::string & _filename, bool _rdOnly )
                 )
             );
 
-        if( m_region == nullptr )
+        if( m_region == reinterpret_cast<void*>(-1) )
             throw map_failed();
 
         qlog::info << "mapped " << _filename << " to " << static_cast<void *>( m_region ) << std::endl;

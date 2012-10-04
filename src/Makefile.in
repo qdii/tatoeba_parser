@@ -33,15 +33,19 @@ Makefile: Makefile.in ../config.status
 
 all: $(package)
 
-$(package): $(OBJ)
+prec.h.gch: prec.h
+	$(CXX) $(DEFS) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -x c++-header -c $<
+
+$(package): prec.h.gch $(OBJ)
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(OBJ) $(LIBS)
 
 %.o: %.cpp
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -o $@ -c $<
     
 clean:
-	-rm $(OBJ) &>/dev/null
-	-rm $(package) &>/dev/null
+	-rm -f $(OBJ)
+	-rm -f $(package)
+	-rm -f prec.h.gch
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)

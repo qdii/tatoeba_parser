@@ -12,6 +12,7 @@
 #include "file_mapper.h"
 #include <iostream>
 
+
 USING_NAMESPACE
 
 static const char SENTENCES_FILENAME[] = "sentences.csv";
@@ -37,7 +38,6 @@ int main( int argc, char * argv[] )
     userOptions options;
     options.treatCommandLine( argc, argv );
     startLog( options.isVerbose() );
-
     const std::string csvPath = options.getCsvPath();
 
     datainfo info; ///< info will store statistics about the files (how many sentences there are, etc.)
@@ -108,7 +108,15 @@ int main( int argc, char * argv[] )
         return 0;
     }
 
-    allSentences.allocate(info);
+    try
+    {
+        allSentences.allocate(info);
+    }
+    catch (const std::bad_alloc & )
+    {
+        qlog::error << "Not enough memory.\n";
+        return 0;
+    }
 
     // start parsing
     info.m_nbSentences = sentenceParser.start( allSentences );
@@ -165,6 +173,7 @@ int main( int argc, char * argv[] )
         catch ( const std::bad_alloc & exception )
         {
             qlog::error << "Out of memory\n";
+            return 0;
         }
     }
 
@@ -214,7 +223,15 @@ int main( int argc, char * argv[] )
     if( !options.justParse() )
     {
         // create an container to retrieve sentences from id in a very fast manner
-        allSentences.prepare( info );
+        try
+        {
+            allSentences.prepare( info );
+        }
+        catch( const std::bad_alloc & exc)
+        {
+            qlog::error << "Not enough memory.\n";
+            return 0;
+        }
 
         // go through every sentence and see if it matches the filter
         auto itr = allSentences.begin();

@@ -16,6 +16,22 @@
 
 #endif
 
+// ___________________________ SYSTEM INCLUDES _________________________________
+
+#include <string.h>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <boost/regex.hpp>
+#include <boost/regex/icu.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/cmdline.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <iostream>
+#include <stdexcept>
+#include <cstdint>
+
 // ___________________________ COMPATIBILITY ___________________________________
 
 #if __GNUC__ == 4 && (__GNUC_MINOR__ > 7 || \
@@ -102,5 +118,11 @@ private:
 #ifdef USE_VALGRIND
 #   include <valgrind/valgrind.h>
 #endif
+
+// --------------------------- PROJECT INCLUDES --------------------------------
+
+#include "sentence.h"
+#include "filter.h"
+#include "file_mapper.h"
 
 #endif // PREC_H

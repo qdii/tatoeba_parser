@@ -13,6 +13,10 @@
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
 
+#ifdef TATO_MEM_DEBUG
+#   include <sys/resource.h>
+#endif
+
 NAMESPACE_START
 
 namespace po = boost::program_options;
@@ -43,6 +47,10 @@ userOptions::userOptions()
       "translations matches them all." )
     ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
     ( "version", "Displays the current version of the program." )
+
+#ifdef TATO_MEM_DEBUG
+    ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space.")
+#endif
     ;
 }
 
@@ -130,7 +138,18 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
             )
         );
     }
-
+#ifdef TATO_MEM_DEBUG
+    if ( m_vm.count( "limit-mem" ))
+    {
+        struct rlimit lim;
+        getrlimit( RLIMIT_AS, &lim );
+        qlog::info << "virtual space soft limit was " << lim.rlim_cur << '\n';
+        lim.rlim_cur =  m_vm["limit-mem"].as<rlim_t>();
+        const int res = setrlimit( RLIMIT_AS, &lim );
+        qlog::info(res == 0) << "virtual space soft limit has been set to " << lim.rlim_cur << '\n';
+        qlog::warning(res != 0) << "setrlimit call failed\n";
+    }
+#endif
     qlog::info << "registered " << allFilters_.size() << " filters\n";
 }
 
