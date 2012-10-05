@@ -38,6 +38,7 @@ int main( int argc, char * argv[] )
     userOptions options;
     options.treatCommandLine( argc, argv );
     startLog( options.isVerbose() );
+    options.treatConfigFile();
     const std::string csvPath = options.getCsvPath();
 
     datainfo info; ///< info will store statistics about the files (how many sentences there are, etc.)

@@ -12,6 +12,7 @@
 #include "linkset.h"
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
+#include <fstream>
 
 #ifdef TATO_MEM_DEBUG
 #   include <sys/resource.h>
@@ -24,6 +25,8 @@ namespace po = boost::program_options;
 userOptions::userOptions()
     :m_desc( "" )
     ,m_vm()
+    ,m_configFileDescriptions()
+    ,m_configFileCsvPath()
 {
     m_desc.add_options()
     ( "help,h", "Produce help message." )
@@ -46,13 +49,16 @@ userOptions::userOptions()
       "regular expressions are provided, a sentence will be kept if any of its "
       "translations matches them all." )
     ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
+    ( "config-path", po::value<std::string>(), "Sets the path of the config file. ~/.tatoparser will be used by default." )
     ( "version", "Displays the current version of the program." )
-    ( "just-parse", "Do not actually do anything but parsing. Useful for debug.")
+    ( "just-parse", "Do not actually do anything but parsing. Useful for debug." )
 
 #ifdef TATO_MEM_DEBUG
-    ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space.")
+    ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space." )
 #endif
     ;
+
+    declareConfigFileValidOptions();
 }
 
 // -------------------------------------------------------------------------- //
@@ -121,7 +127,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         // for each regex, we create a filter
         const std::vector< std::string > & allRegex = m_vm["regex"].as<std::vector<std::string>>();
 
-        for( auto regex : allRegex )
+for( auto regex : allRegex )
         {
             std::shared_ptr<filter> newFilter =
                 std::shared_ptr<filter>( new filterRegex( regex ) );
@@ -139,18 +145,22 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
             )
         );
     }
+
 #ifdef TATO_MEM_DEBUG
-    if ( m_vm.count( "limit-mem" ))
+
+    if( m_vm.count( "limit-mem" ) )
     {
         struct rlimit lim;
         getrlimit( RLIMIT_AS, &lim );
         qlog::info << "virtual space soft limit was " << lim.rlim_cur << '\n';
         lim.rlim_cur =  m_vm["limit-mem"].as<rlim_t>();
         const int res = setrlimit( RLIMIT_AS, &lim );
-        qlog::info(res == 0) << "virtual space soft limit has been set to " << lim.rlim_cur << '\n';
-        qlog::warning(res != 0) << "setrlimit call failed\n";
+        qlog::info( res == 0 ) << "virtual space soft limit has been set to " << lim.rlim_cur << '\n';
+        qlog::warning( res != 0 ) << "setrlimit call failed\n";
     }
+
 #endif
+
     qlog::info << "registered " << allFilters_.size() << " filters\n";
 }
 
@@ -162,5 +172,51 @@ void userOptions::printVersion()
     std::cout   << PACKAGE_STRING << "\n"
                 << "Please report bugs to " << PACKAGE_BUGREPORT << "\n";
 }
+
+// -------------------------------------------------------------------------- //
+
+void userOptions::treatConfigFile()
+{
+    const std::string configFilePath =
+        std::string( m_vm.count( "config-path" ) ?
+          m_vm["config-path"].as<std::string>() : getenv( "HOME" ) ) + "/.tatoparser";
+
+    qlog::info << "parsing config file in " << configFilePath << '\n';
+
+    try
+    {
+        po::basic_parsed_options<char> configFileOptions =
+            po::parse_config_file<char>( configFilePath.c_str(), m_configFileDescriptions );
+
+        // treat options
+        for( po::basic_option<char> opt : configFileOptions.options )
+        {
+            if ( opt.string_key == "csv-path" )
+            {
+                assert( opt.value.size() );
+                qlog::info << "csv-path: " << opt.value[opt.value.size()-1] << '\n';
+                m_configFileCsvPath = opt.value[opt.value.size()-1];
+            }
+            else
+            {
+                qlog::warning << "\tunknown token:" << opt.original_tokens[0] << '\n';
+            }
+        }
+    }
+    catch (const po::error& exc)
+    {
+        qlog::warning << "Failed to parse config file (" << exc.what() << ")\n";
+    }
+}
+
+// -------------------------------------------------------------------------- //
+
+void userOptions::declareConfigFileValidOptions()
+{
+    m_configFileDescriptions.add_options()
+    ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
+    ;
+}
+
 
 NAMESPACE_END

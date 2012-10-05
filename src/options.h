@@ -12,6 +12,8 @@ struct dataset;
 struct linkset;
 struct tagset;
 
+static const char DEFAULT_CONFIG_FILE_PATH[] = "~/.tatoparser";
+
 /**@struct userOptions
  * @brief Treats the user-passed parameters (--help and such)
  */
@@ -29,7 +31,7 @@ struct userOptions
      * @param[in] _tagset The list of tags
      * @param[out] allFilters_ The filter list that will be filled in by the call */
     void getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset,
-                        FilterVector & allFilters_);
+                     FilterVector & allFilters_ );
 
     /**@brief Checks if any argument the user specified needs the links.csv to be parsed */
     bool isItNecessaryToParseLinksFile() const;
@@ -55,16 +57,33 @@ struct userOptions
     /**@brief This is debug, only the parsing is done */
     bool justParse() const;
 
+
 public:
     void printHelp();
     void printVersion();
+
 
     std::string getCsvPath() const;
 
 private:
     boost::program_options::options_description m_desc;
     boost::program_options::variables_map       m_vm;
+
+// ------- CONFIG FILE -------------
+public:
+    /**@brief Reads user information from a config file
+     * @param[in] _path The path to the config file */
+    void treatConfigFile();
+
+private:
+    /**@brief Sets which options are valid in the config file.*/
+    void declareConfigFileValidOptions();
+
+    boost::program_options::options_description     m_configFileDescriptions;
+    std::string m_configFileCsvPath;
 };
+
+// -------------------------------------------------------------------------- //
 
 inline
 bool userOptions::isItNecessaryToParseTagFile() const
@@ -136,7 +155,13 @@ void userOptions::printHelp()
 inline
 std::string userOptions::getCsvPath() const
 {
-    return m_vm.count( "csv-path" ) ? m_vm["csv-path"].as<std::string>() : ".";
+    if( m_vm.count( "csv-path" ) )
+        return m_vm[ "csv-path" ].as<std::string>();
+    else if( m_configFileCsvPath.size() )
+        return m_configFileCsvPath;
+
+    //else
+    return ".";
 }
 
 // -------------------------------------------------------------------------- //
