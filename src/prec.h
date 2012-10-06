@@ -31,6 +31,12 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdint>
+#include <valgrind/valgrind.h>
+
+#ifndef TATO_DEBUG
+#   define NDEBUG
+#endif
+#include <assert.h>
 
 // ___________________________ COMPATIBILITY ___________________________________
 
@@ -69,27 +75,6 @@
 #define QDIILOG_NAME_LOGGER_WARNING warning
 #define QDIILOG_NAME_LOGGER_ERROR error
 #include "qdiilog.hpp"
-
-// __________________________ERROR CODES________________________________________
-
-NAMESPACE_START
-static const int    SUCCESS             = 0;
-static const int    CANT_OPEN_FILE      = -1;
-static const int    INVALID_ARG         = -2;
-static const int    OUT_OF_MEMORY       = -3;
-static const int    DOES_NOT_MATCH      = -4;
-static const int    INTERNAL_ERROR      = -5;
-static const int    CANT_OPEN_SENTENCES_CSV     = -6;
-static const int    CANT_OPEN_LINKS_CSV         = -7;
-static const int    NO_SUCH_TAG         = -8;
-static const int    CANT_OPEN_TAGS_CSV  = -9;
-NAMESPACE_END
-
-// ______________________________ VALGRIND ___________________________________
-
-#ifdef USE_VALGRIND
-#   include <valgrind/valgrind.h>
-#endif
 
 // --------------------------- PROJECT INCLUDES --------------------------------
 

@@ -14,7 +14,7 @@
 #include <boost/program_options/parsers.hpp>
 #include <fstream>
 
-#ifdef TATO_MEM_DEBUG
+#ifdef TATO_DEBUG
 #   include <sys/resource.h>
 #endif
 
@@ -29,8 +29,20 @@ userOptions::userOptions()
     ,m_configFileDescriptions()
     ,m_configFileCsvPath()
 {
+    // ----- general options
+    po::options_description generalOptions( "" );
+    generalOptions.add_options()
+        ( "help,h", "Produce help message." )
+        ( "verbose,v", "Displays more info." )
+        ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
+        ( "config-path", po::value<std::string>(), "Sets the path of the config file. ~/.tatoparser will be used by default." )
+        ( "version", "Displays the current version of the program." )
+    ;
+    m_desc.add( generalOptions );
+    m_visibleOptions.add( generalOptions );
+
     // ----- filters
-    po::options_description filteringOptions("Use those options to select the sentences to display");
+    po::options_description filteringOptions( "Use those options to select the sentences to display" );
     filteringOptions.add_options()
         ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
         ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
@@ -42,39 +54,31 @@ userOptions::userOptions()
           "regular expressions are provided, a sentence will be kept if any of its "
           "translations matches them all." )
     ;
-    m_desc.add(filteringOptions);
-
-    // ----- debug
-    po::options_description debugOptions("Debug settings");
-    debugOptions.add_options()
-        ( "just-parse", "Do not actually do anything but parsing. Useful for debug." )
-#ifdef TATO_MEM_DEBUG
-        ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space." )
-#endif
-    ;
-    m_desc.add(debugOptions);
+    m_desc.add( filteringOptions );
+    m_visibleOptions.add( filteringOptions );
 
     // ----- display
-    po::options_description displayOptions("Use those options to change the way sentences are displayed");
+    po::options_description displayOptions( "Use those options to change the way sentences are displayed" );
     displayOptions.add_options()
         ( "display-line-numbers,n", "Display the indexes of the lines." )
         ( "display-ids,i", "Displays the sentence ids." )
     ;
-    m_desc.add(displayOptions);
+    m_desc.add( displayOptions );
+    m_visibleOptions.add( displayOptions );
 
 
-    // ----- general options
-    po::options_description generalOptions("");
-    generalOptions.add_options()
-        ( "help,h", "Produce help message." )
-        ( "verbose,v", "Displays more info." )
-        ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
-        ( "config-path", po::value<std::string>(), "Sets the path of the config file. ~/.tatoparser will be used by default." )
-        ( "version", "Displays the current version of the program." )
+    // ----- debug
+    po::options_description debugOptions( "Debug settings" );
+    debugOptions.add_options()
+        ( "just-parse", "Do not actually do anything but parsing. Useful for debug." )
+#ifdef TATO_DEBUG
+        ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space." )
+#endif
     ;
-
-    m_desc.add(generalOptions);
-    m_visibleOptions.add(generalOptions).add(filteringOptions).add(displayOptions);
+    m_desc.add( debugOptions );
+#ifdef TATO_DEBUG
+    m_visibleOptions.add( debugOptions );
+#endif
     declareConfigFileValidOptions();
 }
 
@@ -144,7 +148,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         // for each regex, we create a filter
         const std::vector< std::string > & allRegex = m_vm["regex"].as<std::vector<std::string>>();
 
-        for( auto regex : allRegex )
+for( auto regex : allRegex )
         {
             std::shared_ptr<filter> newFilter =
                 std::shared_ptr<filter>( new filterRegex( regex ) );
@@ -163,7 +167,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         );
     }
 
-#ifdef TATO_MEM_DEBUG
+#ifdef TATO_DEBUG
 
     if( m_vm.count( "limit-mem" ) )
     {
@@ -196,7 +200,7 @@ void userOptions::treatConfigFile()
 {
     const std::string configFilePath =
         std::string( m_vm.count( "config-path" ) ?
-          m_vm["config-path"].as<std::string>() : getenv( "HOME" ) ) + "/.tatoparser";
+                     m_vm["config-path"].as<std::string>() : getenv( "HOME" ) ) + "/.tatoparser";
 
     qlog::info << "parsing config file in " << configFilePath << '\n';
 
@@ -208,7 +212,7 @@ void userOptions::treatConfigFile()
         // treat options
         for( po::basic_option<char> opt : configFileOptions.options )
         {
-            if ( opt.string_key == "csv-path" )
+            if( opt.string_key == "csv-path" )
             {
                 assert( opt.value.size() );
                 qlog::info << "csv-path: " << opt.value[opt.value.size()-1] << '\n';
@@ -220,7 +224,7 @@ void userOptions::treatConfigFile()
             }
         }
     }
-    catch (const po::error& exc)
+    catch( const po::error & exc )
     {
         qlog::warning << "Failed to parse config file (" << exc.what() << ")\n";
     }
