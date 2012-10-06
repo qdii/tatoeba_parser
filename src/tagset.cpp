@@ -13,7 +13,7 @@ tagset::tagset()
 
 bool tagset::isSentenceTagged( sentence::id _id, tagId _tag )
 {
-    sentenceList & __restrict
+    sentenceList & TATO_RESTRICT
         allSentencesMatchingTheTag = m_tagToSentences[ _tag ];
 
     return std::find(

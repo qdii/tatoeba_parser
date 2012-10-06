@@ -52,11 +52,11 @@ size_t fastSentenceParser<iterator>::countLines()
 // -------------------------------------------------------------------------- //
 
 template<typename iterator>
-size_t fastSentenceParser<iterator>::start( dataset & __restrict _data ) TATO_NO_THROW
+size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO_NO_THROW
 {
     size_t nbSentences = 0;
 
-    register iterator __restrict    ptr         = m_begin;
+    register iterator TATO_RESTRICT    ptr         = m_begin;
     register iterator const         ptrEnd      = m_end;
 
     if( ptr == 0 || ptrEnd == ptr )

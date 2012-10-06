@@ -32,20 +32,20 @@ struct filterTranslationRegex : public filter
     /**@brief Checks that a sentence has a translation that matches all the regular expressions
      * @param[in] _sentence The sentence to match
      * @return true if one of the sentence translation matches all the regular expressions */
-    bool parse( const sentence & __restrict _sentence ) TATO_OVERRIDE __restrict TATO_NO_THROW
+    bool parse( const sentence & TATO_RESTRICT _sentence ) TATO_OVERRIDE TATO_RESTRICT TATO_NO_THROW
     {
         bool ret = false;
 
         // links is a NULL terminated list of sentence::id, each of them being a
         // translation of the passed sentence
-        const sentence::id * __restrict links =
+        const sentence::id * TATO_RESTRICT links =
             m_linkset.getLinksOf( _sentence.getId() );
 
         // match every translation against the set of regular expressions
         for ( sentence::id linkId = *links; linkId != sentence::INVALID_ID; linkId = *++links)
         {
             // the i-th translation
-            sentence * __restrict link = m_dataset[linkId];
+            sentence * TATO_RESTRICT link = m_dataset[linkId];
 
             if( link ) // the sentence might not exist if sentences.csv and links.csv are inconsistent
             {

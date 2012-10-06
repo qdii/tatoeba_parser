@@ -40,10 +40,10 @@ size_t fastLinkParser<iterator>::countLines() const
 // -------------------------------------------------------------------------- //
 
 template<typename iterator>
-size_t fastLinkParser<iterator>::start( linkset & __restrict allLinks_ ) TATO_NO_THROW
+size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO_NO_THROW
 {
     size_t nbLinks = 0;
-    register iterator __restrict ptr = m_begin;
+    register iterator TATO_RESTRICT ptr = m_begin;
     iterator ptrEnd = m_end;
 
     if( ptr == nullptr || ptr == ptrEnd )

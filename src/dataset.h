@@ -71,14 +71,14 @@ sentence * dataset::operator[]( sentence::id _id )
 // -------------------------------------------------------------------------- //
 
 inline
-void dataset::prepare( const datainfo & _info ) __restrict
+void dataset::prepare( const datainfo & _info ) TATO_RESTRICT
 {
     m_fastAccess.reserve( _info.m_highestId + 1 );
     const size_t nbSentences = m_allSentences.size();
 
     for( size_t index = 0; index < nbSentences; ++index )
     {
-        const sentence & __restrict curSentence = m_allSentences[ index ];
+        const sentence & TATO_RESTRICT curSentence = m_allSentences[ index ];
         assert( curSentence.getId() != sentence::INVALID_ID );
         assert( curSentence.getId() < static_cast<sentence::id>(m_fastAccess.capacity()) );
         m_fastAccess[curSentence.getId()] = index;

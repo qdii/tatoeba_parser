@@ -22,10 +22,10 @@ struct filterTranslatableInLanguage : public filter
 
     /**@brief Checks that any of the translation of a sentence is in a given language
      * @param[in] _sentence The sentence to check */
-    bool parse( const sentence & __restrict _sentence ) __restrict TATO_NO_THROW TATO_OVERRIDE
+    bool parse( const sentence & TATO_RESTRICT _sentence ) TATO_RESTRICT TATO_NO_THROW TATO_OVERRIDE
     {
         // get the ids of the translations of this sentence
-        const sentence::id * __restrict allLinksOfSentence =
+        const sentence::id * TATO_RESTRICT allLinksOfSentence =
             m_linkset.getLinksOf( _sentence.getId() );
 
         if( allLinksOfSentence )

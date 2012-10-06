@@ -62,7 +62,7 @@ private:
 // -------------------------------------------------------------------------- //
 
 inline
-void linkset::addLink( sentence::id _a, sentence::id _b ) __restrict
+void linkset::addLink( sentence::id _a, sentence::id _b ) TATO_RESTRICT
 {
     static sentence::id lastIdValue = sentence::INVALID_ID;
 
@@ -80,7 +80,7 @@ void linkset::addLink( sentence::id _a, sentence::id _b ) __restrict
 // -------------------------------------------------------------------------- //
 
 inline
-bool linkset::areLinked( sentence::id _a, sentence::id _b ) const __restrict
+bool linkset::areLinked( sentence::id _a, sentence::id _b ) const TATO_RESTRICT
 {
     /** @todo : recode with iterators */
     const sentence::id * iter = &m_links[m_pointers[_a]];

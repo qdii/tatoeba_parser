@@ -31,10 +31,10 @@ size_t fastTagParser<iterator>::countTags()
 
 
 template<typename iterator>
-int fastTagParser<iterator>::start( tagset & __restrict _tagset ) TATO_NO_THROW
+int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THROW
 {
-    register iterator __restrict cursor = m_begin;
-    register iterator const __restrict end = m_end;
+    register iterator TATO_RESTRICT cursor = m_begin;
+    register iterator const TATO_RESTRICT end = m_end;
 
     sentence::id sentenceId = sentence::INVALID_ID;
     char * tagName = nullptr;

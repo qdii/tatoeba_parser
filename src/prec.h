@@ -42,6 +42,12 @@
 #   define TATO_OVERRIDE
 #   define TATO_NO_THROW throw()
 #endif
+
+#if defined __llvm__ || defined __clang__
+#   define TATO_RESTRICT
+#else
+#   define TATO_RESTRICT __restrict__
+#endif
 // ___________________________ NAMESPACE _______________________________________
 
 #ifdef NAMESPACE
@@ -78,40 +84,6 @@ static const int    CANT_OPEN_LINKS_CSV         = -7;
 static const int    NO_SUCH_TAG         = -8;
 static const int    CANT_OPEN_TAGS_CSV  = -9;
 NAMESPACE_END
-
-// __________________________ HANDY METRICS ____________________________________
-
-#include <chrono>
-#define TIME_ME TimeThisFunction<decltype(qlog::info)> timeMe(qlog::info, __func__);
-#define TIME_ME_COUT TimeThisFunction<decltype(std::cout)> timeMe(std::cout, __func__);
-template<typename T>
-struct TimeThisFunction
-{
-    TimeThisFunction( T & _output, const std::string & _func )
-        :m_start( std::chrono::high_resolution_clock::now() )
-        ,m_output( _output )
-        ,m_functionName( _func )
-    {
-    }
-
-    ~TimeThisFunction()
-    {
-        using namespace std::chrono;
-        const time_point<high_resolution_clock> finish =
-            high_resolution_clock::now();
-
-        const duration<double> timeSpent =
-            duration_cast<duration<double>>( finish - m_start );
-
-        m_output << m_functionName << " lasted "
-                 << timeSpent.count() << " seconds.\n";
-    }
-
-private:
-    const std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
-    T & m_output;
-    std::string m_functionName;
-};
 
 // ______________________________ VALGRIND ___________________________________
 
