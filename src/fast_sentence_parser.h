@@ -1,6 +1,8 @@
 #ifndef FAST_SENTENCE_PARSER_H
 #define FAST_SENTENCE_PARSER_H
 
+#include <boost/spirit/include/qi.hpp>
+
 #include "dataset.h"
 #define TATO_DIAGNOZE
 NAMESPACE_START
@@ -54,121 +56,41 @@ size_t fastSentenceParser<iterator>::countLines()
 template<typename iterator>
 size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO_NO_THROW
 {
+    namespace qi = boost::spirit::qi;
+
     size_t nbSentences = 0;
 
-    register iterator TATO_RESTRICT    ptr         = m_begin;
-    register iterator const         ptrEnd      = m_end;
+    // memory to parse
+    auto start = m_begin;
+    auto const end = m_end;
 
-    if( ptr == 0 || ptrEnd == ptr )
-        return 0;
+    // variables to store parsed data
+    sentence::id id;
+    boost::iterator_range<iterator> langRange;
+    boost::iterator_range<iterator> sentenceRange;
 
-    // the parser is a state machine that goes through those states:
-    static const int ID=0;
-    static const int LANG=1;
-    static const int DATA=2;
-    static const int ID_WAIT_FOR_TAB=4;
-    static const int LANG_WAIT_FOR_TAB=5;
-    static const int DATA_WAIT_FOR_EOL=7;
+    // for each parsed sentence...
+    while(qi::parse(start, end, (
+        // grammar for a single line of CSV
+        // sentence ID
+        qi::uint_ >> '\t' >>
 
-    // parse it
-    char * lang = nullptr;
-    char * data = nullptr;
-    char c = '\0';
-    int state = ID;
-    sentence::id id = sentence::INVALID_ID;
+        // language: 3- or 4-character code, "\N" or nothing
+        qi::raw[qi::repeat(3,4)[qi::ascii::lower] | "\\N" | qi::eps] >> '\t' >>
 
-#ifdef TATO_DIAGNOZE
-    size_t line = 1;
-#endif
+        // sentence: a non-empty string of characters till the next end of line
+        qi::raw[+~qi::char_('\n')] >> '\n'
+    ), id, langRange, sentenceRange)) {
+        // change separators into string endings
+        *(langRange.end()) = '\0';
+        *(sentenceRange.end()) = '\0';
 
-    for( ; ptr != ptrEnd; ++ptr )
-    {
-        c = *ptr;
+        _data.addSentence(id, langRange.begin(), sentenceRange.begin());
+        nbSentences += 1;
+    }
 
-#ifdef TATO_DIAGNOZE
-        if (c == '\n')
-            ++line;
-#endif
-
-        switch( state )
-        {
-
-        case DATA_WAIT_FOR_EOL:
-            assert( c != '\t' );
-
-            if( __builtin_expect( c == '\n', false ) )
-            {
-
-                _data.addSentence( id, lang, data );
-                ++nbSentences;
-
-                assert( id != sentence::INVALID_ID );
-                assert( lang != nullptr );
-                assert( data != nullptr );
-                data = nullptr;
-                lang = nullptr;
-                id =  sentence::INVALID_ID;
-
-                *ptr = '\0';
-                state = ID;
-            }
-
-            break;
-
-        case LANG_WAIT_FOR_TAB:
-            if( __builtin_expect( c == '\t', false ) )
-            {
-                *ptr = '\0';
-                state = DATA;
-            }
-
-#ifdef TATO_DIAGNOZE
-            if( c == '\n' )
-            {
-                qlog::warning << "line " << line << " is ill-formed\n";
-                state = ID;
-            }
-#endif
-
-            break;
-
-        case ID:
-            id = 0;
-            state = ID_WAIT_FOR_TAB;
-            //break;
-
-        case ID_WAIT_FOR_TAB:
-            assert( c != '\n' );
-
-            if( c != '\t' )
-                id = 10 * id + ( c - '0' );
-            else
-                state = LANG;
-
-            break;
-
-        case LANG:
-            assert( c != '\n' );
-
-#ifdef TATO_DIAGNOZE
-            if( c == '\t' )
-            {
-                qlog::warning << "line " << line << " is ill-formed\n";
-                *ptr = '\0';
-            }
-#endif
-
-            lang = ptr;
-            state = LANG_WAIT_FOR_TAB;
-            break;
-
-
-        case DATA:
-            assert( c != '\t' );
-            data = ptr;
-            state = DATA_WAIT_FOR_EOL;
-            break;
-        }
+    if (start != end) {
+        qlog::warning << "Failed to parse sentence from line " << nbSentences << std::endl;
     }
 
     return nbSentences;
