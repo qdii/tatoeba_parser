@@ -66,7 +66,7 @@ public:
     std::string getCsvPath() const;
 
 private:
-    boost::program_options::options_description m_desc;
+    boost::program_options::options_description m_desc, m_visibleOptions;
     boost::program_options::variables_map       m_vm;
 
 // ------- CONFIG FILE -------------
@@ -147,7 +147,7 @@ inline
 void userOptions::printHelp()
 {
     std::cout << "Usage: " << PACKAGE_NAME << " <OPTION>\nWhere OPTION can be any of:\n";
-    std::cout << m_desc << std::endl;
+    std::cout << m_visibleOptions << std::endl;
 }
 
 // -------------------------------------------------------------------------- //

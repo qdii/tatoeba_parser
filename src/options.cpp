@@ -24,40 +24,57 @@ namespace po = boost::program_options;
 
 userOptions::userOptions()
     :m_desc( "" )
+    ,m_visibleOptions()
     ,m_vm()
     ,m_configFileDescriptions()
     ,m_configFileCsvPath()
 {
-    m_desc.add_options()
-    ( "help,h", "Produce help message." )
-    //( "compulsory,c", po::value<std::string>(), "The characters that should appear in the sentence." )
-    //( "optional,o", po::value<std::string>(), "The characters that may compose the sentence." )
-    ( "display-line-numbers,n", "Display the indexes of the lines." )
-    ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
-    ( "display-ids,i", "Displays the sentence ids." )
-    //( "separator,s", po::value<char>(), "Changes the separator characters, default is '\\t'" )
-    ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
-    ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
-    //( "depedent-regex,d",  po::value<std::vector<std::string> >()->composing(), "A set of regular expressions which have to be all matched." )
-    ( "is-translatable-in", po::value<std::string>(), "Keep the sentence if it has a translation in a given language." )
-    //( "translation-contains-regex,j", po::value<std::string>(), "A regex that one of the translation of the sentence should match." )
-    ( "verbose,v", "Displays more info." )
-    ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag." )
-    //( "translates", po::value<sentence::id>(), "Checks if the sentence is a translation of the given sentence id" )
-    ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
-      "Filters only sentences which translations match this regex. If many "
-      "regular expressions are provided, a sentence will be kept if any of its "
-      "translations matches them all." )
-    ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
-    ( "config-path", po::value<std::string>(), "Sets the path of the config file. ~/.tatoparser will be used by default." )
-    ( "version", "Displays the current version of the program." )
-    ( "just-parse", "Do not actually do anything but parsing. Useful for debug." )
+    // ----- filters
+    po::options_description filteringOptions("Use those options to select the sentences to display");
+    filteringOptions.add_options()
+        ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
+        ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
+        ( "is-translatable-in", po::value<std::string>(), "Keep the sentence if it has a translation in a given language." )
+        ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
+        ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag." )
+        ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
+          "Filters only sentences which translations match this regex. If many "
+          "regular expressions are provided, a sentence will be kept if any of its "
+          "translations matches them all." )
+    ;
+    m_desc.add(filteringOptions);
 
+    // ----- debug
+    po::options_description debugOptions("Debug settings");
+    debugOptions.add_options()
+        ( "just-parse", "Do not actually do anything but parsing. Useful for debug." )
 #ifdef TATO_MEM_DEBUG
-    ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space." )
+        ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space." )
 #endif
     ;
+    m_desc.add(debugOptions);
 
+    // ----- display
+    po::options_description displayOptions("Use those options to change the way sentences are displayed");
+    displayOptions.add_options()
+        ( "display-line-numbers,n", "Display the indexes of the lines." )
+        ( "display-ids,i", "Displays the sentence ids." )
+    ;
+    m_desc.add(displayOptions);
+
+
+    // ----- general options
+    po::options_description generalOptions("");
+    generalOptions.add_options()
+        ( "help,h", "Produce help message." )
+        ( "verbose,v", "Displays more info." )
+        ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
+        ( "config-path", po::value<std::string>(), "Sets the path of the config file. ~/.tatoparser will be used by default." )
+        ( "version", "Displays the current version of the program." )
+    ;
+
+    m_desc.add(generalOptions);
+    m_visibleOptions.add(generalOptions).add(filteringOptions).add(displayOptions);
     declareConfigFileValidOptions();
 }
 
@@ -127,7 +144,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         // for each regex, we create a filter
         const std::vector< std::string > & allRegex = m_vm["regex"].as<std::vector<std::string>>();
 
-for( auto regex : allRegex )
+        for( auto regex : allRegex )
         {
             std::shared_ptr<filter> newFilter =
                 std::shared_ptr<filter>( new filterRegex( regex ) );
@@ -214,7 +231,7 @@ void userOptions::treatConfigFile()
 void userOptions::declareConfigFileValidOptions()
 {
     m_configFileDescriptions.add_options()
-    ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
+        ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
     ;
 }
 
