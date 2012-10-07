@@ -58,7 +58,7 @@ if test "x${limit_mem}" = xyes; then
 fi
 
 # Checks for mmap
-AC_CHECK_HEADERS([sys/mman.h], , )
+AC_CHECK_HEADERS([sys/mman.h], ,[AC_MSG_WARN([mman.h was not found on your computer. Parsing will be slower.])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -68,9 +68,6 @@ AC_TYPE_SIZE_T
 AC_TYPE_UINT16_T
 
 # Checks for library functions.
-AC_FUNC_MMAP
-AC_CHECK_FUNCS([munmap])
-
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
 AC_OUTPUT

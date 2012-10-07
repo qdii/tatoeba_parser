@@ -1,13 +1,19 @@
 #include "prec.h"
 #include "file_mapper.h"
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
+
+#if HAVE_SYS_MMAN_H == 1
+#   include <sys/mman.h>
+#   include <sys/stat.h>
+#   include <sys/types.h>
+#   include <unistd.h>
+#   include <fcntl.h>
+#else
+#   include <fstream>
+#endif
 
 NAMESPACE_START
 
+#if HAVE_SYS_MMAN_H == 1
 fileMapper::fileMapper( const std::string & _filename, bool _rdOnly )
     :m_size( 0 )
     ,m_region( nullptr )
@@ -37,7 +43,7 @@ fileMapper::fileMapper( const std::string & _filename, bool _rdOnly )
                 )
             );
 
-        if( m_region == reinterpret_cast<void*>(-1) )
+        if( m_region == reinterpret_cast<void *>( -1 ) )
             throw map_failed();
 
         qlog::info << "mapped " << _filename << " to " << static_cast<void *>( m_region ) << std::endl;
@@ -57,5 +63,60 @@ fileMapper::~fileMapper() TATO_NO_THROW
         qlog::info << "unmapped region " << static_cast<void *>( m_region ) << std::endl;
     }
 }
+
+// -------------------------------------------------------------------------- //
+
+#else // HAVE_SYS_MMAN_H
+
+fileMapper::fileMapper( const std::string & _filename, bool /* _rdOnly */ )
+    :m_size( 0 )
+    ,m_region( nullptr )
+{
+    // get the file size
+    std::ifstream filestream(
+        _filename.c_str(),
+        std::ios_base::binary | std::ios_base::in | std::ios_base::ate
+    );
+    filestream.exceptions( std::ifstream::failbit | std::ifstream::badbit );
+    const size_t filesize = filestream.tellg();
+    char * region = nullptr;
+
+    // copy the file to memory
+    try
+    {
+        region = new char[filesize + 1];
+    }
+    catch( const std::bad_alloc & exc )
+    {
+        qlog::warning << "Failed to allocate " << filesize  + 1<< " to map " << _filename << '\n';
+        throw map_failed();
+    }
+
+    try
+    {
+        filestream.seekg(std::ios_base::beg);
+        filestream.read( region, filesize );
+        filestream.close();
+    }
+    catch( const std::ifstream::failure & exc )
+    {
+        delete [] region;
+        throw invalid_file( _filename );
+    }
+
+    region[filesize] = '\0';
+
+    // everything seems fine, lets build the object
+    m_region = region;
+    m_size = filesize;
+}
+
+// -------------------------------------------------------------------------- //
+
+fileMapper::~fileMapper() TATO_NO_THROW
+{
+    delete [] m_region;
+}
+#endif // HAVE_SYS_MMAN_H
 
 NAMESPACE_END
