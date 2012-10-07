@@ -59,6 +59,7 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
     namespace qi = boost::spirit::qi;
 
     size_t nbSentences = 0;
+    size_t line = 1;
 
     // memory to parse
     auto start = m_begin;
@@ -69,28 +70,40 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
     boost::iterator_range<iterator> langRange;
     boost::iterator_range<iterator> sentenceRange;
 
-    // for each parsed sentence...
-    while(qi::parse(start, end, (
-        // grammar for a single line of CSV
-        // sentence ID
-        qi::uint_ >> '\t' >>
+    while(true) {
+        // try to parse a sentence... (note: it will simply fail when at the
+        // end of file)
+        if (qi::parse(start, end, (
+            // grammar for a single line of CSV
+            // sentence ID
+            qi::uint_ >> '\t' >>
 
-        // language: 3- or 4-character code, "\N" or nothing
-        qi::raw[qi::repeat(3,4)[qi::ascii::lower] | "\\N" | qi::eps] >> '\t' >>
+            // language: 3- or 4-character code, "\N" or nothing
+            qi::raw[qi::repeat(3,4)[qi::ascii::lower] | "\\N" | qi::eps] >> '\t' >>
 
-        // sentence: a non-empty string of characters till the next end of line
-        qi::raw[+~qi::char_('\n')] >> '\n'
-    ), id, langRange, sentenceRange)) {
-        // change separators into string endings
-        *(langRange.end()) = '\0';
-        *(sentenceRange.end()) = '\0';
+            // sentence: a non-empty string of characters till the next end of line
+            qi::raw[+~qi::char_('\n')] >> '\n'
+        ), id, langRange, sentenceRange)) {
+            // ok, we managed to parse a sentence.
+            // change separators into string endings
+            *(langRange.end()) = '\0';
+            *(sentenceRange.end()) = '\0';
 
-        _data.addSentence(id, langRange.begin(), sentenceRange.begin());
-        nbSentences += 1;
-    }
+            _data.addSentence(id, langRange.begin(), sentenceRange.begin());
+            nbSentences++;
+        } else if (start != end) {
+            // we failed at parsing the sentence, and we're not at the end of
+            // the file yet
+            qlog::warning << "Failed to parse sentence from line " << line << std::endl;
 
-    if (start != end) {
-        qlog::warning << "Failed to parse sentence from line " << nbSentences << std::endl;
+            // skip over the nearest \n and try again.
+            while (*(start++) != '\n');
+        } else {
+            // we're at the end of file. finish the job
+            break;
+        }
+
+        line++;
     }
 
     return nbSentences;
