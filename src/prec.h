@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/regex/icu.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/cmdline.hpp>

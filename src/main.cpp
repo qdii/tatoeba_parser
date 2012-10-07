@@ -12,7 +12,6 @@
 #include "file_mapper.h"
 #include <iostream>
 
-
 USING_NAMESPACE
 
 static const char SENTENCES_FILENAME[] = "sentences.csv";
@@ -96,8 +95,8 @@ int main( int argc, char * argv[] )
 
     // create the parser
     fastSentenceParser<char *> sentenceParser(
-        sentenceMap->getRegion(),
-        sentenceMap->getRegion() + sentenceMap->getSize()
+        sentenceMap->begin(),
+        sentenceMap->end()
     );
 
     // allocate memory for the sentence structure
@@ -150,9 +149,7 @@ int main( int argc, char * argv[] )
             fileMapper linksMap( linksPath );
 
             // we create the parser
-            fastLinkParser<char *> linksParser(
-                linksMap.getRegion(), linksMap.getRegion() + linksMap.getSize()
-            );
+            fastLinkParser<char *> linksParser(linksMap.begin(), linksMap.end());
 
             // we allocate memory for the structure that will store the links
             info.m_nbLinks = linksParser.countLines();
@@ -193,8 +190,8 @@ int main( int argc, char * argv[] )
         {
             tagFileMapping = new fileMapper( tagsPath );
             fastTagParser<char *> tagParser(
-                tagFileMapping->getRegion(),
-                tagFileMapping->getRegion() + tagFileMapping->getSize()
+                tagFileMapping->begin(),
+                tagFileMapping->end()
             );
             tagParser.start(allTags);
         }

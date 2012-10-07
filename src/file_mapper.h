@@ -38,6 +38,16 @@ struct fileMapper
     /**@brief Returns the size of the mapping in bytes */
     size_t getSize() const { return m_size; }
 
+public: // support for iterators
+    typedef char *          iterator;
+    typedef const char *    const_iterator;
+
+    iterator        begin()         { return getRegion(); }
+    const_iterator  begin() const   { return getRegion(); }
+
+    iterator        end()           { return getRegion() + getSize(); }
+    const_iterator  end() const     { return getRegion() + getSize(); }
+
 private:
     size_t m_size;
     char * m_region;
