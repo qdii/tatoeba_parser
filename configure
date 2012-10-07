@@ -3502,12 +3502,70 @@ fi
 
 done
 
+
+# Checks for boost headers
 for ac_header in boost/program_options.hpp
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "boost/program_options.hpp" "ac_cv_header_boost_program_options_hpp" "$ac_includes_default"
 if test "x$ac_cv_header_boost_program_options_hpp" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_BOOST_PROGRAM_OPTIONS_HPP 1
+_ACEOF
+
+else
+  as_fn_error $? "Unable to find Boost Program Options header (boost/program_options.hpp)" "$LINENO" 5
+fi
+
+done
+
+for ac_header in boost/program_options/options_description.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/program_options/options_description.hpp" "ac_cv_header_boost_program_options_options_description_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_program_options_options_description_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_PROGRAM_OPTIONS_OPTIONS_DESCRIPTION_HPP 1
+_ACEOF
+
+else
+  as_fn_error $? "Unable to find Boost Program Options header (boost/program_options.hpp)" "$LINENO" 5
+fi
+
+done
+
+for ac_header in boost/program_options//cmdline.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/program_options//cmdline.hpp" "ac_cv_header_boost_program_options__cmdline_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_program_options__cmdline_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_PROGRAM_OPTIONS__CMDLINE_HPP 1
+_ACEOF
+
+else
+  as_fn_error $? "Unable to find Boost Program Options header (boost/program_options.hpp)" "$LINENO" 5
+fi
+
+done
+
+for ac_header in boost/program_options/variables_map.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/program_options/variables_map.hpp" "ac_cv_header_boost_program_options_variables_map_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_program_options_variables_map_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_PROGRAM_OPTIONS_VARIABLES_MAP_HPP 1
+_ACEOF
+
+else
+  as_fn_error $? "Unable to find Boost Program Options header (boost/program_options.hpp)" "$LINENO" 5
+fi
+
+done
+
+for ac_header in boost/program_options/parsers.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/program_options/parsers.hpp" "ac_cv_header_boost_program_options_parsers_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_program_options_parsers_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_PROGRAM_OPTIONS_PARSERS_HPP 1
 _ACEOF
 
 else
@@ -3530,6 +3588,36 @@ fi
 
 done
 
+for ac_header in boost/regex/icu.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/regex/icu.hpp" "ac_cv_header_boost_regex_icu_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_regex_icu_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_REGEX_ICU_HPP 1
+_ACEOF
+
+else
+  as_fn_error $? "Unable to find Boost Regex header (boost/regex/icu.hpp)" "$LINENO" 5
+fi
+
+done
+
+for ac_header in boost/spirit/include/qi.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/spirit/include/qi.hpp" "ac_cv_header_boost_spirit_include_qi_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_spirit_include_qi_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_SPIRIT_INCLUDE_QI_HPP 1
+_ACEOF
+
+else
+  as_fn_error $? "Unable to find Boost Spirit header (boost/spirit/include/qi	.hpp)" "$LINENO" 5
+fi
+
+done
+
+
+# Checks for memory limitation headers
 if test "x${limit_mem}" = xyes; then
   for ac_header in sys/resource.h
 do :
@@ -3546,6 +3634,21 @@ fi
 done
 
 fi
+
+# Checks for mmap
+for ac_header in sys/mman.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "sys/mman.h" "ac_cv_header_sys_mman_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_mman_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_MMAN_H 1
+_ACEOF
+
+fi
+
+done
+
+
 # Checks for typedefs, structures, and compiler characteristics.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
 $as_echo_n "checking for stdbool.h that conforms to C99... " >&6; }

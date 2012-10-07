@@ -3,8 +3,30 @@
 /* Define to 1 if you have the <boost/program_options.hpp> header file. */
 #undef HAVE_BOOST_PROGRAM_OPTIONS_HPP
 
+/* Define to 1 if you have the <boost/program_options/options_description.hpp>
+   header file. */
+#undef HAVE_BOOST_PROGRAM_OPTIONS_OPTIONS_DESCRIPTION_HPP
+
+/* Define to 1 if you have the <boost/program_options/parsers.hpp> header
+   file. */
+#undef HAVE_BOOST_PROGRAM_OPTIONS_PARSERS_HPP
+
+/* Define to 1 if you have the <boost/program_options/variables_map.hpp>
+   header file. */
+#undef HAVE_BOOST_PROGRAM_OPTIONS_VARIABLES_MAP_HPP
+
+/* Define to 1 if you have the <boost/program_options//cmdline.hpp> header
+   file. */
+#undef HAVE_BOOST_PROGRAM_OPTIONS__CMDLINE_HPP
+
 /* Define to 1 if you have the <boost/regex.hpp> header file. */
 #undef HAVE_BOOST_REGEX_HPP
+
+/* Define to 1 if you have the <boost/regex/icu.hpp> header file. */
+#undef HAVE_BOOST_REGEX_ICU_HPP
+
+/* Define to 1 if you have the <boost/spirit/include/qi.hpp> header file. */
+#undef HAVE_BOOST_SPIRIT_INCLUDE_QI_HPP
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
@@ -35,6 +57,9 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/mman.h> header file. */
+#undef HAVE_SYS_MMAN_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H

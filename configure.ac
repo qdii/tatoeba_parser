@@ -41,11 +41,25 @@ char test_function() { return boost::u32regex_match( "abc", some_regex ) ? '1' :
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h string.h unistd.h])
+
+# Checks for boost headers
 AC_CHECK_HEADERS([boost/program_options.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
+AC_CHECK_HEADERS([boost/program_options/options_description.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
+AC_CHECK_HEADERS([boost/program_options/cmdline.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
+AC_CHECK_HEADERS([boost/program_options/variables_map.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
+AC_CHECK_HEADERS([boost/program_options/parsers.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
 AC_CHECK_HEADERS([boost/regex.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex.hpp)])])
+AC_CHECK_HEADERS([boost/regex/icu.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex/icu.hpp)])])
+AC_CHECK_HEADERS([boost/spirit/include/qi.hpp], , [AC_MSG_ERROR([Unable to find Boost Spirit header (boost/spirit/include/qi	.hpp)])])
+
+# Checks for memory limitation headers
 if test "x${limit_mem}" = xyes; then
   AC_CHECK_HEADERS([sys/resource.h], ,[AC_MSG_ERROR([Unable to find <sys/resource.h>, necessary to build debug functions.])])
 fi
+
+# Checks for mmap
+AC_CHECK_HEADERS([sys/mman.h], , )
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
