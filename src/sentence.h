@@ -8,8 +8,8 @@ NAMESPACE_START
 struct sentence
 {
     /**@brief A number that identifies the sentence uniquely */
-    typedef int32_t id;
-    static const int32_t INVALID_ID = 0;
+    typedef uint32_t id;
+    static const uint32_t INVALID_ID = 0;
 
     /**@brief Constructs a sentence
      * @param[in] _id   An unique identifier for the sentence
