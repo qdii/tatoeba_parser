@@ -14,7 +14,7 @@
 #include <boost/program_options/parsers.hpp>
 #include <fstream>
 
-#ifdef TATO_DEBUG
+#ifdef HAVE_SYS_RESOURCE_H
 #   include <sys/resource.h>
 #endif
 
@@ -71,12 +71,12 @@ userOptions::userOptions()
     po::options_description debugOptions( "Debug settings" );
     debugOptions.add_options()
         ( "just-parse", "Do not actually do anything but parsing. Useful for debug." )
-#ifdef TATO_DEBUG
+#ifdef HAVE_SYS_RESOURCE_H
         ( "limit-mem", po::value<rlim_t>(), "limit the available virtual space." )
 #endif
     ;
     m_desc.add( debugOptions );
-#ifdef TATO_DEBUG
+#ifndef NDEBUG
     m_visibleOptions.add( debugOptions );
 #endif
     declareConfigFileValidOptions();
@@ -148,7 +148,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         // for each regex, we create a filter
         const std::vector< std::string > & allRegex = m_vm["regex"].as<std::vector<std::string>>();
 
-for( auto regex : allRegex )
+        for( auto regex : allRegex )
         {
             std::shared_ptr<filter> newFilter =
                 std::shared_ptr<filter>( new filterRegex( regex ) );
@@ -167,7 +167,7 @@ for( auto regex : allRegex )
         );
     }
 
-#ifdef TATO_DEBUG
+#ifdef HAVE_SYS_RESOURCE_H
 
     if( m_vm.count( "limit-mem" ) )
     {

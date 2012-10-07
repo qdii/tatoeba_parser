@@ -32,10 +32,6 @@
 #include <stdexcept>
 #include <cstdint>
 #include <valgrind/valgrind.h>
-
-#ifndef TATO_DEBUG
-#   define NDEBUG
-#endif
 #include <assert.h>
 
 // ___________________________ COMPATIBILITY ___________________________________

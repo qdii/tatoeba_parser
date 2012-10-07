@@ -679,6 +679,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_limit_mem
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1294,6 +1295,12 @@ if test -n "$ac_init_help"; then
      short | recursive ) echo "Configuration of tatoparser 2.2:";;
    esac
   cat <<\_ACEOF
+
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-limit-mem    	provides an option to limitate the virtual memory (--limit-mem).
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -2285,6 +2292,16 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 ac_config_headers="$ac_config_headers config.h"
 
 
+# Debug mode
+# Check whether --enable-limit-mem was given.
+if test "${enable_limit_mem+set}" = set; then :
+  enableval=$enable_limit_mem; limit_mem=${enableval}
+else
+  limit_mem=no
+fi
+
+
+
 # Checks for programs.
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -3035,6 +3052,7 @@ else
 fi
 
 
+
 # workaround while http://stackoverflow.com/questions/12679072/ac-search-libs-when-the-function-name-varies
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether libicuuc is required" >&5
 $as_echo_n "checking whether libicuuc is required... " >&6; }
@@ -3512,7 +3530,22 @@ fi
 
 done
 
+if test "x${limit_mem}" = xyes; then
+  for ac_header in sys/resource.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "sys/resource.h" "ac_cv_header_sys_resource_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_resource_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_RESOURCE_H 1
+_ACEOF
 
+else
+  as_fn_error $? "Unable to find <sys/resource.h>, necessary to build debug functions." "$LINENO" 5
+fi
+
+done
+
+fi
 # Checks for typedefs, structures, and compiler characteristics.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
 $as_echo_n "checking for stdbool.h that conforms to C99... " >&6; }
