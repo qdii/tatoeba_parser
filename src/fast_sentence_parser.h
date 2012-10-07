@@ -4,7 +4,7 @@
 #include <boost/spirit/include/qi.hpp>
 
 #include "dataset.h"
-#define TATO_DIAGNOZE
+
 NAMESPACE_START
 
 /**@brief Parses the sentences out of a buffer
@@ -62,7 +62,7 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
     size_t line = 1;
 
     // memory to parse
-    auto start = m_begin;
+    auto begin = m_begin;
     auto const end = m_end;
 
     // variables to store parsed data
@@ -73,7 +73,7 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
     while(true) {
         // try to parse a sentence... (note: it will simply fail when at the
         // end of file)
-        if (qi::parse(start, end, (
+        if (qi::parse(begin, end, (
             // grammar for a single line of CSV
             // sentence ID
             qi::uint_ >> '\t' >>
@@ -91,13 +91,13 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
 
             _data.addSentence(id, langRange.begin(), sentenceRange.begin());
             nbSentences++;
-        } else if (start != end) {
+        } else if (begin != end) {
             // we failed at parsing the sentence, and we're not at the end of
             // the file yet
             qlog::warning << "Failed to parse sentence from line " << line << std::endl;
 
             // skip over the nearest \n and try again.
-            while (*(start++) != '\n');
+            while (*(begin++) != '\n');
         } else {
             // we're at the end of file. finish the job
             break;
