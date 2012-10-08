@@ -63,8 +63,10 @@ private:
 inline
 sentence * dataset::operator[]( sentence::id _id )
 {
-    assert( _id < static_cast<sentence::id>( m_fastAccess.size() ) ); // if m_fastAccess is empty, it means that prepare() command has not been run before.
-    assert( m_fastAccess[_id] < m_allSentences.size() );
+    assert( !m_fastAccess.empty() ); // if m_fastAccess is empty, it means that prepare() command has not been run before.
+    if (m_fastAccess[_id] == static_cast<size_t>(-1))
+        return nullptr;
+
     return & ( m_allSentences[ m_fastAccess[_id] ] );
 }
 
@@ -73,14 +75,14 @@ sentence * dataset::operator[]( sentence::id _id )
 inline
 void dataset::prepare( const datainfo & _info ) TATO_RESTRICT
 {
-    m_fastAccess.reserve( _info.m_highestId + 1 );
+    m_fastAccess.resize( _info.m_highestId + 1, static_cast<size_t>(-1) );
     const size_t nbSentences = m_allSentences.size();
 
     for( size_t index = 0; index < nbSentences; ++index )
     {
         const sentence & TATO_RESTRICT curSentence = m_allSentences[ index ];
         assert( curSentence.getId() != sentence::INVALID_ID );
-        assert( curSentence.getId() < static_cast<sentence::id>(m_fastAccess.capacity()) );
+        assert( curSentence.getId() < static_cast<sentence::id>(m_fastAccess.size()) );
         m_fastAccess[curSentence.getId()] = index;
     }
 }
