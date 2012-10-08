@@ -374,12 +374,8 @@ public:
     static void prependAll( const std::string & _text );
 
 private:
-    static const unsigned MUTED         = 0x00000001;
-    static const unsigned DECORATED     = 0x00000002;
-
-    std::vector<bool> m_flags;
-
-
+    bool m_isDecorated;
+    bool m_isMuted;
 
 private:
     struct Decoration
@@ -426,13 +422,10 @@ template<Loglevel Level>
 Logger<Level>::Logger( bool _muted, bool _decorated )
     :std::basic_ios<char>()
     ,std::basic_ostream<char>()
-    ,m_flags()
+    ,m_isDecorated( _decorated )
+    ,m_isMuted( _muted )
     ,m_decoration( nullptr )
 {
-    m_flags.reserve( 3 );
-    m_flags[MUTED] = _muted;
-    m_flags[DECORATED] = _decorated;
-
     registerMe( *this );
 }
 
@@ -442,7 +435,8 @@ template<Loglevel Level>
 Logger<Level>::Logger( const Logger & _copy )
     :std::basic_ios<char>()
     ,std::basic_ostream<char>()
-    ,m_flags( _copy.m_flags )
+    ,m_isDecorated( _copy.m_isDecorated )
+    ,m_isMuted( _copy.m_isMuted )
     ,m_decoration( nullptr )
 {
     setOutput( const_cast<Logger &>( _copy ) );
@@ -460,7 +454,7 @@ std::vector<Logger<Level>*>* Logger<Level>::m_allLoggers;
 template<Loglevel Level> inline
 bool Logger<Level>::isMuted() const
 {
-    return m_flags[MUTED];
+    return m_isMuted;
 }
 
 // -------------------------------------------------------------------------- //
@@ -468,7 +462,7 @@ bool Logger<Level>::isMuted() const
 template<Loglevel Level> inline
 bool Logger<Level>::isDecorated() const
 {
-    return m_flags[DECORATED];
+    return m_isDecorated;
 }
 
 // -------------------------------------------------------------------------- //
@@ -521,16 +515,6 @@ Logger<Level> & Logger<Level>::operator=( const Logger<Level> & _copy )
     Decoration * const newDecoration =
         _copy.m_decoration ? new Decoration : nullptr;
 
-    try
-    {
-        m_flags.reserve( _copy.m_flags.size() );
-    }
-    catch( std::bad_alloc & e )
-    {
-        delete newDecoration;
-        throw;
-    }
-
     if( newDecoration )
     {
         try
@@ -551,7 +535,8 @@ Logger<Level> & Logger<Level>::operator=( const Logger<Level> & _copy )
     if( newDecoration )
         newDecoration->prependText = _copy.m_decoration->prependText;
 
-    m_flags = _copy.m_flags;
+    m_isDecorated = _copy.m_isDecorated;
+    m_isMuted     = _copy.m_isMuted;
 
     delete m_decoration;
     m_decoration = newDecoration;
