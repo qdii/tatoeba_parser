@@ -1,0 +1,2 @@
+- Tatoparser could try and download the files from the website if it doesn’t find them.
+- Add some scripts to generate a webpage from output (like "5 random questions")
