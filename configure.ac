@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([tatoparser], 2.2, [victor.lavaud@gmail.com])
+AC_INIT([tatoparser], 2.3, [victor.lavaud@gmail.com])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])

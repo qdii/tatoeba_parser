@@ -1,3 +1,11 @@
+v2.3
+	- Fixed build when the user doesn’t have valgrind
+	- Fixed a bug causing a crash when links.csv and sentences.csv were inconsistent.
+	- mmap/munmap is no longer required (but are still used when available)
+	- boost::spirit is now used to parse sentences.csv. Thanks to liori.
+	- Fixed a lot of compilation problems reported by lool0 and sqrrl.
+	- Added unittests.
+
 v2.2
 	- Automake is now used as a build system
 	- Added --is-translatable-in switch, which keeps sentences that can be translated in a given language. 
