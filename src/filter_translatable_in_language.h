@@ -25,24 +25,18 @@ struct filterTranslatableInLanguage : public filter
     bool parse( const sentence & TATO_RESTRICT _sentence ) TATO_RESTRICT TATO_NO_THROW TATO_OVERRIDE
     {
         // get the ids of the translations of this sentence
-        const sentence::id * TATO_RESTRICT allLinksOfSentence =
-            m_linkset.getLinksOf( _sentence.getId() );
+        auto allLinksOfSentence = m_linkset.getLinksOf( _sentence.getId() );
 
-        if( allLinksOfSentence )
+        // go through the translations and check if any of them matches the language the user set
+        for (auto iter = allLinksOfSentence.first; iter != allLinksOfSentence.second; ++iter)
         {
-            // go through the translations and check if any of them matches the language the user set
-            while( *allLinksOfSentence != sentence::INVALID_ID )
+            // sometimes links.csv references sentences that just don’t exist
+            if( m_dataset[*iter] != nullptr )
             {
-                // sometimes links.csv references sentences that just don’t exist
-                if( m_dataset[*allLinksOfSentence] != nullptr )
-                {
-                    assert( m_dataset[*allLinksOfSentence]->lang() );
+                assert( m_dataset[*iter]->lang() );
 
-                    if( m_lang == m_dataset[*allLinksOfSentence]->lang() )
-                        return true;
-                }
-
-                ++allLinksOfSentence;
+                if( m_lang == m_dataset[*iter]->lang() )
+                    return true;
             }
         }
 

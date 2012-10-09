@@ -36,14 +36,14 @@ struct filterTranslationRegex : public filter
     {
         bool ret = false;
 
-        // links is a NULL terminated list of sentence::id, each of them being a
-        // translation of the passed sentence
-        const sentence::id * TATO_RESTRICT links =
-            m_linkset.getLinksOf( _sentence.getId() );
+        auto links = m_linkset.getLinksOf( _sentence.getId() );
+        sentence::id linkId = sentence::INVALID_ID;
 
         // match every translation against the set of regular expressions
-        for ( sentence::id linkId = *links; linkId != sentence::INVALID_ID; linkId = *++links)
+        for ( auto linkIter = links.first; linkIter != links.second; ++linkIter )
         {
+            linkId = *linkIter;
+
             // the i-th translation
             sentence * TATO_RESTRICT link = m_dataset[linkId];
 

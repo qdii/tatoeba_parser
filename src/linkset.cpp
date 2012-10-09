@@ -9,7 +9,7 @@ NAMESPACE_START
 
 linkset::linkset()
     :m_links()
-    ,m_pointers()
+    ,m_offsets()
 {
 }
 
@@ -21,11 +21,11 @@ void linkset::allocate( const datainfo & _datainfo )
     m_links.resize( _datainfo.m_nbLinks + _datainfo.m_nbLinks/100, 0 );
 
     // prepare ptrs array
-    m_pointers.resize( _datainfo.m_highestId + 1, 0 );
+    m_offsets.resize( _datainfo.m_highestId + 1 );
 
     qlog::info << "Allocated "
                << ( m_links.capacity()*sizeof( sentence::id ) +
-                    m_pointers.capacity()*sizeof( size_t ) ) / ( 1024*1024 )
+                    m_offsets.capacity()*sizeof( size_t ) ) / ( 1024*1024 )
 
                << " MB to store links\n";
 }
