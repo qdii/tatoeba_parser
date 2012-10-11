@@ -84,7 +84,6 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
         }
     }
 
-    allLinks_.addLink( sentence::INVALID_ID, sentence::INVALID_ID); // workaround to prevent memory corruption. linkset needs to be fixed.
     qlog::info << "parsed all links.\n";
 
     return nbLinks;

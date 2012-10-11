@@ -54,6 +54,9 @@ struct userOptions
     /**@brief Should we display the id of the matching sentences? */
     bool displayIds() const;
 
+    /**@brief Should we display the first translation? */
+    bool displayFirstTranslation() const;
+
     /**@brief This is debug, only the parsing is done */
     bool justParse() const;
 
@@ -64,6 +67,7 @@ public:
 
 
     std::string getCsvPath() const;
+    std::string getFirstTranslationLanguage() const;
 
 private:
     boost::program_options::options_description m_desc, m_visibleOptions;
@@ -164,6 +168,16 @@ std::string userOptions::getCsvPath() const
     return ".";
 }
 
+
+// -------------------------------------------------------------------------- //
+inline
+std::string userOptions::getFirstTranslationLanguage() const
+{
+    if( m_vm.count( "display-first-translation" ) )
+        return m_vm[ "display-first-translation" ].as<std::string>();
+
+    return "";
+}
 // -------------------------------------------------------------------------- //
 
 inline
@@ -174,5 +188,10 @@ bool userOptions::justParse() const
 
 // -------------------------------------------------------------------------- //
 
+inline
+bool userOptions::displayFirstTranslation() const
+{
+    return m_vm.count( "display-first-translation" );
+}
 NAMESPACE_END
 #endif //TATOPARSER_OPTIONS_H

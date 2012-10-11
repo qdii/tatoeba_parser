@@ -44,6 +44,7 @@ public:
 
 public:
     sentence * operator[]( sentence::id );
+    const sentence * operator[]( sentence::id ) const;
 
     /**@brief Should be run before any sentence is retrieved using operator[]
      */
@@ -64,6 +65,18 @@ inline
 sentence * dataset::operator[]( sentence::id _id )
 {
     assert( !m_fastAccess.empty() ); // if m_fastAccess is empty, it means that prepare() command has not been run before.
+    if (m_fastAccess[_id] == static_cast<size_t>(-1))
+        return nullptr;
+
+    return & ( m_allSentences[ m_fastAccess[_id] ] );
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+const sentence * dataset::operator[]( sentence::id _id ) const
+{
+    assert( !m_fastAccess.empty() );
     if (m_fastAccess[_id] == static_cast<size_t>(-1))
         return nullptr;
 

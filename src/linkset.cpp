@@ -32,6 +32,26 @@ void linkset::allocate( const datainfo & _datainfo )
 
 // -------------------------------------------------------------------------- //
 
+sentence::id getFirstSentenceTranslation(
+    const dataset & _dataset,
+    const linkset & _linkset,
+    sentence::id _sentence,
+    const std::string & _lang
+)
+{
+    auto allTranslations = _linkset.getLinksOf( _sentence );
+
+    for( auto iter = allTranslations.first; iter != allTranslations.second; ++iter )
+    {
+        assert( *iter != sentence::INVALID_ID);
+        if ( _dataset[*iter] && _lang == _dataset[*iter]->lang() )
+        {
+            return *iter;
+        }
+    }
+
+    return sentence::INVALID_ID;
+}
 
 
 NAMESPACE_END

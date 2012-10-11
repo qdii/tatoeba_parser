@@ -235,6 +235,7 @@ int main( int argc, char * argv[] )
         auto itr = allSentences.begin();
         auto endFilter = allFilters.end();
         unsigned printedLineNumber = 0;
+        std::string translationLanguage = options.getFirstTranslationLanguage();
 
         for( size_t i = 0; i < info.m_nbSentences; ++i )
         {
@@ -246,15 +247,41 @@ int main( int argc, char * argv[] )
                 shouldDisplay &= ( *filter )->parse( sentence );
             }
 
+            // display the sentence if it is seleted by all the filters
             if( shouldDisplay )
             {
+                // option -n
                 if( options.displayLineNumbers() )
                     std::cout << ++printedLineNumber << '\t';
 
+                // option -i
                 if( options.displayIds() )
                     std::cout << sentence.getId() << '\t';
 
-                std::cout << sentence.str() << '\n';
+                // display the sentence
+                std::cout << sentence.str();
+
+                // display a translation if it was requested
+                if ( options.displayFirstTranslation() )
+                {
+                    // find a suitable translation
+                    const sentence::id firstTranslationId =
+                        getFirstSentenceTranslation(
+                            allSentences,
+                            allLinks,
+                            sentence.getId(),
+                            translationLanguage
+                        );
+
+                    if ( firstTranslationId != sentence::INVALID_ID
+                            && allSentences[firstTranslationId] )
+                    {
+                        // display the translation
+                        std::cout << '\t' << allSentences[firstTranslationId]->str();
+                    }
+                }
+
+                std::cout << '\n';
             }
         }
     }

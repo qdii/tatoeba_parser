@@ -62,6 +62,7 @@ userOptions::userOptions()
     displayOptions.add_options()
         ( "display-line-numbers,n", "Display the indexes of the lines." )
         ( "display-ids,i", "Displays the sentence ids." )
+        ( "display-first-translation", po::value<std::string>(), "Display the first translation of the sentence in a given language." )
     ;
     m_desc.add( displayOptions );
     m_visibleOptions.add( displayOptions );

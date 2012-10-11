@@ -8,6 +8,7 @@
 NAMESPACE_START
 
 struct datainfo;
+struct dataset;
 
 /**@struct linkset
  * @brief A container that represents the links between the sentences */
@@ -72,6 +73,21 @@ private:
     linkset( const linkset & );
     linkset & operator=( const linkset & );
 };
+
+// -------------------------------------------------------------------------- //
+
+/**@brief Retrieve the first translation of a sentence in a given language.
+ * @param[in] _dataset Container for all the sentences.
+ * @param[in] _linkset Container for all the links.
+ * @param[in] _sentence The id of the sentence which translation are retrieved.
+ * @param[in] _lang The language to translate the sentence in
+ * @return The id of the first translation, or sentence::INVALID_ID  */
+sentence::id getFirstSentenceTranslation(
+    const dataset & _dataset,
+    const linkset & _linkset,
+    sentence::id _sentence,
+    const std::string & _lang
+);
 
 // -------------------------------------------------------------------------- //
 

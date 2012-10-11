@@ -152,6 +152,9 @@
 
 // ___________________________  INCLUDES  ____________________________________
 
+#ifndef QDIILOG_WITHOUT_BOOST
+#   include <boost/config.hpp>
+#endif
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -168,6 +171,14 @@
 #else
 #   define QDIILOG_NS_START
 #   define QDIILOG_NS_END
+#endif
+
+#ifndef QDIILOG_WITHOUT_BOOST
+#   ifdef BOOST_NO_SCOPED_ENUMS
+#       define QDIILOG_NO_SCOPED_ENUMS
+#   endif
+#else
+#   define QDIILOG_NO_SCOPED_ENUMS
 #endif
 
 // let the user defines his object names
@@ -192,6 +203,7 @@ QDIILOG_NS_START
 // -------------------------------------------------------------------------- //
 
 /**@brief The different granularity of logging */
+#ifndef QDIILOG_NO_SCOPED_ENUMS
 enum class Loglevel
 {
     debug,
@@ -202,6 +214,17 @@ enum class Loglevel
 
     disable
 };
+#else
+namespace Loglevel
+{
+    static const uint_fast8_t debug = 1;
+    static const uint_fast8_t trace = 2;
+    static const uint_fast8_t info = 3;
+    static const uint_fast8_t warning = 4;
+    static const uint_fast8_t error = 5;
+    static const uint_fast8_t disable = 0;
+}
+#endif
 // -------------------------------------------------------------------------- //
 
 /**@struct UserFilter
@@ -211,8 +234,15 @@ enum class Loglevel
 template<typename T>
 struct UserFilter
 {
+#ifdef QDIILOG_NO_SCOPED_ENUMS
+#   define QDIILOG_LOGLEVEL_USERFILTER_LEVEL_TYPE uint_fast8_t
+#   define QDIILOG_TEMPLATE_DECL uint_fast8_t
+#else
+#   define QDIILOG_LOGLEVEL_USERFILTER_LEVEL_TYPE Loglevel
+#   define QDIILOG_TEMPLATE_DECL Loglevel
+#endif
     /**@private */
-    static Loglevel level;
+    static QDIILOG_LOGLEVEL_USERFILTER_LEVEL_TYPE level;
 };
 
 // -------------------------------------------------------------------------- //
@@ -222,12 +252,12 @@ struct UserFilter
  * @internal
  */
 template<typename T>
-Loglevel UserFilter<T>::level;
+QDIILOG_LOGLEVEL_USERFILTER_LEVEL_TYPE UserFilter<T>::level;
 
 // -------------------------------------------------------------------------- //
 
 inline
-void setLogLevel( Loglevel _level )
+void setLogLevel( QDIILOG_LOGLEVEL_USERFILTER_LEVEL_TYPE _level )
 {
     UserFilter<int>::level = _level;
 }
@@ -256,7 +286,7 @@ void setLogLevel( Loglevel _level )
  * }
  * @endcode
  */
-template< Loglevel Level >
+template< QDIILOG_TEMPLATE_DECL Level >
 struct Logger : public std::ostream
 {
     /**@brief Construct a logger
@@ -418,10 +448,10 @@ private:
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 Logger<Level>::Logger( bool _muted, bool _decorated )
     :std::basic_ios<char>()
-    ,std::basic_ostream<char>()
+    ,std::basic_ostream<char>( nullptr )
     ,m_isDecorated( _decorated )
     ,m_isMuted( _muted )
     ,m_decoration( nullptr )
@@ -431,10 +461,10 @@ Logger<Level>::Logger( bool _muted, bool _decorated )
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 Logger<Level>::Logger( const Logger & _copy )
     :std::basic_ios<char>()
-    ,std::basic_ostream<char>()
+    ,std::basic_ostream<char>( nullptr )
     ,m_isDecorated( _copy.m_isDecorated )
     ,m_isMuted( _copy.m_isMuted )
     ,m_decoration( nullptr )
@@ -446,12 +476,12 @@ Logger<Level>::Logger( const Logger & _copy )
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 std::vector<Logger<Level>*>* Logger<Level>::m_allLoggers;
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level> inline
+template< QDIILOG_TEMPLATE_DECL Level > inline
 bool Logger<Level>::isMuted() const
 {
     return m_isMuted;
@@ -459,7 +489,7 @@ bool Logger<Level>::isMuted() const
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level> inline
+template< QDIILOG_TEMPLATE_DECL Level > inline
 bool Logger<Level>::isDecorated() const
 {
     return m_isDecorated;
@@ -467,7 +497,7 @@ bool Logger<Level>::isDecorated() const
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 Logger<Level> Logger<Level>::treat( const std::string & _userMessage )
 {
     if( !isMuted() && isGranularityOk() )
@@ -494,7 +524,7 @@ Logger<Level> Logger<Level>::treat( const std::string & _userMessage )
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 void Logger<Level>::prepend( const std::string & _text )
 {
     if( !m_decoration )
@@ -506,7 +536,7 @@ void Logger<Level>::prepend( const std::string & _text )
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 Logger<Level> & Logger<Level>::operator=( const Logger<Level> & _copy )
 {
     if( this == &_copy )
@@ -549,7 +579,7 @@ Logger<Level> & Logger<Level>::operator=( const Logger<Level> & _copy )
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 Logger<Level>::~Logger()
 {
     delete m_decoration;
@@ -562,13 +592,13 @@ Logger<Level>::~Logger()
 typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
 typedef CoutType & ( *StandardEndLine )( CoutType & );
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 Logger<Level> && operator<<( Logger<Level> & _logger, StandardEndLine _endl )
 {
     return std::move( _logger ) << _endl;
 }
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 Logger<Level> && operator<<( Logger<Level> && _logger, StandardEndLine _endl )
 {
     if( !_logger.isMuted() && _logger.isGranularityOk() )
@@ -585,7 +615,7 @@ Logger<Level> && operator<<( Logger<Level> && _logger, StandardEndLine _endl )
  * @param[in] _logger The logger which will take care of the user message
  * @param[in] _message The message of the user.
  * @return A logger (which might be different  */
-template<Loglevel Level, typename UserMessage>
+template< QDIILOG_TEMPLATE_DECL Level, typename UserMessage>
 Logger<Level> operator<<( Logger<Level> & _logger, const UserMessage & _message )
 {
     return std::move( _logger ) << _message;
@@ -597,7 +627,7 @@ Logger<Level> operator<<( Logger<Level> & _logger, const UserMessage & _message 
  * @param[in] _logger The logger which will take care of the user message
  * @param[in] _message The message of the user.
  * @return A logger (which might be different  */
-template<Loglevel Level, typename UserMessage>
+template< QDIILOG_TEMPLATE_DECL Level, typename UserMessage>
 Logger<Level> operator<<( Logger<Level> && _logger, const UserMessage & _message )
 {
     if( !_logger.isMuted() )
@@ -613,7 +643,7 @@ Logger<Level> operator<<( Logger<Level> && _logger, const UserMessage & _message
 // -------------------------------------------------------------------------- //
 
 /**@brief Changes the output of all the loggers of this level */
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 void Logger<Level>::setAllOutputs( std::ostream & _newOutput )
 {
     const auto end = m_allLoggers->end();
@@ -628,7 +658,7 @@ void Logger<Level>::setAllOutputs( std::ostream & _newOutput )
 // -------------------------------------------------------------------------- //
 
 /**@brief Changes the output of all the loggers of this level */
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 void Logger<Level>::prependAll( const std::string & _text )
 {
     const auto end = m_allLoggers->end();
@@ -642,7 +672,7 @@ void Logger<Level>::prependAll( const std::string & _text )
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 void Logger<Level>::setOutput( std::ostream & _newOutput )
 {
     //assert( _newOutput.rdbuf() );
@@ -651,7 +681,7 @@ void Logger<Level>::setOutput( std::ostream & _newOutput )
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 bool Logger<Level>::isGranularityOk() const
 {
     bool doesLevelAllowLogging = false;
@@ -684,7 +714,7 @@ bool Logger<Level>::isGranularityOk() const
 
 // -------------------------------------------------------------------------- //
 
-template<Loglevel Level>
+template< QDIILOG_TEMPLATE_DECL Level >
 Logger<Level> Logger<Level>::operator()( bool _condition )
 {
     Logger<Level> logger( !_condition, true );
@@ -702,11 +732,11 @@ Logger<Level> Logger<Level>::operator()( bool _condition )
 inline
 void setOutput( std::ostream & _newOutput )
 {
-    Logger<Loglevel::debug>::setAllOutputs( _newOutput );
-    Logger<Loglevel::trace>::setAllOutputs( _newOutput );
-    Logger<Loglevel::info>::setAllOutputs( _newOutput );
-    Logger<Loglevel::warning>::setAllOutputs( _newOutput );
-    Logger<Loglevel::error>::setAllOutputs( _newOutput );
+    Logger< Loglevel::debug>::setAllOutputs( _newOutput );
+    Logger< Loglevel::trace>::setAllOutputs( _newOutput );
+    Logger< Loglevel::info>::setAllOutputs( _newOutput );
+    Logger< Loglevel::warning>::setAllOutputs( _newOutput );
+    Logger< Loglevel::error>::setAllOutputs( _newOutput );
 }
 
 // -------------------------------------------------------------------------- //
