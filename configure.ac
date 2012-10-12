@@ -50,7 +50,8 @@ AC_CHECK_HEADERS([boost/program_options/variables_map.hpp], ,[AC_MSG_ERROR([Unab
 AC_CHECK_HEADERS([boost/program_options/parsers.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
 AC_CHECK_HEADERS([boost/regex.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex.hpp)])])
 AC_CHECK_HEADERS([boost/regex/icu.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex/icu.hpp)])])
-AC_CHECK_HEADERS([boost/spirit/include/qi.hpp], , [AC_MSG_ERROR([Unable to find Boost Spirit header (boost/spirit/include/qi	.hpp)])])
+AC_CHECK_HEADERS([boost/spirit/include/qi.hpp], , [AC_MSG_ERROR([Unable to find Boost Spirit header (boost/spirit/include/qi.hpp)])])
+AC_CHECK_HEADERS([boost/config.hpp], , [AC_MSG_ERROR([Unable to find Boost Config header (boost/config.hpp)])])
 
 # Checks for memory limitation headers
 if test "x${limit_mem}" = xyes; then

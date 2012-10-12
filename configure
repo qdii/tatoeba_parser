@@ -3540,7 +3540,21 @@ if test "x$ac_cv_header_boost_spirit_include_qi_hpp" = xyes; then :
 _ACEOF
 
 else
-  as_fn_error $? "Unable to find Boost Spirit header (boost/spirit/include/qi	.hpp)" "$LINENO" 5
+  as_fn_error $? "Unable to find Boost Spirit header (boost/spirit/include/qi.hpp)" "$LINENO" 5
+fi
+
+done
+
+for ac_header in boost/config.hpp
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "boost/config.hpp" "ac_cv_header_boost_config_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_boost_config_hpp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BOOST_CONFIG_HPP 1
+_ACEOF
+
+else
+  as_fn_error $? "Unable to find Boost Config header (boost/config.hpp)" "$LINENO" 5
 fi
 
 done
