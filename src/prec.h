@@ -62,6 +62,9 @@
 #define QDIILOG_NAME_LOGGER_INFO info
 #define QDIILOG_NAME_LOGGER_WARNING warning
 #define QDIILOG_NAME_LOGGER_ERROR error
+#ifndef HAVE_BOOST_CONFIG_HPP
+#   define QDIILOG_WITHOUT_BOOST
+#endif
 #include "qdiilog.hpp"
 
 // --------------------------- PROJECT INCLUDES --------------------------------

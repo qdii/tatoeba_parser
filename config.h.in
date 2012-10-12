@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have the <boost/config.hpp> header file. */
+#undef HAVE_BOOST_CONFIG_HPP
+
 /* Define to 1 if you have the <boost/program_options/cmdline.hpp> header
    file. */
 #undef HAVE_BOOST_PROGRAM_OPTIONS_CMDLINE_HPP
