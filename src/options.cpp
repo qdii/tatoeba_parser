@@ -1,6 +1,7 @@
 #include "prec.h"
 #include "options.h"
 #include "sentence.h"
+#include "filter_id.h"
 #include "filter_regex.h"
 #include "filter_translation_regex.h"
 #include "filter_link.h"
@@ -44,6 +45,7 @@ userOptions::userOptions()
     // ----- filters
     po::options_description filteringOptions( "Use those options to select the sentences to display" );
     filteringOptions.add_options()
+        ( "has-id", po::value<sentence::id>(), "Filters out sentences which ids are different to this one." )
         ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
         ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
         ( "is-translatable-in", po::value<std::string>(), "Keep the sentence if it has a translation in a given language." )
@@ -98,6 +100,15 @@ void userOptions::treatCommandLine( int argc, char * argv[] )
 void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset, FilterVector & allFilters_ )
 {
     qlog::warning( allFilters_.size() ) << "allFilters.size() > 0\n";
+
+    if ( m_vm.count( "has-id") )
+    {
+        allFilters_.push_back(
+            std::shared_ptr<filter>(
+                new filterId( m_vm["has-id"].as<sentence::id>() )
+            )
+        );
+    }
 
     // The various filters will be applied in order. The language filter is
     // very light so we want it first to discard as many sentences as possible
