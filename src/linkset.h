@@ -112,6 +112,8 @@ void linkset::addLink( sentence::id _a, sentence::id _b ) TATO_RESTRICT
 inline
 bool linkset::areLinked( sentence::id _a, sentence::id _b ) const TATO_RESTRICT
 {
+    assert( _a != sentence::INVALID_ID );
+    assert( _b != sentence::INVALID_ID );
     const std::pair< const_iterator, const_iterator > & translationsOfA =
         getLinksOf( _a );
 
@@ -128,9 +130,9 @@ linkset::getLinksOf( sentence::id _a ) const
     assert( _a < m_offsets.size() );
     const std::pair<size_t, size_t> & sentenceOffsets = m_offsets[_a];
     assert( sentenceOffsets.first < m_links.size() );
-    assert( sentenceOffsets.second < m_links.size() );
+    assert( sentenceOffsets.second <= m_links.size() );
     return std::pair<linkset::const_iterator, linkset::const_iterator>(
-               &m_links[sentenceOffsets.first], &m_links[sentenceOffsets.second]
+               m_links.data() + sentenceOffsets.first, m_links.data() + sentenceOffsets.second
            );
 }
 
