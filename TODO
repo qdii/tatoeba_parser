@@ -1,4 +1,4 @@
 - Tatoparser could try and download the files from the website if it doesn’t find them.
 - Add some scripts to generate a webpage from output (like "5 random questions")
 - Add automake support
-- Add an option to display the first translation of a sentence
+- OPTIMIZATION: To know exactly how many sentences should be stored (i.e. how big "allSentences" should be), we count all the lines in sentences.csv (in fast_sentence_parser this is the function countLines), then we allocate space in the container. Counting lines amounts for about 30% of the time of the parsing. Is it worth it? Would reallocating the sentence container take more time? If counting lines makes sense, there could be a way to do it faster, for instance, estimate the number of lines by taking the average size of line, the size of the file, and dividing the second by the first.
