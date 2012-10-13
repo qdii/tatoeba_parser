@@ -27,6 +27,7 @@ userOptions::userOptions()
     :m_desc( "" )
     ,m_visibleOptions()
     ,m_vm()
+    ,m_separator("\t")
     ,m_configFileDescriptions()
     ,m_configFileCsvPath()
 {
@@ -65,6 +66,7 @@ userOptions::userOptions()
         ( "display-line-numbers,n", "Display the indexes of the lines." )
         ( "display-ids,i", "Displays the sentence ids." )
         ( "display-first-translation", po::value<std::string>(), "Display the first translation of the sentence in a given language." )
+        ( "separator", po::value<std::string>(&m_separator), "Sets the separator character ('\\t' by default)." )
     ;
     m_desc.add( displayOptions );
     m_visibleOptions.add( displayOptions );
@@ -251,5 +253,6 @@ void userOptions::declareConfigFileValidOptions()
     ;
 }
 
+// -------------------------------------------------------------------------- //
 
 NAMESPACE_END

@@ -60,6 +60,9 @@ struct userOptions
     /**@brief This is debug, only the parsing is done */
     bool justParse() const;
 
+    /**@brief Gets the separator character */
+    std::string getSeparator() const;
+
 
 public:
     void printHelp();
@@ -72,6 +75,7 @@ public:
 private:
     boost::program_options::options_description m_desc, m_visibleOptions;
     boost::program_options::variables_map       m_vm;
+    std::string                                 m_separator;
 
 // ------- CONFIG FILE -------------
 public:
@@ -192,6 +196,14 @@ inline
 bool userOptions::displayFirstTranslation() const
 {
     return m_vm.count( "display-first-translation" );
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+std::string userOptions::getSeparator() const
+{
+    return m_separator;
 }
 NAMESPACE_END
 #endif //TATOPARSER_OPTIONS_H

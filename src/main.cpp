@@ -236,6 +236,7 @@ int main( int argc, char * argv[] )
         auto endFilter = allFilters.end();
         unsigned printedLineNumber = 0;
         std::string translationLanguage = options.getFirstTranslationLanguage();
+        const std::string & separator = options.getSeparator();
 
         for( size_t i = 0; i < info.m_nbSentences; ++i )
         {
@@ -252,11 +253,11 @@ int main( int argc, char * argv[] )
             {
                 // option -n
                 if( options.displayLineNumbers() )
-                    std::cout << ++printedLineNumber << '\t';
+                    std::cout << ++printedLineNumber << separator;
 
                 // option -i
                 if( options.displayIds() )
-                    std::cout << sentence.getId() << '\t';
+                    std::cout << sentence.getId() << separator;
 
                 // display the sentence
                 std::cout << sentence.str();
@@ -277,7 +278,7 @@ int main( int argc, char * argv[] )
                             && allSentences[firstTranslationId] )
                     {
                         // display the translation
-                        std::cout << '\t' << allSentences[firstTranslationId]->str();
+                        std::cout << separator << allSentences[firstTranslationId]->str();
                     }
                 }
 
