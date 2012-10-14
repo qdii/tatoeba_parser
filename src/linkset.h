@@ -99,7 +99,10 @@ void linkset::addLink( sentence::id _a, sentence::id _b ) TATO_RESTRICT
     if( lastIdValue != _a )
     {
         lastIdValue = _a;
-        assert( _a < static_cast<sentence::id>( m_offsets.size() ) );
+        while ( _a >= static_cast<sentence::id>( m_offsets.size() ) )
+        {
+            m_offsets.resize( 2 * m_offsets.size() );
+        }
         m_offsets[_a].first = m_links.size();
     }
 
