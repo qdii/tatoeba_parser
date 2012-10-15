@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([tatoparser], 2.3, [victor.lavaud@gmail.com])
+AC_INIT([tatoparser], 2.4, [victor.lavaud@gmail.com])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
@@ -51,7 +51,7 @@ AC_CHECK_HEADERS([boost/program_options/parsers.hpp], ,[AC_MSG_ERROR([Unable to 
 AC_CHECK_HEADERS([boost/regex.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex.hpp)])])
 AC_CHECK_HEADERS([boost/regex/icu.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex/icu.hpp)])])
 AC_CHECK_HEADERS([boost/spirit/include/qi.hpp], , [AC_MSG_ERROR([Unable to find Boost Spirit header (boost/spirit/include/qi.hpp)])])
-AC_CHECK_HEADERS([boost/config.hpp], , [AC_MSG_ERROR([Unable to find Boost Config header (boost/config.hpp)])])
+AC_CHECK_HEADERS([boost/config.hpp], , )
 
 # Checks for memory limitation headers
 if test "x${limit_mem}" = xyes; then

@@ -1,3 +1,11 @@
+v2.4	
+	- Added --separator switch to change the way line numbers, sentence texts, and translations are separated.
+	- Added --has-id to look for a specific sentence
+	- Fixed a bug causing an invalid memory access at the end of the linkset container.
+	- The project now uses <boost/config.hpp> if it is found on the machine
+	- Added --display-first-translation to output a translation in addition to the sentence.
+
+
 v2.3
 	- Fixed build when the user doesn’t have valgrind
 	- Fixed a bug causing a crash when links.csv and sentences.csv were inconsistent.
