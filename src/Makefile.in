@@ -37,7 +37,7 @@ prec.h.gch: prec.h
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -x c++-header -c $<
 
 $(package): prec.h.gch $(OBJ)
-	$(CXX) $(DEFS) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(OBJ) $(LIBS)
+	$(CXX) $(DEFS) $(CXXFLAGS) $(CPPFLAGS) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
 
 %.o: %.cpp
 	$(CXX) $(DEFS) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -o $@ -c $<
