@@ -13,7 +13,7 @@ bindir         = @bindir@
 srcdir         = @srcdir@
 VPATH          = @srcdir@
 
-all $(package) clean install uninstall:
+all $(package) clean install uninstall check:
 	$(MAKE) -C src $@
 
 dist: $(distdir).tar.gz
@@ -34,6 +34,8 @@ $(distdir):
 	cp $(srcdir)/install-sh $(distdir)
 	cp $(srcdir)/config.h.in $(distdir)
 
+test: FORCE
+	cd $(srcdir)/unittests && rm -f $(package) && ln -s $(bindir)/tatoparser . && sh allTests.sh
 
 Makefile: Makefile.in config.status
 	./config.status $@
@@ -41,4 +43,4 @@ Makefile: Makefile.in config.status
 config.status: configure
 	./config.status --recheck
 
-.PHONY: FORCE all clean dist install uninstall
+.PHONY: FORCE all clean dist install uninstall check
