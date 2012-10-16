@@ -25,7 +25,10 @@ struct fastSentenceParser
     /**@brief Returns the number of lines in the buffer
       *@warning If some lines are fucked up in the file, the number of sentences
       *         will be inferior to the number of lines. */
-    size_t          countLines();
+    size_t          countLines() const;
+
+    /**@brief Estimate the number of lines in the buffer*/
+    size_t          countLinesFast() const;
 
 private:
     iterator m_begin, m_end;
@@ -43,13 +46,26 @@ fastSentenceParser<iterator>::fastSentenceParser( iterator _begin, iterator _end
 // -------------------------------------------------------------------------- //
 
 template<typename iterator>
-size_t fastSentenceParser<iterator>::countLines()
+size_t fastSentenceParser<iterator>::countLines() const
 {
     const size_t nbSentences =
         std::count( m_begin, m_end, '\n' );
     qlog::info << "number of sentences: " << nbSentences << '\n';
     return nbSentences;
 }
+
+// -------------------------------------------------------------------------- //
+
+template<typename iterator>
+size_t fastSentenceParser<iterator>::countLinesFast() const
+{
+    const size_t nbChars =
+        reinterpret_cast<size_t>(&*m_end) - reinterpret_cast<size_t>(&*m_begin);
+    static const size_t AVERAGE_NB_BYTES_PER_SENTENCE = 58;
+    qlog::info << "estimated number of sentences: " << nbChars / AVERAGE_NB_BYTES_PER_SENTENCE << '\n';
+    return nbChars / AVERAGE_NB_BYTES_PER_SENTENCE;
+}
+
 
 // -------------------------------------------------------------------------- //
 

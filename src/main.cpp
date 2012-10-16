@@ -100,7 +100,7 @@ int main( int argc, char * argv[] )
     );
 
     // allocate memory for the sentence structure
-    info.m_nbSentences = sentenceParser.countLines();
+    info.m_nbSentences = sentenceParser.countLinesFast();
 
     if( info.m_nbSentences <= 0 )
     {
