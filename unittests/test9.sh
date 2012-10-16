@@ -1,5 +1,5 @@
 #!/bin/sh
-source ./unittests_common.sh
+. ./unittests_common.sh
 
 result=`$tatoparser_bin --has-id 3`
 expected_result='你在干什麼啊？'
