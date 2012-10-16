@@ -32,7 +32,7 @@ struct filterTranslationRegex : public filter
     /**@brief Checks that a sentence has a translation that matches all the regular expressions
      * @param[in] _sentence The sentence to match
      * @return true if one of the sentence translation matches all the regular expressions */
-    bool parse( const sentence & TATO_RESTRICT _sentence ) TATO_OVERRIDE TATO_RESTRICT TATO_NO_THROW
+    bool parse( const sentence & TATO_RESTRICT _sentence ) TATO_OVERRIDE
     {
         bool ret = false;
 
