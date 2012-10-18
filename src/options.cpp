@@ -27,9 +27,10 @@ userOptions::userOptions()
     :m_desc( "" )
     ,m_visibleOptions()
     ,m_vm()
-    ,m_separator("\t")
+    ,m_separator( "\t" )
     ,m_configFileDescriptions()
     ,m_configFileCsvPath()
+    ,m_configFileAcceptedLanguages()
 {
     // ----- general options
     po::options_description generalOptions( "" );
@@ -50,7 +51,7 @@ userOptions::userOptions()
         ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
         ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
         ( "is-translatable-in", po::value<std::string>(), "Keep the sentence if it has a translation in a given language." )
-        ( "language,l", po::value<std::string>(), "Restrict the languages to a given one." )
+        ( "language,l", po::value<std::vector<std::string>>(), "Filter out sentences which languages is different from the ones given. Accept multiple values." )
         ( "has-tag,g", po::value<std::string>(), "Checks if the sentence has a given tag." )
         ( "translation-regex,p", po::value<std::vector<std::string> >()->composing(),
           "Filters only sentences which translations match this regex. If many "
@@ -66,7 +67,7 @@ userOptions::userOptions()
         ( "display-line-numbers,n", "Display the indexes of the lines." )
         ( "display-ids,i", "Displays the sentence ids." )
         ( "display-first-translation", po::value<std::string>(), "Display the first translation of the sentence in a given language." )
-        ( "separator", po::value<std::string>(&m_separator), "Sets the separator character ('\\t' by default)." )
+        ( "separator", po::value<std::string>( &m_separator ), "Sets the separator character ('\\t' by default)." )
     ;
     m_desc.add( displayOptions );
     m_visibleOptions.add( displayOptions );
@@ -101,12 +102,16 @@ void userOptions::treatCommandLine( int argc, char * argv[] )
 /**@brief Populate the passed list of filters with certain filters */
 void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset, FilterVector & allFilters_ )
 {
+    using std::shared_ptr;
+    using std::vector;
+    using std::string;
+
     qlog::warning( allFilters_.size() ) << "allFilters.size() > 0\n";
 
-    if ( m_vm.count( "has-id") )
+    if( m_vm.count( "has-id" ) )
     {
         allFilters_.push_back(
-            std::shared_ptr<filter>(
+            shared_ptr<filter>(
                 new filterId( m_vm["has-id"].as<sentence::id>() )
             )
         );
@@ -117,8 +122,16 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     if( m_vm.count( "language" ) )
     {
         allFilters_.push_back(
-            std::shared_ptr<filter>(
-                new filterLang( m_vm["language"].as<std::string>() )
+            shared_ptr<filter>(
+                new filterLang( m_vm["language"].as<vector<string>>() )
+            )
+        );
+    }
+    else if ( m_configFileAcceptedLanguages.size() )
+    {
+        allFilters_.push_back(
+            shared_ptr<filter>(
+                new filterLang( m_configFileAcceptedLanguages )
             )
         );
     }
@@ -126,7 +139,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     if( m_vm.count( "is-linked-to" ) )
     {
         allFilters_.push_back(
-            std::shared_ptr<filter>(
+            shared_ptr<filter>(
                 new filterLink( _linkset, m_vm["is-linked-to"].as<sentence::id>() )
             )
         );
@@ -136,8 +149,8 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     {
         allFilters_.push_back(
 
-            std::shared_ptr<filter>(
-                new filterTag( _tagset, m_vm["has-tag"].as<std::string>() )
+            shared_ptr<filter>(
+                new filterTag( _tagset, m_vm["has-tag"].as<string>() )
 
             )
         );
@@ -146,10 +159,10 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     if( m_vm.count( "is-translatable-in" ) )
     {
         allFilters_.push_back(
-            std::shared_ptr<filter>(
+            shared_ptr<filter>(
                 new filterTranslatableInLanguage(
                     _dataset, _linkset,
-                    m_vm["is-translatable-in"].as<std::string>()
+                    m_vm["is-translatable-in"].as<string>()
                 )
             )
         );
@@ -160,12 +173,12 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     if( m_vm.count( "regex" ) )
     {
         // for each regex, we create a filter
-        const std::vector< std::string > & allRegex = m_vm["regex"].as<std::vector<std::string>>();
+        const vector< string > & allRegex = m_vm["regex"].as<vector<string>>();
 
         for( auto regex : allRegex )
         {
-            std::shared_ptr<filter> newFilter =
-                std::shared_ptr<filter>( new filterRegex( regex ) );
+            shared_ptr<filter> newFilter =
+                shared_ptr<filter>( new filterRegex( regex ) );
             allFilters_.push_back( newFilter );
         }
     }
@@ -173,10 +186,10 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     if( m_vm.count( "translation-regex" ) )
     {
         allFilters_.push_back(
-            std::shared_ptr<filter>(
+            shared_ptr<filter>(
                 new filterTranslationRegex(
                     _dataset, _linkset,
-                    m_vm["translation-regex"].as<std::vector<std::string>>() )
+                    m_vm["translation-regex"].as<vector<string>>() )
             )
         );
     }
@@ -232,11 +245,18 @@ void userOptions::treatConfigFile()
                 qlog::info << "csv-path: " << opt.value[opt.value.size()-1] << '\n';
                 m_configFileCsvPath = opt.value[opt.value.size()-1];
             }
+            else if ( opt.string_key == "lang" )
+            {
+                for( size_t languageIndex = 0; languageIndex < opt.value.size(); ++languageIndex )
+                    m_configFileAcceptedLanguages.push_back( opt.value[languageIndex] );
+            }
             else
             {
                 qlog::warning << "\tunknown token:" << opt.original_tokens[0] << '\n';
             }
         }
+
+
     }
     catch( const po::error & exc )
     {
@@ -250,6 +270,7 @@ void userOptions::declareConfigFileValidOptions()
 {
     m_configFileDescriptions.add_options()
         ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
+        ( "lang", po::value<std::vector<std::string>>(), "Only keep a sentence that matches this language. Multiple entries allowed." )
     ;
 }
 

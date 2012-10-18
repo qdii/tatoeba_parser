@@ -89,6 +89,7 @@ private:
 
     boost::program_options::options_description     m_configFileDescriptions;
     std::string m_configFileCsvPath;
+    std::vector<std::string> m_configFileAcceptedLanguages;
 };
 
 // -------------------------------------------------------------------------- //
@@ -155,7 +156,9 @@ inline
 void userOptions::printHelp()
 {
     std::cout << "Usage: " << PACKAGE_NAME << " <OPTION>\nWhere OPTION can be any of:\n";
-    std::cout << m_visibleOptions << std::endl;
+    std::cout << m_visibleOptions << '\n';
+    std::cout << "Config file will be searched for these options:\n";
+    std::cout << m_configFileDescriptions << '\n';
 }
 
 // -------------------------------------------------------------------------- //
