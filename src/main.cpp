@@ -29,13 +29,22 @@ void startLog( bool _verbose );
 
 int main( int argc, char * argv[] )
 {
+    startLog( false );
     FilterVector allFilters; ///< the filter list
     ///< to select sentences based on the user options)
 
     // create the filters with respect to the user options
     allFilters.reserve( 5 );
     userOptions options;
-    options.treatCommandLine( argc, argv );
+    try
+    {
+        options.treatCommandLine( argc, argv );
+    }
+    catch (const boost::program_options::unknown_option & err)
+    {
+        qlog::error << "Unknown option: " << err.get_option_name() << '\n';
+        return 0;
+    }
     startLog( options.isVerbose() );
     options.treatConfigFile();
     const std::string csvPath = options.getCsvPath();
