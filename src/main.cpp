@@ -43,7 +43,7 @@ int main( int argc, char * argv[] )
     catch (const boost::program_options::unknown_option & err)
     {
         qlog::error << "Unknown option: " << err.get_option_name() << '\n';
-        return 0;
+        return EXIT_FAILURE;
     }
     startLog( options.isVerbose() );
     options.treatConfigFile();
@@ -62,19 +62,21 @@ int main( int argc, char * argv[] )
     {
         qlog::error << "Invalid regular expression\n"
                     << qlog::setBashColor() << err.what() << '\n';
-        return 0;
+        return EXIT_FAILURE;
     }
 
     if( options.isVersionRequested() )
     {
         options.printVersion();
-        return 0;
+        return EXIT_FAILURE;
     }
 
-    if( ( !allFilters.size() && !options.justParse() ) || options.isHelpRequested() )
+    if(      argc == 1
+        || ( argc == 2 && !options.justParse() )
+        || options.isHelpRequested()            )
     {
         options.printHelp();
-        return 0;
+        return EXIT_FAILURE;
     }
 
 
@@ -94,12 +96,12 @@ int main( int argc, char * argv[] )
     catch( const invalid_file & exception )
     {
         qlog::error << "Cannot open " << sentencesPath << '\n';
-        return 0;
+        return EXIT_FAILURE;
     }
     catch( const map_failed & exception )
     {
         qlog::error << "Failed to map " << sentencesPath << '\n';
-        return 0;
+        return EXIT_FAILURE;
     }
 
     // create the parser
@@ -114,7 +116,7 @@ int main( int argc, char * argv[] )
     if( info.m_nbSentences <= 0 )
     {
         qlog::error << sentencesPath << " is empty\n";
-        return 0;
+        return EXIT_FAILURE;
     }
 
     try
@@ -124,7 +126,7 @@ int main( int argc, char * argv[] )
     catch (const std::bad_alloc & )
     {
         qlog::error << "Not enough memory.\n";
-        return 0;
+        return EXIT_FAILURE;
     }
 
     // start parsing
@@ -170,17 +172,17 @@ int main( int argc, char * argv[] )
         catch( const invalid_file & exception )
         {
             qlog::error << "Cannot open " << linksPath << '\n';
-            return 0;
+            return EXIT_FAILURE;
         }
         catch( const map_failed & exception )
         {
             qlog::error << "Failed to map " << linksPath << '\n';
-            return 0;
+            return EXIT_FAILURE;
         }
         catch ( const std::bad_alloc & exception )
         {
             qlog::error << "Out of memory\n";
-            return 0;
+            return EXIT_FAILURE;
         }
     }
 
@@ -207,17 +209,17 @@ int main( int argc, char * argv[] )
         catch( const std::bad_alloc & exc )
         {
             qlog::error << "An error occurred while parsing file " << tagsPath << std::endl;
-            return 0;
+            return EXIT_FAILURE;
         }
         catch( const invalid_file & exception )
         {
             qlog::error << "Cannot open " << tagsPath << '\n';
-            return 0;
+            return EXIT_FAILURE;
         }
         catch( const map_failed & exception )
         {
             qlog::error << "Failed to map " << tagsPath << '\n';
-            return 0;
+            return EXIT_FAILURE;
         }
     }
 
@@ -237,7 +239,7 @@ int main( int argc, char * argv[] )
         catch( const std::bad_alloc & exc)
         {
             qlog::error << "Not enough memory.\n";
-            return 0;
+            return EXIT_FAILURE;
         }
 
         // go through every sentence and see if it matches the filter
@@ -299,7 +301,7 @@ int main( int argc, char * argv[] )
     delete sentenceMap;
     delete tagFileMapping;
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 // -------------------------------------------------------------------------- //
