@@ -12,7 +12,15 @@ AC_ARG_ENABLE([limit-mem],
   [  --enable-limit-mem    	provides an option to limitate the virtual memory (--limit-mem).],
   [limit_mem=${enableval}],
   [limit_mem=no])
+AC_ARG_ENABLE([debug],
+  [  --enable-debug	adds asserts and debug code to the build.],
+  [debug_mode=${enableval}],
+  [debug_mode=no])
 
+if test "$debug_mode" = "no"
+then
+  CXXFLAGS="$CXXFLAGS -DNDEBUG"
+fi
 
 # Checks for programs.
 AC_PROG_CXX
