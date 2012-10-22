@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([tatoparser], 2.4, [victor.lavaud@gmail.com])
+AM_INIT_AUTOMAKE
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
@@ -78,7 +79,8 @@ AC_TYPE_UINT16_T
 
 # Checks for library functions.
 AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+                 src/Makefile
+		 unittests/Makefile])
 AC_OUTPUT
 
 echo \
