@@ -10,6 +10,7 @@
 #include "fast_link_parser.h"
 #include "fast_tag_parser.h"
 #include "file_mapper.h"
+#include "interface_lib.h"
 #include <iostream>
 
 USING_NAMESPACE
@@ -49,7 +50,6 @@ int main( int argc, char * argv[] )
     options.treatConfigFile();
     const std::string csvPath = options.getCsvPath();
 
-    datainfo info; ///< info will store statistics about the files (how many sentences there are, etc.)
     linkset allLinks;
     tagset allTags;
     dataset allSentences; ///< data will contain the sentences
@@ -79,151 +79,14 @@ int main( int argc, char * argv[] )
         return EXIT_FAILURE;
     }
 
-
-
-    ////////////////////////////
-    // parsing sentences file //
-    ////////////////////////////
-
-    fileMapper * sentenceMap = nullptr;
-    const std::string sentencesPath = csvPath + '/' + SENTENCES_FILENAME;
-
-    // map "sentences.csv" to some address in our virtual space
-    try
-    {
-        sentenceMap = new fileMapper( sentencesPath );
-    }
-    catch( const invalid_file & exception )
-    {
-        qlog::error << "Cannot open " << sentencesPath << '\n';
-        return EXIT_FAILURE;
-    }
-    catch( const map_failed & exception )
-    {
-        qlog::error << "Failed to map " << sentencesPath << '\n';
-        return EXIT_FAILURE;
-    }
-
-    // create the parser
-    fastSentenceParser<char *> sentenceParser(
-        sentenceMap->begin(),
-        sentenceMap->end()
+    // call the parsing library
+    init(
+            ( options.isItNecessaryToParseLinksFile() ? 0 : NO_LINKS )
+        |   ( options.isItNecessaryToParseTagFile() ? 0 : NO_TAGS )
     );
 
-    // allocate memory for the sentence structure
-    info.m_nbSentences = sentenceParser.countLinesFast();
-
-    if( info.m_nbSentences <= 0 )
-    {
-        qlog::error << sentencesPath << " is empty\n";
-        return EXIT_FAILURE;
-    }
-
-    try
-    {
-        allSentences.allocate(info);
-    }
-    catch (const std::bad_alloc & )
-    {
-        qlog::error << "Not enough memory.\n";
-        return EXIT_FAILURE;
-    }
-
-    // start parsing
-    info.m_nbSentences = sentenceParser.start( allSentences );
-
-    // retrieve the sentence of highest id so as to be able to create containers
-    // of the right size to store links and tags
-    const sentence & sentenceOfHighestId =
-        *std::max_element(
-            allSentences.begin(), allSentences.end(),
-            []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
-        );
-
-    qlog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
-    info.m_highestId = sentenceOfHighestId.getId();
-
-
-
-
-    ///////////////////////
-    // parsing links.csv //
-    ///////////////////////
-
-    if( options.isItNecessaryToParseLinksFile() )
-    {
-        const std::string linksPath = csvPath + '/' + LINKS_FILENAME;
-
-        try
-        {
-            // we map tags.csv to somewhere in our virtual space
-            fileMapper linksMap( linksPath );
-
-            // we create the parser
-            fastLinkParser<char *> linksParser(linksMap.begin(), linksMap.end());
-
-            // we allocate memory for the structure that will store the links
-            info.m_nbLinks = linksParser.countLines();
-            allLinks.allocate( info );
-
-            // we parse the file and store the data
-            linksParser.start( allLinks );
-        }
-        catch( const invalid_file & exception )
-        {
-            qlog::error << "Cannot open " << linksPath << '\n';
-            return EXIT_FAILURE;
-        }
-        catch( const map_failed & exception )
-        {
-            qlog::error << "Failed to map " << linksPath << '\n';
-            return EXIT_FAILURE;
-        }
-        catch ( const std::bad_alloc & exception )
-        {
-            qlog::error << "Out of memory\n";
-            return EXIT_FAILURE;
-        }
-    }
-
-
-
-    //////////////////////
-    // parsing tags.csv //
-    //////////////////////
-
-    fileMapper * tagFileMapping = nullptr;
-
-    if( options.isItNecessaryToParseTagFile() )
-    {
-        const std::string tagsPath = csvPath + '/' + TAG_FILENAME;
-        try
-        {
-            tagFileMapping = new fileMapper( tagsPath );
-            fastTagParser<char *> tagParser(
-                tagFileMapping->begin(),
-                tagFileMapping->end()
-            );
-            tagParser.start(allTags);
-        }
-        catch( const std::bad_alloc & exc )
-        {
-            qlog::error << "An error occurred while parsing file " << tagsPath << std::endl;
-            return EXIT_FAILURE;
-        }
-        catch( const invalid_file & exception )
-        {
-            qlog::error << "Cannot open " << tagsPath << '\n';
-            return EXIT_FAILURE;
-        }
-        catch( const map_failed & exception )
-        {
-            qlog::error << "Failed to map " << tagsPath << '\n';
-            return EXIT_FAILURE;
-        }
-    }
-
-
+    parse( allSentences, allLinks, allTags, csvPath + '/' + SENTENCES_FILENAME,
+            csvPath + '/' + LINKS_FILENAME, csvPath + '/' + TAG_FILENAME );
 
 
     ///////////////////////////
@@ -231,28 +94,20 @@ int main( int argc, char * argv[] )
     ///////////////////////////
     if( !options.justParse() )
     {
-        // create an container to retrieve sentences from id in a very fast manner
-        try
-        {
-            allSentences.prepare( info );
-        }
-        catch( const std::bad_alloc & exc)
-        {
-            qlog::error << "Not enough memory.\n";
-            return EXIT_FAILURE;
-        }
-
         // go through every sentence and see if it matches the filter
         auto itr = allSentences.begin();
         auto endFilter = allFilters.end();
         unsigned printedLineNumber = 0;
         std::string translationLanguage = options.getFirstTranslationLanguage();
         const std::string & separator = options.getSeparator();
+        bool shouldDisplay = true;
 
-        for( size_t i = 0; i < info.m_nbSentences; ++i )
+        for( sentence sentence : allSentences )
         {
-            auto sentence = *itr++;
-            bool shouldDisplay = true;
+            if (sentence.getId() == sentence::INVALID_ID)
+                continue;
+
+            shouldDisplay = true;
 
             for( auto filter = allFilters.begin(); shouldDisplay && filter != endFilter; ++filter )
             {
@@ -298,8 +153,7 @@ int main( int argc, char * argv[] )
         }
     }
 
-    delete sentenceMap;
-    delete tagFileMapping;
+    terminate();
 
     return EXIT_SUCCESS;
 }

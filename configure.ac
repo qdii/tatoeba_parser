@@ -26,6 +26,7 @@ fi
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_INSTALL
+AC_PROG_RANLIB
 
 # Checks for libraries.
 AC_SEARCH_LIBS([_ZN5boost15program_options18option_descriptionC1Ev], [boost_program_options], , AC_MSG_ERROR([Unable to find Boost Program Options library]))
