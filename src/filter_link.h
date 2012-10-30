@@ -2,7 +2,8 @@
 #define FILTER_LINK_H
 
 #include "filter.h"
-#include "linkset.h"
+#include <tatoparser/linkset.h>
+#include <tatoparser/sentence.h>
 
 NAMESPACE_START
 

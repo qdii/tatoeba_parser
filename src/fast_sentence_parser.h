@@ -3,7 +3,7 @@
 
 #include <boost/spirit/include/qi.hpp>
 
-#include "dataset.h"
+#include "tatoparser/dataset.h"
 
 NAMESPACE_START
 
@@ -50,7 +50,7 @@ size_t fastSentenceParser<iterator>::countLines() const
 {
     const size_t nbSentences =
         std::count( m_begin, m_end, '\n' );
-    qlog::info << "number of sentences: " << nbSentences << '\n';
+    llog::info << "number of sentences: " << nbSentences << '\n';
     return nbSentences;
 }
 
@@ -62,7 +62,7 @@ size_t fastSentenceParser<iterator>::countLinesFast() const
     const size_t nbChars =
         reinterpret_cast<size_t>(&*m_end) - reinterpret_cast<size_t>(&*m_begin);
     static const size_t AVERAGE_NB_BYTES_PER_SENTENCE = 58;
-    qlog::info << "estimated number of sentences: " << nbChars / AVERAGE_NB_BYTES_PER_SENTENCE << '\n';
+    llog::info << "estimated number of sentences: " << nbChars / AVERAGE_NB_BYTES_PER_SENTENCE << '\n';
     return nbChars / AVERAGE_NB_BYTES_PER_SENTENCE;
 }
 
@@ -110,7 +110,7 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
         } else if (begin != end) {
             // we failed at parsing the sentence, and we're not at the end of
             // the file yet
-            qlog::warning << "Failed to parse sentence from line " << line << std::endl;
+            llog::warning << "Failed to parse sentence from line " << line << std::endl;
 
             // skip over the nearest \n and try again.
             while (*(begin++) != '\n');

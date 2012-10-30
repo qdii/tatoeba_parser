@@ -1,8 +1,8 @@
-#include "prec.h"
-#include "sentence.h"
+#include "prec_library.h"
 #include <string.h>
-#include "linkset.h"
-#include "dataset.h"
+#include "tatoparser/sentence.h"
+#include "tatoparser/linkset.h"
+#include "tatoparser/dataset.h"
 #include "datainfo.h"
 
 NAMESPACE_START
@@ -23,7 +23,7 @@ void linkset::allocate( const datainfo & _datainfo )
     // prepare ptrs array
     m_offsets.resize( _datainfo.m_highestId + 1 );
 
-    qlog::info << "Allocated "
+    llog::info << "Allocated "
                << ( m_links.capacity()*sizeof( sentence::id ) +
                     m_offsets.capacity()*sizeof( size_t ) ) / ( 1024*1024 )
 

@@ -1,7 +1,11 @@
 #ifndef FAST_LINK_PARSER_H
 #define FAST_LINK_PARSER_H
 
+#include <algorithm>
+
 NAMESPACE_START
+
+struct linkset;
 
 /**@struct fastLinkParser
  * @tparam iterator An input iterator to read into a buffer */
@@ -84,7 +88,7 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
         }
     }
 
-    qlog::info << "parsed all links.\n";
+    llog::info << "parsed all links.\n";
 
     return nbLinks;
 }

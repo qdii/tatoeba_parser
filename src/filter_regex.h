@@ -3,6 +3,7 @@
 
 #include <boost/regex/icu.hpp>
 #include <boost/regex.hpp>
+#include <tatoparser/sentence.h>
 #include "filter.h"
 
 NAMESPACE_START

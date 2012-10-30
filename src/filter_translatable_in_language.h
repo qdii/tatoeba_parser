@@ -1,6 +1,10 @@
 #ifndef FILTER_TRANSLATABLE_IN_LANGUAGE_H
 #define FILTER_TRANSLATABLE_IN_LANGUAGE_H
 
+#include <tatoparser/sentence.h>
+#include <tatoparser/dataset.h>
+#include <tatoparser/linkset.h>
+#include <string>
 #include "filter.h"
 
 NAMESPACE_START

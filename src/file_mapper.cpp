@@ -1,4 +1,4 @@
-#include "prec.h"
+#include "prec_library.h"
 #include "file_mapper.h"
 
 #if HAVE_SYS_MMAN_H == 1
@@ -46,7 +46,7 @@ fileMapper::fileMapper( const std::string & _filename, bool _rdOnly )
         if( m_region == reinterpret_cast<void *>( -1 ) )
             throw map_failed();
 
-        qlog::info << "mapped " << _filename << " to " << static_cast<void *>( m_region ) << std::endl;
+        llog::info << "mapped " << _filename << " to " << static_cast<void *>( m_region ) << std::endl;
     }
     else
         throw invalid_file( _filename );
@@ -60,7 +60,7 @@ fileMapper::~fileMapper() TATO_NO_THROW
     if( m_region )
     {
         munmap( m_region, m_size );
-        qlog::info << "unmapped region " << static_cast<void *>( m_region ) << std::endl;
+        llog::info << "unmapped region " << static_cast<void *>( m_region ) << std::endl;
     }
 }
 
@@ -88,7 +88,7 @@ fileMapper::fileMapper( const std::string & _filename, bool /* _rdOnly */ )
     }
     catch( const std::bad_alloc & exc )
     {
-        qlog::warning << "Failed to allocate " << filesize  + 1<< " to map " << _filename << '\n';
+        llog::warning << "Failed to allocate " << filesize  + 1<< " to map " << _filename << '\n';
         throw map_failed();
     }
 

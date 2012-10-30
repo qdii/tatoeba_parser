@@ -418,30 +418,30 @@ private:
 
 private:
     // this section permits configuring things that apply to all the loggers
-    static std::vector<Logger *> * m_allLoggers;
+    static std::vector<Logger *> * m_alqloggers;
     static void registerMe( Logger & _logger )
     {
-        if( !m_allLoggers )
-            m_allLoggers = new std::vector<Logger *>();
+        if( !m_alqloggers )
+            m_alqloggers = new std::vector<Logger *>();
 
-        m_allLoggers->push_back( &_logger );
+        m_alqloggers->push_back( &_logger );
     }
 
     static void unregisterMe( Logger & _logger )
     {
-        m_allLoggers->erase(
+        m_alqloggers->erase(
             std::find(
-                m_allLoggers->begin(),
-                m_allLoggers->end(),
+                m_alqloggers->begin(),
+                m_alqloggers->end(),
                 &_logger
             ),
-            m_allLoggers->end()
+            m_alqloggers->end()
         );
 
-        if( m_allLoggers->empty() )
+        if( m_alqloggers->empty() )
         {
-            delete m_allLoggers;
-            m_allLoggers = nullptr;
+            delete m_alqloggers;
+            m_alqloggers = nullptr;
         }
     }
 };
@@ -477,7 +477,7 @@ Logger<Level>::Logger( const Logger & _copy )
 // -------------------------------------------------------------------------- //
 
 template< QDIILOG_TEMPLATE_DECL Level >
-std::vector<Logger<Level>*>* Logger<Level>::m_allLoggers;
+std::vector<Logger<Level>*>* Logger<Level>::m_alqloggers;
 
 // -------------------------------------------------------------------------- //
 
@@ -646,9 +646,9 @@ Logger<Level> operator<<( Logger<Level> && _logger, const UserMessage & _message
 template< QDIILOG_TEMPLATE_DECL Level >
 void Logger<Level>::setAllOutputs( std::ostream & _newOutput )
 {
-    const auto end = m_allLoggers->end();
+    const auto end = m_alqloggers->end();
 
-    for( typename std::vector<Logger *>::iterator logger = m_allLoggers->begin();
+    for( typename std::vector<Logger *>::iterator logger = m_alqloggers->begin();
             logger != end; ++logger )
     {
         ( *logger )->setOutput( _newOutput );
@@ -661,9 +661,9 @@ void Logger<Level>::setAllOutputs( std::ostream & _newOutput )
 template< QDIILOG_TEMPLATE_DECL Level >
 void Logger<Level>::prependAll( const std::string & _text )
 {
-    const auto end = m_allLoggers->end();
+    const auto end = m_alqloggers->end();
 
-    for( typename std::vector<Logger *>::iterator logger = m_allLoggers->begin();
+    for( typename std::vector<Logger *>::iterator logger = m_alqloggers->begin();
             logger != end; ++logger )
     {
         ( *logger )->prepend( _text );

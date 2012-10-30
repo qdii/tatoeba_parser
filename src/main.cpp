@@ -1,16 +1,12 @@
 #include "prec.h"
-#include "dataset.h"
-#include "linkset.h"
-#include "tagset.h"
+#include <tatoparser/dataset.h>
+#include <tatoparser/linkset.h>
+#include <tatoparser/tagset.h>
+#include <tatoparser/interface_lib.h>
 #include "options.h"
 #include "filter_id.h"
 #include "filter_tag.h"
 #include "filter_regex.h"
-#include "fast_sentence_parser.h"
-#include "fast_link_parser.h"
-#include "fast_tag_parser.h"
-#include "file_mapper.h"
-#include "interface_lib.h"
 #include <iostream>
 
 USING_NAMESPACE
@@ -37,15 +33,17 @@ int main( int argc, char * argv[] )
     // create the filters with respect to the user options
     allFilters.reserve( 5 );
     userOptions options;
+
     try
     {
         options.treatCommandLine( argc, argv );
     }
-    catch (const boost::program_options::unknown_option & err)
+    catch( const boost::program_options::unknown_option & err )
     {
         qlog::error << "Unknown option: " << err.get_option_name() << '\n';
         return EXIT_FAILURE;
     }
+
     startLog( options.isVerbose() );
     options.treatConfigFile();
     const std::string csvPath = options.getCsvPath();
@@ -71,22 +69,31 @@ int main( int argc, char * argv[] )
         return EXIT_FAILURE;
     }
 
-    if(      argc == 1
-        || ( argc == 2 && !options.justParse() )
-        || options.isHelpRequested()            )
+    if( argc == 1
+            || ( argc == 2 && !options.justParse() )
+            || options.isHelpRequested() )
     {
         options.printHelp();
         return EXIT_FAILURE;
     }
 
     // call the parsing library
-    init(
-            ( options.isItNecessaryToParseLinksFile() ? 0 : NO_LINKS )
-        |   ( options.isItNecessaryToParseTagFile() ? 0 : NO_TAGS )
-    );
+    const int libraryInit =
+        init(
+            ( options.isItNecessaryToParseLinksFile() ? 0 : NO_LINKS ) |
+            ( options.isItNecessaryToParseTagFile() ? 0 : NO_TAGS ) |
+            ( options.isVerbose() ? 0 : VERBOSE )
+        );
 
-    parse( allSentences, allLinks, allTags, csvPath + '/' + SENTENCES_FILENAME,
-            csvPath + '/' + LINKS_FILENAME, csvPath + '/' + TAG_FILENAME );
+    if (libraryInit != EXIT_SUCCESS)
+        return EXIT_FAILURE;
+
+    const int libraryParsing =
+        parse( allSentences, allLinks, allTags, csvPath + '/' + SENTENCES_FILENAME,
+           csvPath + '/' + LINKS_FILENAME, csvPath + '/' + TAG_FILENAME );
+
+    if (libraryParsing != EXIT_SUCCESS)
+        return EXIT_FAILURE;
 
 
     ///////////////////////////
@@ -104,7 +111,7 @@ int main( int argc, char * argv[] )
 
         for( sentence sentence : allSentences )
         {
-            if (sentence.getId() == sentence::INVALID_ID)
+            if( sentence.getId() == sentence::INVALID_ID )
                 continue;
 
             shouldDisplay = true;
@@ -129,7 +136,7 @@ int main( int argc, char * argv[] )
                 std::cout << sentence.str();
 
                 // display a translation if it was requested
-                if ( options.displayFirstTranslation() )
+                if( options.displayFirstTranslation() )
                 {
                     // find a suitable translation
                     const sentence::id firstTranslationId =
@@ -140,7 +147,7 @@ int main( int argc, char * argv[] )
                             translationLanguage
                         );
 
-                    if ( firstTranslationId != sentence::INVALID_ID
+                    if( firstTranslationId != sentence::INVALID_ID
                             && allSentences[firstTranslationId] )
                     {
                         // display the translation

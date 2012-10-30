@@ -1,6 +1,8 @@
 #ifndef FAST_TAG_PARSER_H
 #define FAST_TAG_PARSER_H
 
+#include "tatoparser/tagset.h"
+
 NAMESPACE_START
 
 template<typename iterator>
@@ -70,7 +72,7 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
         _tagset.tagSentence( sentenceId, tagName );
     }
 
-    qlog::trace << "done parsing tags.\n";
+    llog::trace << "done parsing tags.\n";
 
     return 0;
 }

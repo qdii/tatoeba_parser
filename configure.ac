@@ -2,11 +2,17 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([tatoparser], 2.4, [victor.lavaud@gmail.com])
+AC_INIT([tatoparser], 2.5, [victor.lavaud@gmail.com])
 AM_INIT_AUTOMAKE
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
+
+AC_SUBST([TATOPARSER_SO_VERSION], [2:5:0])
+AC_SUBST([TATOPARSER_API_VERSION], [2.5])
+
+LT_PREREQ([2.2])
+LT_INIT()
 
 # Debug mode
 AC_ARG_ENABLE([limit-mem],
@@ -26,7 +32,6 @@ fi
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_INSTALL
-AC_PROG_RANLIB
 
 # Checks for libraries.
 AC_SEARCH_LIBS([_ZN5boost15program_options18option_descriptionC1Ev], [boost_program_options], , AC_MSG_ERROR([Unable to find Boost Program Options library]))
@@ -81,6 +86,7 @@ AC_TYPE_UINT16_T
 # Checks for library functions.
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+		 include/Makefile
 		 unittests/Makefile])
 AC_OUTPUT
 
@@ -96,5 +102,6 @@ echo \
    where the optional <target> is:
      all                - build all binaries
      install            - install everything
+     check		- run unit tests
 
 --------------------------------------------------"

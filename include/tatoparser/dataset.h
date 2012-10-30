@@ -11,11 +11,8 @@ NAMESPACE_START
  * @brief A structure that stores all the sentences */
 struct dataset
 {
-    dataset()
-        :m_allSentences()
-        ,m_fastAccess()
-    {
-    }
+    /**@brief Constructs a dataset */
+    dataset();
 
     typedef std::vector<sentence> containerType;
 
@@ -26,13 +23,7 @@ struct dataset
     typedef std::vector<size_t> fastAccessArray;
 
 public:
-    void allocate( const datainfo & _info )
-    {
-        assert( _info.m_nbSentences > 0 );
-        m_allSentences.reserve( _info.m_nbSentences );
-
-        qlog::info << "Allocated " << ( m_allSentences.capacity() * sizeof( sentence ) )/ ( 1024*1024 )<< " MB for sentences.\n";
-    }
+    void allocate( const datainfo & _info );
 
 public:
     iterator begin() { return m_allSentences.begin(); }
@@ -81,23 +72,6 @@ const sentence * dataset::operator[]( sentence::id _id ) const
         return nullptr;
 
     return & ( m_allSentences[ m_fastAccess[_id] ] );
-}
-
-// -------------------------------------------------------------------------- //
-
-inline
-void dataset::prepare( const datainfo & _info ) TATO_RESTRICT
-{
-    m_fastAccess.resize( _info.m_highestId + 1, static_cast<size_t>(-1) );
-    const size_t nbSentences = m_allSentences.size();
-
-    for( size_t index = 0; index < nbSentences; ++index )
-    {
-        const sentence & TATO_RESTRICT curSentence = m_allSentences[ index ];
-        assert( curSentence.getId() != sentence::INVALID_ID );
-        assert( curSentence.getId() < static_cast<sentence::id>(m_fastAccess.size()) );
-        m_fastAccess[curSentence.getId()] = index;
-    }
 }
 
 // -------------------------------------------------------------------------- //

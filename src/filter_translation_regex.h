@@ -1,11 +1,12 @@
 #ifndef FILTER_TRANSLATION_REGEX
 #define FILTER_TRANSLATION_REGEX
 
+#include <vector>
 #include <boost/regex.hpp>
+#include <tatoparser/dataset.h>
+#include <tatoparser/linkset.h>
+#include <tatoparser/sentence.h>
 #include "filter.h"
-#include "dataset.h"
-#include "linkset.h"
-
 
 NAMESPACE_START
 

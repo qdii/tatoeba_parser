@@ -1,5 +1,5 @@
-#include "prec.h"
-#include "sentence.h"
+#include "prec_library.h"
+#include "tatoparser/sentence.h"
 NAMESPACE_START
 // -------------------------------------------------------------------------- //
 

@@ -1,5 +1,5 @@
-#include "prec.h"
-#include "tagset.h"
+#include "prec_library.h"
+#include "tatoparser/tagset.h"
 
 NAMESPACE_START
 

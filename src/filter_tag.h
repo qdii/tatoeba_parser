@@ -2,8 +2,9 @@
 #define FILTER_TAG_H
 
 #include <string>
+#include <tatoparser/tagset.h>
+#include <tatoparser/sentence.h>
 #include "filter.h"
-#include "tagset.h"
 
 NAMESPACE_START
 

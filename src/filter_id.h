@@ -2,7 +2,7 @@
 #define FILTER_ID_H
 
 #include "filter.h"
-#include "sentence.h"
+#include <tatoparser/sentence.h>
 
 NAMESPACE_START
 

@@ -1,8 +1,8 @@
-#include "prec.h"
-#include "interface_lib.h"
-#include "dataset.h"
-#include "tagset.h"
-#include "linkset.h"
+#include "prec_library.h"
+#include "tatoparser/interface_lib.h"
+#include "tatoparser/dataset.h"
+#include "tatoparser/tagset.h"
+#include "tatoparser/linkset.h"
 #include "fast_sentence_parser.h"
 #include "fast_link_parser.h"
 #include "fast_tag_parser.h"
@@ -42,6 +42,9 @@ int init( ParserFlag _flags )
 
     g_parserFlags = _flags;
 
+    llog::setOutput(std::cout);
+    llog::setLogLevel( isFlagSet(VERBOSE) ? llog::Loglevel::info : llog::Loglevel::error );
+
     return EXIT_SUCCESS;
 }
 
@@ -57,12 +60,12 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
     }
     catch( const invalid_file & exception )
     {
-        qlog::error << "Cannot open " << _sentencesPath << '\n';
+        llog::error << "Cannot open " << _sentencesPath << '\n';
         return EXIT_FAILURE;
     }
     catch( const map_failed & exception )
     {
-        qlog::error << "Failed to map " << _sentencesPath << '\n';
+        llog::error << "Failed to map " << _sentencesPath << '\n';
         return EXIT_FAILURE;
     }
 
@@ -77,7 +80,7 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
 
     if( _info_.m_nbSentences <= 0 )
     {
-        qlog::error << _sentencesPath << " is empty\n";
+        llog::error << _sentencesPath << " is empty\n";
         return EXIT_FAILURE;
     }
 
@@ -87,7 +90,7 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
     }
     catch( const std::bad_alloc & )
     {
-        qlog::error << "Not enough memory.\n";
+        llog::error << "Not enough memory.\n";
         return EXIT_FAILURE;
     }
 
@@ -98,10 +101,10 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
     const sentence & sentenceOfHighestId =
         *std::max_element(
             allSentences_.begin(), allSentences_.end(),
-    []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+            []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
         );
 
-    qlog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
+    llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
     _info_.m_highestId = sentenceOfHighestId.getId();
 
     return EXIT_SUCCESS;
@@ -129,17 +132,17 @@ int parseLinks( const std::string & _linksPath, datainfo & _info_, linkset & all
     }
     catch( const invalid_file & exception )
     {
-        qlog::error << "Cannot open " << _linksPath << '\n';
+        llog::error << "Cannot open " << _linksPath << '\n';
         return EXIT_FAILURE;
     }
     catch( const map_failed & exception )
     {
-        qlog::error << "Failed to map " << _linksPath << '\n';
+        llog::error << "Failed to map " << _linksPath << '\n';
         return EXIT_FAILURE;
     }
     catch( const std::bad_alloc & exception )
     {
-        qlog::error << "Out of memory\n";
+        llog::error << "Out of memory\n";
         return EXIT_FAILURE;
     }
 
@@ -162,17 +165,17 @@ int parseTags( const std::string & _tagPath, datainfo &, tagset & allTags_ )
     }
     catch( const std::bad_alloc & )
     {
-        qlog::error << "An error occurred while parsing file " << _tagPath << std::endl;
+        llog::error << "An error occurred while parsing file " << _tagPath << std::endl;
         return EXIT_FAILURE;
     }
     catch( const invalid_file & )
     {
-        qlog::error << "Cannot open " << _tagPath << '\n';
+        llog::error << "Cannot open " << _tagPath << '\n';
         return EXIT_FAILURE;
     }
     catch( const map_failed & )
     {
-        qlog::error << "Failed to map " << _tagPath << '\n';
+        llog::error << "Failed to map " << _tagPath << '\n';
         return EXIT_FAILURE;
     }
 
@@ -202,7 +205,7 @@ int  parse( dataset & allSentences_,
         }
         catch( const std::bad_alloc & exc)
         {
-            qlog::error << "Not enough memory.\n";
+            llog::error << "Not enough memory.\n";
             return EXIT_FAILURE;
         }
     }

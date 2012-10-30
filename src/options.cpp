@@ -1,6 +1,5 @@
 #include "prec.h"
 #include "options.h"
-#include "sentence.h"
 #include "filter_id.h"
 #include "filter_regex.h"
 #include "filter_translation_regex.h"
@@ -8,9 +7,10 @@
 #include "filter_lang.h"
 #include "filter_tag.h"
 #include "filter_translatable_in_language.h"
-#include "dataset.h"
-#include "tagset.h"
-#include "linkset.h"
+#include <tatoparser/dataset.h>
+#include <tatoparser/tagset.h>
+#include <tatoparser/linkset.h>
+#include <tatoparser/sentence.h>
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <fstream>
