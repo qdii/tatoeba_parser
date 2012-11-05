@@ -1,6 +1,9 @@
 #ifndef FILE_MAPPER_H
 #define FILE_MAPPER_H
 
+#include "tatoparser/namespace.h"
+#include <string>
+
 NAMESPACE_START
 
 /**@struct invalid_file

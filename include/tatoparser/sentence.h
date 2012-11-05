@@ -2,6 +2,7 @@
 #define TATO_PARSER_SENTENCE_H
 
 #include <cstdint>
+#include "namespace.h"
 
 NAMESPACE_START
 

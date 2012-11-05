@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <stdexcept>
+#include <utility>
+#include "namespace.h"
 #include "sentence.h"
 
 NAMESPACE_START

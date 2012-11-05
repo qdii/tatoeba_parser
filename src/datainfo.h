@@ -1,6 +1,9 @@
 #ifndef DATAINFO_H
 #define DATAINFO_H
 
+#include "tatoparser/namespace.h"
+#include "tatoparser/sentence.h"
+
 NAMESPACE_START
 
 /**@brief Retains some informations about the parsed files */

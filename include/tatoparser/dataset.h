@@ -2,6 +2,7 @@
 #define DATASET_H
 
 #include <vector>
+#include "namespace.h"
 #include "sentence.h"
 #include "datainfo.h"
 

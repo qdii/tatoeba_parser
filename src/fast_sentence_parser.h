@@ -1,8 +1,10 @@
 #ifndef FAST_SENTENCE_PARSER_H
 #define FAST_SENTENCE_PARSER_H
 
+
 #include <boost/spirit/include/qi.hpp>
 
+#include "tatoparser/namespace.h"
 #include "tatoparser/dataset.h"
 
 NAMESPACE_START

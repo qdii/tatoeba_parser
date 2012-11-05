@@ -2,6 +2,7 @@
 #define FAST_LINK_PARSER_H
 
 #include <algorithm>
+#include "tatoparser/namespace.h"
 
 NAMESPACE_START
 

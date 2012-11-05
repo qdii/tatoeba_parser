@@ -1,6 +1,10 @@
 #ifndef TATOPARSER_INTERFACE_LIB_H
 #define TATOPARSER_INTERFACE_LIB_H
 
+#include <cstdint>
+#include <string>
+#include "namespace.h"
+
 NAMESPACE_START
 
 // -------------------------------------------------------------------------- //

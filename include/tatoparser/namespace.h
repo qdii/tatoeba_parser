@@ -1,0 +1,14 @@
+#ifndef LIBTATOPARSER_NAMESPACE_H
+#define LIBTATOPARSER_NAMESPACE_H
+
+#ifdef NAMESPACE
+#   define NAMESPACE_START namespace NAMESPACE {
+#   define NAMESPACE_END }
+#   define USING_NAMESPACE using namespace NAMESPACE;
+#else
+#   define NAMESPACE_START
+#   define NAMESPACE_END
+#   define USING_NAMESPACE
+#endif
+
+#endif //LIBTATOPARSER_NAMESPACE_H

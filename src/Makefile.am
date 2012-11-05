@@ -4,7 +4,7 @@ prec.h.gch: prec.h
 	$(CXXCOMPILE) -x c++-header -c $<
 
 prec_library.h.gch: prec_library.h
-	$(CXXCOMPILE) -x c++-header -fPIC -c $<
+	$(CXXCOMPILE) -x c++-header -fPIC -iquote $(top_srcdir)/include -c $<
 
 lib_LTLIBRARIES = libtatoparser.la
 libtatoparser_la_SOURCES = file_mapper.cpp linkset.cpp sentence.cpp tagset.cpp interface_lib.cpp dataset.cpp

@@ -24,8 +24,9 @@
 #if HAVE_BOOST_CONFIG_HPP == 1
 #   include <boost/config.hpp>
 #endif
-// ___________________________ COMPATIBILITY ___________________________________
+#include "tatoparser/namespace.h"
 
+// ___________________________ COMPATIBILITY ___________________________________
 
 #ifndef BOOST_NO_NOEXCEPT
 #   define TATO_NO_THROW noexcept
@@ -40,17 +41,6 @@
 #   define TATO_RESTRICT
 #else
 #   define TATO_RESTRICT __restrict
-#endif
-// ___________________________ NAMESPACE _______________________________________
-
-#ifdef NAMESPACE
-#   define NAMESPACE_START namespace NAMESPACE {
-#   define NAMESPACE_END }
-#   define USING_NAMESPACE using namespace NAMESPACE;
-#else
-#   define NAMESPACE_START
-#   define NAMESPACE_END
-#   define USING_NAMESPACE
 #endif
 
 // __________________________ LOGGING __________________________________________
