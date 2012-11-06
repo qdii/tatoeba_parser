@@ -1,5 +1,6 @@
 #include "prec_library.h"
 #include "tatoparser/dataset.h"
+#include "datainfo.h"
 
 NAMESPACE_START
 

@@ -82,7 +82,7 @@ int main( int argc, char * argv[] )
         init(
             ( options.isItNecessaryToParseLinksFile() ? 0 : NO_LINKS ) |
             ( options.isItNecessaryToParseTagFile() ? 0 : NO_TAGS ) |
-            ( options.isVerbose() ? 0 : VERBOSE )
+            ( options.isVerbose() ? VERBOSE : 0 )
         );
 
     if (libraryInit != EXIT_SUCCESS)
@@ -102,7 +102,6 @@ int main( int argc, char * argv[] )
     if( !options.justParse() )
     {
         // go through every sentence and see if it matches the filter
-        auto itr = allSentences.begin();
         auto endFilter = allFilters.end();
         unsigned printedLineNumber = 0;
         std::string translationLanguage = options.getFirstTranslationLanguage();
@@ -171,5 +170,5 @@ void startLog( bool verbose )
 {
     qlog::setLogLevel( verbose ? qlog::Loglevel::info : qlog::Loglevel::error );
     qlog::setPrependedTextQdiiFlavourBashColors();
-    qlog::setOutput( std::cout );
+    qlog::setOutput( std::cerr );
 }

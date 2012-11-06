@@ -4,6 +4,7 @@
 #include <vector>
 #include <stdexcept>
 #include <utility>
+#include <algorithm>
 #include "namespace.h"
 #include "sentence.h"
 

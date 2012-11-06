@@ -3,6 +3,7 @@
 #include "tatoparser/dataset.h"
 #include "tatoparser/tagset.h"
 #include "tatoparser/linkset.h"
+#include "datainfo.h"
 #include "fast_sentence_parser.h"
 #include "fast_link_parser.h"
 #include "fast_tag_parser.h"
@@ -42,7 +43,7 @@ int init( ParserFlag _flags )
 
     g_parserFlags = _flags;
 
-    llog::setOutput(std::cout);
+    llog::setOutput(std::cerr);
     llog::setLogLevel( isFlagSet(VERBOSE) ? llog::Loglevel::info : llog::Loglevel::error );
 
     return EXIT_SUCCESS;

@@ -2,11 +2,18 @@
 #define DATASET_H
 
 #include <vector>
+#include <cstddef>
+#include <assert.h>
 #include "namespace.h"
 #include "sentence.h"
-#include "datainfo.h"
+
+#ifndef TATO_RESTRICT
+#   define TATO_RESTRICT
+#endif
 
 NAMESPACE_START
+
+struct datainfo;
 
 /**@struct dataset
  * @brief A structure that stores all the sentences */
@@ -21,7 +28,7 @@ struct dataset
     typedef typename containerType::const_iterator const_iterator;
 
     // fastAccessArray stores index of sentences
-    typedef std::vector<size_t> fastAccessArray;
+    typedef std::vector<std::size_t> fastAccessArray;
 
 public:
     void allocate( const datainfo & _info );
@@ -57,7 +64,7 @@ inline
 sentence * dataset::operator[]( sentence::id _id )
 {
     assert( !m_fastAccess.empty() ); // if m_fastAccess is empty, it means that prepare() command has not been run before.
-    if (m_fastAccess[_id] == static_cast<size_t>(-1))
+    if (m_fastAccess[_id] == static_cast<std::size_t>(-1))
         return nullptr;
 
     return & ( m_allSentences[ m_fastAccess[_id] ] );
@@ -69,7 +76,7 @@ inline
 const sentence * dataset::operator[]( sentence::id _id ) const
 {
     assert( !m_fastAccess.empty() );
-    if (m_fastAccess[_id] == static_cast<size_t>(-1))
+    if (m_fastAccess[_id] == static_cast<std::size_t>(-1))
         return nullptr;
 
     return & ( m_allSentences[ m_fastAccess[_id] ] );
