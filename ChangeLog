@@ -1,3 +1,15 @@
+v2.5	
+	- The code is now split into a library responsible for parsing the files into data structures, 
+	  and a binary using that library to filter the sentences in an appropriate way.
+	- Fixed a bug causing failure to return 0 instead of 1.
+	- Configure now has a --disable-debug to turn off debug.
+	- User option --lang can be supplied multiple times so that sentences from many languages can be kept.
+	- Unittests have been re-written to work with dash in addition to bash.
+	- Sentence parsing has been accelerated by estimating the number of sentences instead of counting the 
+	  number of lines in the file.
+	- Make has a new target called "check" to run unit tests.
+	- LDFLAGS are now passed to make.
+
 v2.4	
 	- Added --separator switch to change the way line numbers, sentence texts, and translations are separated.
 	- Added --has-id to look for a specific sentence
