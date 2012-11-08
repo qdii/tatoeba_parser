@@ -4,6 +4,7 @@
 #include "tatoparser/tagset.h"
 #include "tatoparser/linkset.h"
 #include "datainfo.h"
+#include "fast_sentence_adv_parser.h"
 #include "fast_sentence_parser.h"
 #include "fast_link_parser.h"
 #include "fast_tag_parser.h"
@@ -17,9 +18,10 @@ static fileMapper * g_sentenceMap = nullptr;
 static fileMapper * g_linksMap = nullptr;
 static fileMapper * g_tagMap = nullptr;
 
+static fastDetailedParser<char *> * g_detailedParser = nullptr;
 static fastSentenceParser<char *> * g_sentenceParser = nullptr;
-static fastTagParser<char *> *      g_tagParser = nullptr;
-static fastLinkParser<char *> *     g_linkParser = nullptr;
+static fastTagParser<char *>    *   g_tagParser = nullptr;
+static fastLinkParser<char *>   *   g_linkParser = nullptr;
 
 // -------------------------------------------------------------------------- //
 
@@ -43,8 +45,8 @@ int init( ParserFlag _flags )
 
     g_parserFlags = _flags;
 
-    llog::setOutput(std::cerr);
-    llog::setLogLevel( isFlagSet(VERBOSE) ? llog::Loglevel::info : llog::Loglevel::error );
+    llog::setOutput( std::cerr );
+    llog::setLogLevel( isFlagSet( VERBOSE ) ? llog::Loglevel::info : llog::Loglevel::error );
 
     return EXIT_SUCCESS;
 }
@@ -102,7 +104,7 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
     const sentence & sentenceOfHighestId =
         *std::max_element(
             allSentences_.begin(), allSentences_.end(),
-            []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+    []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
         );
 
     llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
@@ -185,6 +187,67 @@ int parseTags( const std::string & _tagPath, datainfo &, tagset & allTags_ )
 
 // -------------------------------------------------------------------------- //
 
+static
+int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, dataset & allSentences_ )
+{
+    // map "sentences_detailed.csv" to some address in our virtual space
+    try
+    {
+        g_sentenceMap = new fileMapper( _sentencesPath );
+    }
+    catch( const invalid_file & exception )
+    {
+        llog::error << "Cannot open " << _sentencesPath << '\n';
+        return EXIT_FAILURE;
+    }
+    catch( const map_failed & exception )
+    {
+        llog::error << "Failed to map " << _sentencesPath << '\n';
+        return EXIT_FAILURE;
+    }
+
+    // create the parser
+    g_detailedParser = new fastDetailedParser<char *>(
+        g_sentenceMap->begin(),
+        g_sentenceMap->end()
+    );
+
+    // allocate memory for the sentence structure
+    _info_.m_nbSentences = g_detailedParser->countLinesFast();
+
+    if( _info_.m_nbSentences <= 0 )
+    {
+        llog::error << _sentencesPath << " is empty\n";
+        return EXIT_FAILURE;
+    }
+
+    try
+    {
+        allSentences_.allocate( _info_ );
+    }
+    catch( const std::bad_alloc & )
+    {
+        llog::error << "Not enough memory.\n";
+        return EXIT_FAILURE;
+    }
+
+    _info_.m_nbSentences = g_detailedParser->start( allSentences_ );
+
+    // retrieve the sentence of highest id so as to be able to create containers
+    // of the right size to store links and tags
+    const sentence & sentenceOfHighestId =
+        *std::max_element(
+            allSentences_.begin(), allSentences_.end(),
+            []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+        );
+
+    llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
+    _info_.m_highestId = sentenceOfHighestId.getId();
+
+    return EXIT_SUCCESS;
+}
+// -------------------------------------------------------------------------- //
+
 int  parse( dataset & allSentences_,
             linkset & allLinks_,
             tagset  & allTags_,
@@ -197,14 +260,16 @@ int  parse( dataset & allSentences_,
 
     if( sentencePath.size() )
     {
-        parsingSuccess = parseSentences( sentencePath, info, allSentences_ );
+        parsingSuccess = isFlagSet( DETAILED )?
+                         parseDetailed( sentencePath, info, allSentences_ ):
+                         parseSentences( sentencePath, info, allSentences_ );
 
         // create an container to retrieve sentences from id in a very fast manner
         try
         {
             allSentences_.prepare( info );
         }
-        catch( const std::bad_alloc & exc)
+        catch( const std::bad_alloc & exc )
         {
             llog::error << "Not enough memory.\n";
             return EXIT_FAILURE;
@@ -224,6 +289,7 @@ int  parse( dataset & allSentences_,
 
 int terminate()
 {
+    delete g_detailedParser;        g_detailedParser = nullptr;
     delete g_sentenceMap;           g_sentenceMap = nullptr;
     delete g_linksMap;              g_linksMap = nullptr;
     delete g_tagMap;                g_tagMap = nullptr;

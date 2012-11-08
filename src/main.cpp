@@ -12,6 +12,7 @@
 USING_NAMESPACE
 
 static const char SENTENCES_FILENAME[] = "sentences.csv";
+static const char DETAILED_FILENAME[] = "sentences_detailed.csv";
 static const char LINKS_FILENAME[] = "links.csv";
 static const char TAG_FILENAME[] = "tags.csv";
 
@@ -82,14 +83,18 @@ int main( int argc, char * argv[] )
         init(
             ( options.isItNecessaryToParseLinksFile() ? 0 : NO_LINKS ) |
             ( options.isItNecessaryToParseTagFile() ? 0 : NO_TAGS ) |
-            ( options.isVerbose() ? VERBOSE : 0 )
+            ( options.isVerbose() ? VERBOSE : 0 ) |
+            ( options.isItNecessaryToParseDetailedFile() ? DETAILED : 0 )
         );
 
     if (libraryInit != EXIT_SUCCESS)
         return EXIT_FAILURE;
 
     const int libraryParsing =
-        parse( allSentences, allLinks, allTags, csvPath + '/' + SENTENCES_FILENAME,
+        parse( allSentences, allLinks, allTags,
+               options.isItNecessaryToParseDetailedFile() ?
+                    csvPath + '/' + DETAILED_FILENAME     :
+                    csvPath + '/' + SENTENCES_FILENAME,
            csvPath + '/' + LINKS_FILENAME, csvPath + '/' + TAG_FILENAME );
 
     if (libraryParsing != EXIT_SUCCESS)

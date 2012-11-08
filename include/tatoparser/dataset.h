@@ -39,7 +39,10 @@ public:
 
     iterator end() { return m_allSentences.end(); }
     const_iterator end() const { return m_allSentences.end(); }
-    void addSentence( sentence::id _a, const char * _lang, const char * _data );
+    void addSentence( sentence::id _a, const char * _lang, const char * _data,
+                      const char * _author = nullptr,
+                      const char * _creationnDate = nullptr,
+                      const char * _lastModifiedDate = nullptr  );
 
 public:
     sentence * operator[]( sentence::id );
@@ -85,9 +88,12 @@ const sentence * dataset::operator[]( sentence::id _id ) const
 // -------------------------------------------------------------------------- //
 
 inline
-void dataset::addSentence( sentence::id _id, const char * _lang, const char * _data )
+void dataset::addSentence(  sentence::id _id, const char * _lang, const char * _data,
+                            const char * _author,
+                            const char * _creationDate,
+                            const char * _lastModifiedDate )
 {
-    m_allSentences.push_back( sentence( _id, _lang, _data ) );
+    m_allSentences.push_back( sentence( _id, _lang, _data, _author, _creationDate, _lastModifiedDate  ) );
 }
 
 NAMESPACE_END

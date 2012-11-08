@@ -7,6 +7,7 @@
 #include "filter_lang.h"
 #include "filter_tag.h"
 #include "filter_translatable_in_language.h"
+#include "filter_user.h"
 #include <tatoparser/dataset.h>
 #include <tatoparser/tagset.h>
 #include <tatoparser/linkset.h>
@@ -57,6 +58,7 @@ userOptions::userOptions()
           "Filters only sentences which translations match this regex. If many "
           "regular expressions are provided, a sentence will be kept if any of its "
           "translations matches them all." )
+        ( "user,u", po::value<std::string>(), "Keep the sentences which belong to this user only.")
     ;
     m_desc.add( filteringOptions );
     m_visibleOptions.add( filteringOptions );
@@ -113,6 +115,15 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         allFilters_.push_back(
             shared_ptr<filter>(
                 new filterId( m_vm["has-id"].as<sentence::id>() )
+            )
+        );
+    }
+
+    if( m_vm.count( "user" ) )
+    {
+        allFilters_.push_back(
+            shared_ptr<filter>(
+                new filterUser( m_vm["user"].as<std::string>() )
             )
         );
     }

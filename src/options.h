@@ -39,6 +39,9 @@ struct userOptions
     /**@brief Checks if any argument the user specified needs the tags.csv to be parsed */
     bool isItNecessaryToParseTagFile() const;
 
+    /**@brief Checks if any argument the user specified needs the sentence_detailed.csv to be parsed */
+    bool isItNecessaryToParseDetailedFile() const;
+
     /**@brief Has -v been specified? */
     bool isVerbose() const;
 
@@ -108,6 +111,14 @@ bool userOptions::isItNecessaryToParseLinksFile() const
     return  m_vm.count( "is-linked-to" ) ||
             m_vm.count( "translation-regex" ) ||
             m_vm.count( "is-translatable-in" );
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+bool userOptions::isItNecessaryToParseDetailedFile() const
+{
+    return m_vm.count( "user" );
 }
 
 // -------------------------------------------------------------------------- //

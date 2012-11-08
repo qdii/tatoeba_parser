@@ -1,5 +1,5 @@
-#ifndef FILE_MAPPER_H
-#define FILE_MAPPER_H
+#ifndef LIBTATOPARSER_FILE_MAPPER_H
+#define LIBTATOPARSER_FILE_MAPPER_H
 
 #include "tatoparser/namespace.h"
 #include <string>
@@ -62,4 +62,4 @@ private:
 
 NAMESPACE_END
 
-#endif // FILE_MAPPER_H
+#endif // LIBTATOPARSER_FILE_MAPPER_H

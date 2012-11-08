@@ -1,5 +1,5 @@
-#ifndef FAST_TAG_PARSER_H
-#define FAST_TAG_PARSER_H
+#ifndef LIBTATOPARSER_FAST_TAG_PARSER_H
+#define LIBTATOPARSER_FAST_TAG_PARSER_H
 
 #include "tatoparser/tagset.h"
 
@@ -79,4 +79,4 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
 
 NAMESPACE_END
 
-#endif //FAST_TAG_PARSER_H
+#endif //LIBTATOPARSER_FAST_TAG_PARSER_H

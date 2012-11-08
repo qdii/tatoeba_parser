@@ -1,5 +1,5 @@
-#ifndef FAST_LINK_PARSER_H
-#define FAST_LINK_PARSER_H
+#ifndef LIBTATOPARSER_FAST_LINK_PARSER_H
+#define LIBTATOPARSER_FAST_LINK_PARSER_H
 
 #include <algorithm>
 #include "tatoparser/namespace.h"

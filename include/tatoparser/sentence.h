@@ -17,9 +17,12 @@ struct sentence
      * @param[in] _lang The letters of the country
      * @param[in] _data The text that coposes the sentence */
     explicit sentence(
-        sentence::id _id   = INVALID_ID ,
-        const char * _lang = nullptr ,
-        const char * _data = nullptr
+        sentence::id _id   = INVALID_ID,
+        const char * _lang = nullptr,
+        const char * _data = nullptr,
+        const char * _author = nullptr,
+        const char * _creationDate = nullptr,
+        const char * _lastModifiedDate = nullptr
     );
 
     /**@brief Destructs a sentence */
@@ -44,10 +47,16 @@ struct sentence
     /**@brief Returns a pointer to a character string representing the language */
     const char * lang() const { return m_lang; }
 
+    /**@brief Returns a pointer to the author nickname */
+    bool belongsTo( const std::string & _user ) const { return _user == m_author; }
+
 private:
     id           m_id;
     const char * m_lang;
     const char * m_data;
+    const char * m_author;
+    const char * m_creationDate;
+    const char * m_lastModifiedDate;
 } __attribute__( ( packed ) ) ;
 
 // -------------------------------------------------------------------------- //

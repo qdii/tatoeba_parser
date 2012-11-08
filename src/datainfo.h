@@ -1,5 +1,5 @@
-#ifndef DATAINFO_H
-#define DATAINFO_H
+#ifndef LIBTATOPARSER_DATAINFO_H
+#define LIBTATOPARSER_DATAINFO_H
 
 #include "tatoparser/namespace.h"
 #include "tatoparser/sentence.h"
@@ -22,4 +22,4 @@ struct datainfo
 
 NAMESPACE_END
 
-#endif //DATAINFO_H
+#endif //LIBTATOPARSER_DATAINFO_H

@@ -1,5 +1,5 @@
-#ifndef FAST_SENTENCE_PARSER_H
-#define FAST_SENTENCE_PARSER_H
+#ifndef LIBTATOPARSER_FAST_SENTENCE_PARSER_H
+#define LIBTATOPARSER_FAST_SENTENCE_PARSER_H
 
 
 #include <boost/spirit/include/qi.hpp>
@@ -129,4 +129,4 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
 
 
 NAMESPACE_END
-#endif // FAST_SENTENCE_PARSER_H
+#endif // LIBTATOPARSER_FAST_SENTENCE_PARSER_H
