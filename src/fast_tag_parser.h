@@ -71,10 +71,16 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
         *cursor++ = '\0';
 
         // add an entry
-        _tagset.tagSentence( sentenceId, tagName );
+        try
+        {
+            _tagset.tagSentence( sentenceId, tagName );
+        }
+        catch ( const std::bad_alloc & )
+        {
+            llog::error << "Out of memory.\n";
+            break;
+        }
     }
-
-    llog::trace << "done parsing tags.\n";
 
     return 0;
 }

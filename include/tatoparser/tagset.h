@@ -14,7 +14,6 @@ NAMESPACE_START
 struct tagset
 {
     tagset();
-    ~tagset() { }
 
     // An unique identifier representing the tag of the sentence
     typedef uint16_t tagId;
@@ -25,6 +24,10 @@ struct tagset
      * @return INVALID_ID if _tagName is a null string, a valid tagId if not */
     tagId getTagId( const std::string & _tagName );
 
+    /**@brief Adds a new tag for a given sentence
+     * @param[in] _id The id of the sentence
+     * @param[in] _tagName the name of the tag
+     * @throw std::bad_alloc */
     void tagSentence( sentence::id _id, const std::string & _tagName );
 
     bool isSentenceTagged( sentence::id _id, tagId _tag );

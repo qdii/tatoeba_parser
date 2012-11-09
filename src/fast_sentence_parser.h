@@ -109,8 +109,14 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
             *(langRange.end()) = '\0';
             *(sentenceRange.end()) = '\0';
 
-            _data.addSentence(id, langRange.begin(), sentenceRange.begin());
-            nbSentences++;
+            try {
+                _data.addSentence(id, langRange.begin(), sentenceRange.begin());
+                nbSentences++;
+            }
+            catch ( const std::bad_alloc & ) {
+                llog::error << "Not enough memory.\n";
+                break;
+            }
         } else if (begin != end) {
             // we failed at parsing the sentence, and we're not at the end of
             // the file yet

@@ -67,26 +67,26 @@ size_t fastDetailedParser<iterator>::start( dataset & _data ) TATO_NO_THROW
     while( true )
     {
         if( qi::parse( begin, end, (
-           // grammar for a single line of CSV
-           // sentence ID
-           qi::uint_ >> '\t' >>
+            // grammar for a single line of CSV
+            // sentence ID
+            qi::uint_ >> '\t' >>
 
-           // language: 3- or 4-character code, "\N" or nothing
-           qi::raw[qi::repeat( 3,4 )[qi::ascii::lower] | "\\N" | qi::eps] >> '\t' >>
+            // language: 3- or 4-character code, "\N" or nothing
+            qi::raw[qi::repeat( 3,4 )[qi::ascii::lower] | "\\N" | qi::eps] >> '\t' >>
 
-           // sentence: a non-empty string of characters till the next tab
-           qi::raw[+~qi::char_( '\t' )]  >> '\t' >>
+            // sentence: a non-empty string of characters till the next tab
+            qi::raw[+~qi::char_( '\t' )]  >> '\t' >>
 
-           // author
-           qi::raw[+~qi::char_( '\t' )]  >> '\t' >>
+            // author
+            qi::raw[+~qi::char_( '\t' )]  >> '\t' >>
 
-           // creation date
-           qi::raw[+~qi::char_( '\t' )]  >> '\t' >>
+            // creation date
+            qi::raw[+~qi::char_( '\t' )]  >> '\t' >>
 
-           // last modified date
-           qi::raw[+~qi::char_( '\n' )]  >> '\n'
-       ), id, langRange, sentenceRange, authorRange,
-          creationDateRange, lastModifiedDateRange ) )
+            // last modified date
+            qi::raw[+~qi::char_( '\n' )]  >> '\n'
+        ), id, langRange, sentenceRange, authorRange,
+        creationDateRange, lastModifiedDateRange ) )
         {
             // ok, we managed to parse a sentence.
             // change separators into string endings
@@ -96,9 +96,18 @@ size_t fastDetailedParser<iterator>::start( dataset & _data ) TATO_NO_THROW
             *( creationDateRange.end() ) = '\0';
             *( lastModifiedDateRange.end() ) = '\0';
 
-            _data.addSentence( id, langRange.begin(), sentenceRange.begin(),
-                               authorRange.begin(), creationDateRange.begin(),
-                               lastModifiedDateRange.begin() );
+            try
+            {
+                _data.addSentence( id, langRange.begin(), sentenceRange.begin(),
+                authorRange.begin(), creationDateRange.begin(),
+                lastModifiedDateRange.begin() );
+            }
+            catch( const std::bad_alloc & )
+            {
+                llog::error << "Not enough memory.\n";
+                break;
+            }
+
             nbSentences++;
         }
         else if( begin != end )
@@ -139,7 +148,7 @@ template<typename iterator>
 size_t fastDetailedParser<iterator>::countLinesFast() const
 {
     const size_t nbChars =
-        reinterpret_cast<size_t>(&*m_end) - reinterpret_cast<size_t>(&*m_begin);
+        reinterpret_cast<size_t>( &*m_end ) - reinterpret_cast<size_t>( &*m_begin );
     static const size_t AVERAGE_NB_BYTES_PER_SENTENCE = 100;
     llog::info << "estimated number of sentences: " << nbChars / AVERAGE_NB_BYTES_PER_SENTENCE << '\n';
     return nbChars / AVERAGE_NB_BYTES_PER_SENTENCE;

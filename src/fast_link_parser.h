@@ -83,8 +83,16 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
             }
             else if( c == '\n' )
             {
-                allLinks_.addLink( firstId, id );
-                ++nbLinks;
+                try
+                {
+                    allLinks_.addLink( firstId, id );
+                    ++nbLinks;
+                }
+                catch ( std::bad_alloc & )
+                {
+                    llog::error << "Not enough memory.\n";
+                    break;
+                }
             }
 
             id = 0;

@@ -32,7 +32,8 @@ public:
 
     /**@brief register a link between two sentences
      * @param[in] _a The first sentence
-     * @param[in] _b The second sentence */
+     * @param[in] _b The second sentence
+     * @throw std::bad_alloc   */
     void addLink( sentence::id _a, sentence::id _b );
 
     /**@brief checks if two sentences are linked
