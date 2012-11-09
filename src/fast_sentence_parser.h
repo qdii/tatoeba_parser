@@ -63,7 +63,7 @@ size_t fastSentenceParser<iterator>::countLinesFast() const
 {
     const size_t nbChars =
         reinterpret_cast<size_t>(&*m_end) - reinterpret_cast<size_t>(&*m_begin);
-    static const size_t AVERAGE_NB_BYTES_PER_SENTENCE = 58;
+    static const size_t AVERAGE_NB_BYTES_PER_SENTENCE = 56;
     llog::info << "estimated number of sentences: " << nbChars / AVERAGE_NB_BYTES_PER_SENTENCE << '\n';
     return nbChars / AVERAGE_NB_BYTES_PER_SENTENCE;
 }
