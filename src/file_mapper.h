@@ -4,6 +4,8 @@
 #include "tatoparser/namespace.h"
 #include <string>
 
+#pragma GCC visibility push(hidden)
+
 NAMESPACE_START
 
 /**@struct invalid_file
@@ -61,5 +63,7 @@ private:
 };
 
 NAMESPACE_END
+
+#pragma GCC visibility pop
 
 #endif // LIBTATOPARSER_FILE_MAPPER_H

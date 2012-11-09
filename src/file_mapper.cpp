@@ -11,6 +11,8 @@
 #   include <fstream>
 #endif
 
+#pragma GCC visibility push(hidden)
+
 NAMESPACE_START
 
 #if HAVE_SYS_MMAN_H == 1
@@ -120,3 +122,5 @@ fileMapper::~fileMapper() TATO_NO_THROW
 #endif // HAVE_SYS_MMAN_H
 
 NAMESPACE_END
+
+#pragma GCC visibility pop

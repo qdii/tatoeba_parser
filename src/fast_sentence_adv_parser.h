@@ -4,6 +4,8 @@
 #include <boost/spirit/include/qi.hpp>
 #include "tatoparser/namespace.h"
 
+#pragma GCC visibility push(hidden)
+
 NAMESPACE_START
 
 /**@brief Parses the sentences_detailed .csv out of a buffer
@@ -144,5 +146,7 @@ size_t fastDetailedParser<iterator>::countLinesFast() const
 }
 
 NAMESPACE_END
+
+#pragma GCC visibility pop
 
 #endif // LIBTATOPARSER_FAST_SENTENCE_ADV_PARSER_H

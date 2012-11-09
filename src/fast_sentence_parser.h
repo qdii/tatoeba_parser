@@ -7,6 +7,8 @@
 #include "tatoparser/namespace.h"
 #include "tatoparser/dataset.h"
 
+#pragma GCC visibility push(hidden)
+
 NAMESPACE_START
 
 /**@brief Parses the sentences out of a buffer
@@ -127,6 +129,7 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
     return nbSentences;
 }
 
+#pragma GCC visibility pop
 
 NAMESPACE_END
 #endif // LIBTATOPARSER_FAST_SENTENCE_PARSER_H

@@ -3,6 +3,8 @@
 
 #include "tatoparser/tagset.h"
 
+#pragma GCC visibility push(hidden)
+
 NAMESPACE_START
 
 template<typename iterator>
@@ -78,5 +80,7 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
 }
 
 NAMESPACE_END
+
+#pragma GCC visibility pop
 
 #endif //LIBTATOPARSER_FAST_TAG_PARSER_H

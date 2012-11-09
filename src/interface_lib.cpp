@@ -12,6 +12,10 @@
 
 NAMESPACE_START
 
+#pragma GCC visibility push(hidden)
+
+// -------------------------------------------------------------------------- //
+
 static ParserFlag                   g_parserFlags = 0;
 static std::unique_ptr<fileMapper>  g_sentenceMap = nullptr;
 
@@ -23,19 +27,6 @@ bool isFlagSet( ParserFlag _flag )
     return g_parserFlags & _flag;
 }
 
-// -------------------------------------------------------------------------- //
-
-int init( ParserFlag _flags )
-{
-    assert( g_parserFlags == 0 );
-
-    g_parserFlags = _flags;
-
-    llog::setOutput( std::cerr );
-    llog::setLogLevel( isFlagSet( VERBOSE ) ? llog::Loglevel::info : llog::Loglevel::error );
-
-    return EXIT_SUCCESS;
-}
 
 // -------------------------------------------------------------------------- //
 
@@ -242,6 +233,35 @@ int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, datase
 
     return ret;
 }
+
+// -------------------------------------------------------------------------- //
+
+#pragma GCC visibility pop
+
+// -------------------------------------------------------------------------- //
+
+int init( ParserFlag _flags )
+{
+    assert( g_parserFlags == 0 );
+
+    g_parserFlags = _flags;
+
+    llog::setOutput( std::cerr );
+    llog::setLogLevel( isFlagSet( VERBOSE ) ? llog::Loglevel::info : llog::Loglevel::error );
+
+    return EXIT_SUCCESS;
+}
+
+// -------------------------------------------------------------------------- //
+
+int terminate()
+{
+    g_sentenceMap = nullptr;
+    g_parserFlags = 0;
+
+    return EXIT_SUCCESS;
+}
+
 // -------------------------------------------------------------------------- //
 
 int  parse( dataset & allSentences_,
@@ -284,14 +304,5 @@ int  parse( dataset & allSentences_,
     return parsingSuccess;
 }
 
-// -------------------------------------------------------------------------- //
-
-int terminate()
-{
-    g_sentenceMap = nullptr;
-    g_parserFlags = 0;
-
-    return EXIT_SUCCESS;
-}
 
 NAMESPACE_END

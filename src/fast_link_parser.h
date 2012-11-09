@@ -4,6 +4,8 @@
 #include <algorithm>
 #include "tatoparser/namespace.h"
 
+#pragma GCC visibility push(hidden)
+
 NAMESPACE_START
 
 struct linkset;
@@ -95,4 +97,7 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
 }
 
 NAMESPACE_END
+
+#pragma GCC visibility pop
+
 #endif // FAST_LINK_PARSER_H
