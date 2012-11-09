@@ -260,15 +260,18 @@ int  parse( dataset & allSentences_,
                          parseDetailed( sentencePath, info, allSentences_ ):
                          parseSentences( sentencePath, info, allSentences_ );
 
-        // create an container to retrieve sentences from id in a very fast manner
-        try
+        if ( parsingSuccess == EXIT_SUCCESS )
         {
-            allSentences_.prepare( info );
-        }
-        catch( const std::bad_alloc & exc )
-        {
-            llog::error << "Not enough memory.\n";
-            return EXIT_FAILURE;
+            // create an container to retrieve sentences from id in a very fast manner
+            try
+            {
+                allSentences_.prepare( info );
+            }
+            catch( const std::bad_alloc & exc )
+            {
+                llog::error << "Not enough memory.\n";
+                parsingSuccess = EXIT_FAILURE;
+            }
         }
     }
 
