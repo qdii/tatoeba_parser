@@ -12,16 +12,8 @@
 
 NAMESPACE_START
 
-static ParserFlag g_parserFlags = 0;
-
-static fileMapper * g_sentenceMap = nullptr;
-static fileMapper * g_linksMap = nullptr;
-static fileMapper * g_tagMap = nullptr;
-
-static fastDetailedParser<char *> * g_detailedParser = nullptr;
-static fastSentenceParser<char *> * g_sentenceParser = nullptr;
-static fastTagParser<char *>    *   g_tagParser = nullptr;
-static fastLinkParser<char *>   *   g_linkParser = nullptr;
+static ParserFlag                   g_parserFlags = 0;
+static std::unique_ptr<fileMapper>  g_sentenceMap = nullptr;
 
 // -------------------------------------------------------------------------- //
 
@@ -35,13 +27,7 @@ bool isFlagSet( ParserFlag _flag )
 
 int init( ParserFlag _flags )
 {
-    assert( g_sentenceMap == nullptr );
-    assert( g_linksMap == nullptr );
-    assert( g_tagMap == nullptr );
     assert( g_parserFlags == 0 );
-    assert( g_sentenceParser == nullptr );
-    assert( g_tagParser == nullptr );
-    assert( g_linkParser == nullptr );
 
     g_parserFlags = _flags;
 
@@ -53,64 +39,93 @@ int init( ParserFlag _flags )
 
 // -------------------------------------------------------------------------- //
 
-static
-int parseSentences( const std::string & _sentencesPath, datainfo & _info_, dataset & allSentences_ )
+template<typename T, typename ...Args> static
+std::unique_ptr<T> make_unique( Args&& ...args )
 {
-    // map "sentences.csv" to some address in our virtual space
+    return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
+}
+
+// -------------------------------------------------------------------------- //
+
+static
+std::unique_ptr<fileMapper> mapFileToMemory( const std::string & _file )
+{
+    std::unique_ptr<fileMapper>  ret = nullptr;
+
     try
     {
-        g_sentenceMap = new fileMapper( _sentencesPath );
+        ret = make_unique<fileMapper>( _file );
     }
     catch( const invalid_file & exception )
     {
-        llog::error << "Cannot open " << _sentencesPath << '\n';
-        return EXIT_FAILURE;
+        llog::error << "Cannot open " << exception.m_filename << '\n';
     }
     catch( const map_failed & exception )
     {
-        llog::error << "Failed to map " << _sentencesPath << '\n';
-        return EXIT_FAILURE;
-    }
-
-    // create the parser
-    g_sentenceParser = new fastSentenceParser<char *>(
-        g_sentenceMap->begin(),
-        g_sentenceMap->end()
-    );
-
-    // allocate memory for the sentence structure
-    _info_.m_nbSentences = g_sentenceParser->countLinesFast();
-
-    if( _info_.m_nbSentences <= 0 )
-    {
-        llog::error << _sentencesPath << " is empty\n";
-        return EXIT_FAILURE;
-    }
-
-    try
-    {
-        allSentences_.allocate( _info_ );
+        llog::error << "Failed to map " << _file << '\n';
     }
     catch( const std::bad_alloc & )
     {
-        llog::error << "Not enough memory.\n";
-        return EXIT_FAILURE;
+        llog::error << "Out of memory\n";
     }
 
-    _info_.m_nbSentences = g_sentenceParser->start( allSentences_ );
+    return ret;
+}
 
-    // retrieve the sentence of highest id so as to be able to create containers
-    // of the right size to store links and tags
-    const sentence & sentenceOfHighestId =
-        *std::max_element(
-            allSentences_.begin(), allSentences_.end(),
-    []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+// -------------------------------------------------------------------------- //
+
+static
+int parseSentences( const std::string & _sentencesPath, datainfo & _info_, dataset & allSentences_ )
+{
+    int ret = EXIT_FAILURE;
+
+    // map "sentences.csv" to some address in our virtual space
+    g_sentenceMap = std::move( mapFileToMemory( _sentencesPath ) );
+
+    if( g_sentenceMap != nullptr )
+    {
+        // create the parser
+        fastSentenceParser<char *> sentenceParser(
+            g_sentenceMap->begin(),
+            g_sentenceMap->end()
         );
 
-    llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
-    _info_.m_highestId = sentenceOfHighestId.getId();
+        // allocate memory for the sentence structure
+        _info_.m_nbSentences = sentenceParser.countLinesFast();
 
-    return EXIT_SUCCESS;
+        if( _info_.m_nbSentences <= 0 )
+        {
+            llog::error << _sentencesPath << " is empty\n";
+            return ret;
+        }
+
+        try
+        {
+            allSentences_.allocate( _info_ );
+        }
+        catch( const std::bad_alloc & )
+        {
+            llog::error << "Not enough memory.\n";
+            return ret;
+        }
+
+        _info_.m_nbSentences = sentenceParser.start( allSentences_ );
+
+        // retrieve the sentence of highest id so as to be able to create containers
+        // of the right size to store links and tags
+        const sentence & sentenceOfHighestId =
+            *std::max_element(
+                allSentences_.begin(), allSentences_.end(),
+        []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+            );
+
+        llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
+        _info_.m_highestId = sentenceOfHighestId.getId();
+
+        ret = EXIT_SUCCESS;
+    }
+
+    return ret;
 }
 
 // -------------------------------------------------------------------------- //
@@ -118,38 +133,34 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
 static
 int parseLinks( const std::string & _linksPath, datainfo & _info_, linkset & allLinks_ )
 {
-    try
-    {
-        // we map tags.csv to somewhere in our virtual space
-        fileMapper linksMap( _linksPath );
+    int ret = EXIT_FAILURE;
 
-        // we create the parser
-        g_linkParser = new fastLinkParser<char *>( linksMap.begin(), linksMap.end() );
+    // we map tags.csv to somewhere in our virtual space
+    std::unique_ptr<fileMapper> linksMap = std::move( mapFileToMemory( _linksPath ) );
 
-        // we allocate memory for the structure that will store the links
-        _info_.m_nbLinks = g_linkParser->countLines();
-        allLinks_.allocate( _info_ );
+    if( linksMap != nullptr )
+    {
+        try
+        {
+            // we create the parser
+            fastLinkParser<char *> linkParser( linksMap->begin(), linksMap->end() );
 
-        // we parse the file and store the data
-        g_linkParser->start( allLinks_ );
-    }
-    catch( const invalid_file & exception )
-    {
-        llog::error << "Cannot open " << _linksPath << '\n';
-        return EXIT_FAILURE;
-    }
-    catch( const map_failed & exception )
-    {
-        llog::error << "Failed to map " << _linksPath << '\n';
-        return EXIT_FAILURE;
-    }
-    catch( const std::bad_alloc & exception )
-    {
-        llog::error << "Out of memory\n";
-        return EXIT_FAILURE;
+            // we allocate memory for the structure that will store the links
+            _info_.m_nbLinks = linkParser.countLines();
+            allLinks_.allocate( _info_ );
+
+            // we parse the file and store the data
+            linkParser.start( allLinks_ );
+
+            ret = EXIT_SUCCESS;
+        }
+        catch( const std::bad_alloc & exception )
+        {
+            llog::error << "Out of memory\n";
+        }
     }
 
-    return EXIT_SUCCESS;
+    return ret;
 }
 
 // -------------------------------------------------------------------------- //
@@ -157,32 +168,26 @@ int parseLinks( const std::string & _linksPath, datainfo & _info_, linkset & all
 static
 int parseTags( const std::string & _tagPath, datainfo &, tagset & allTags_ )
 {
-    try
+    int ret = EXIT_FAILURE;
+
+    std::unique_ptr<fileMapper> tagMap =
+        std::move( mapFileToMemory( _tagPath ) );
+
+    if( tagMap != nullptr )
     {
-        g_tagMap = new fileMapper( _tagPath );
-        g_tagParser = new fastTagParser<char *>(
-            g_tagMap->begin(),
-            g_tagMap->end()
-        );
-        g_tagParser->start( allTags_ );
-    }
-    catch( const std::bad_alloc & )
-    {
-        llog::error << "An error occurred while parsing file " << _tagPath << std::endl;
-        return EXIT_FAILURE;
-    }
-    catch( const invalid_file & )
-    {
-        llog::error << "Cannot open " << _tagPath << '\n';
-        return EXIT_FAILURE;
-    }
-    catch( const map_failed & )
-    {
-        llog::error << "Failed to map " << _tagPath << '\n';
-        return EXIT_FAILURE;
+        try
+        {
+            fastTagParser<char *> tagParser( tagMap->begin(), tagMap->end() );
+            tagParser.start( allTags_ );
+            ret = EXIT_SUCCESS;
+        }
+        catch( const std::bad_alloc & )
+        {
+            llog::error << "An error occurred while parsing file " << _tagPath << std::endl;
+        }
     }
 
-    return EXIT_SUCCESS;
+    return ret;
 }
 
 // -------------------------------------------------------------------------- //
@@ -190,61 +195,52 @@ int parseTags( const std::string & _tagPath, datainfo &, tagset & allTags_ )
 static
 int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, dataset & allSentences_ )
 {
+    int ret = EXIT_FAILURE;
+
     // map "sentences_detailed.csv" to some address in our virtual space
-    try
+    g_sentenceMap = std::move( mapFileToMemory( _sentencesPath ) );
+
+    if( g_sentenceMap != nullptr )
     {
-        g_sentenceMap = new fileMapper( _sentencesPath );
+        // create the parser
+        fastDetailedParser<char *> detailedParser( g_sentenceMap->begin(), g_sentenceMap->end() );
+
+        // allocate memory for the sentence structure
+        _info_.m_nbSentences = detailedParser.countLinesFast();
+
+        if( _info_.m_nbSentences <= 0 )
+        {
+            llog::error << _sentencesPath << " is empty\n";
+            return ret;
+        }
+
+        try
+        {
+            allSentences_.allocate( _info_ );
+        }
+        catch( const std::bad_alloc & )
+        {
+            llog::error << "Not enough memory.\n";
+            return ret;
+        }
+
+        _info_.m_nbSentences = detailedParser.start( allSentences_ );
+
+        // retrieve the sentence of highest id so as to be able to create containers
+        // of the right size to store links and tags
+        const sentence & sentenceOfHighestId =
+            *std::max_element(
+                allSentences_.begin(), allSentences_.end(),
+                []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+            );
+
+        llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
+        _info_.m_highestId = sentenceOfHighestId.getId();
+
+        ret = EXIT_SUCCESS;
     }
-    catch( const invalid_file & exception )
-    {
-        llog::error << "Cannot open " << _sentencesPath << '\n';
-        return EXIT_FAILURE;
-    }
-    catch( const map_failed & exception )
-    {
-        llog::error << "Failed to map " << _sentencesPath << '\n';
-        return EXIT_FAILURE;
-    }
 
-    // create the parser
-    g_detailedParser = new fastDetailedParser<char *>(
-        g_sentenceMap->begin(),
-        g_sentenceMap->end()
-    );
-
-    // allocate memory for the sentence structure
-    _info_.m_nbSentences = g_detailedParser->countLinesFast();
-
-    if( _info_.m_nbSentences <= 0 )
-    {
-        llog::error << _sentencesPath << " is empty\n";
-        return EXIT_FAILURE;
-    }
-
-    try
-    {
-        allSentences_.allocate( _info_ );
-    }
-    catch( const std::bad_alloc & )
-    {
-        llog::error << "Not enough memory.\n";
-        return EXIT_FAILURE;
-    }
-
-    _info_.m_nbSentences = g_detailedParser->start( allSentences_ );
-
-    // retrieve the sentence of highest id so as to be able to create containers
-    // of the right size to store links and tags
-    const sentence & sentenceOfHighestId =
-        *std::max_element(
-            allSentences_.begin(), allSentences_.end(),
-            []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
-        );
-
-    llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
-    _info_.m_highestId = sentenceOfHighestId.getId();
-
-    return EXIT_SUCCESS;
+    return ret;
 }
 // -------------------------------------------------------------------------- //
 
@@ -260,7 +256,7 @@ int  parse( dataset & allSentences_,
 
     if( sentencePath.size() )
     {
-        parsingSuccess = isFlagSet( DETAILED )?
+        parsingSuccess = isFlagSet( DETAILED ) ?
                          parseDetailed( sentencePath, info, allSentences_ ):
                          parseSentences( sentencePath, info, allSentences_ );
 
@@ -289,14 +285,7 @@ int  parse( dataset & allSentences_,
 
 int terminate()
 {
-    delete g_detailedParser;        g_detailedParser = nullptr;
-    delete g_sentenceMap;           g_sentenceMap = nullptr;
-    delete g_linksMap;              g_linksMap = nullptr;
-    delete g_tagMap;                g_tagMap = nullptr;
-    delete g_sentenceParser;        g_sentenceParser = nullptr;
-    delete g_tagParser;             g_tagParser = nullptr;
-    delete g_linkParser;            g_linkParser = nullptr;
-
+    g_sentenceMap = nullptr;
     g_parserFlags = 0;
 
     return EXIT_SUCCESS;
