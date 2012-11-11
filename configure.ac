@@ -37,22 +37,9 @@ AC_PROG_INSTALL
 AC_SEARCH_LIBS([_ZN5boost15program_options18option_descriptionC1Ev], [boost_program_options], , AC_MSG_ERROR([Unable to find Boost Program Options library]))
 AC_SEARCH_LIBS([_ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j], [boost_regex], , AC_MSG_ERROR([Unable to find Boost Regex]))
 
-
-# workaround while http://stackoverflow.com/questions/12679072/ac-search-libs-when-the-function-name-varies 
-AC_MSG_CHECKING([whether libicuuc is required])
-AC_LINK_IFELSE(	
-		[AC_LANG_CALL([[
-#include <boost/regex.hpp>
-#include <boost/regex/icu.hpp>
-boost::u32regex some_regex( boost::make_u32regex( "abc" ) ); 
-extern "C"
-{
-	char test_function();
-}
-char test_function() { return boost::u32regex_match( "abc", some_regex ) ? '1' : '0'; }
-                       ]], [[ test_function ]])], [AC_MSG_RESULT([no])], [AC_MSG_RESULT([yes])] 
-[LIBS="$LIBS -licuuc"]
-)
+# ICU
+PKG_CHECK_MODULES([ICUUC], [icu-uc])
+LDFLAGS="$LDFLAGS $ICUUC_LIBS"
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h string.h unistd.h])
