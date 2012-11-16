@@ -45,15 +45,7 @@
 
 // __________________________ LOGGING __________________________________________
 
-#define QDIILOG_NAMESPACE llog
-#define QDIILOG_NAME_LOGGER_DEBUG debug
-#define QDIILOG_NAME_LOGGER_TRACE trace
-#define QDIILOG_NAME_LOGGER_INFO info
-#define QDIILOG_NAME_LOGGER_WARNING warning
-#define QDIILOG_NAME_LOGGER_ERROR error
-#if HAVE_BOOST_CONFIG_HPP == 1
-#   define QDIILOG_WITHOUT_BOOST
-#endif
-#include "qdiilog.hpp"
+#define QLOG_NAMESPACE llog
+#include "qlog.hpp"
 
 #endif // PREC_H

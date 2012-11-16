@@ -235,6 +235,21 @@ int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, datase
 }
 
 // -------------------------------------------------------------------------- //
+static
+void startLogging( bool verbose )
+{
+    using namespace llog;
+
+    // prepend markers
+    llog::info.prepend() << "[..] ";
+    llog::warning.prepend() << "[" << color(green) << "ww" << color() << "] ";
+    llog::error.prepend() << "[" << color(red, true) << "EE" << color() << "] " << color(white, true);
+
+    // append just resets color
+    llog::error.append() << color();
+
+    llog::set_loglevel( verbose ? loglevel::info : loglevel::error);
+}
 
 #pragma GCC visibility pop
 
@@ -246,8 +261,8 @@ int init( ParserFlag _flags )
 
     g_parserFlags = _flags;
 
-    llog::setOutput( std::cerr );
-    llog::setLogLevel( isFlagSet( VERBOSE ) ? llog::Loglevel::info : llog::Loglevel::error );
+    llog::set_output( std::cerr );
+    startLogging( isFlagSet(VERBOSE) );
 
     return EXIT_SUCCESS;
 }
