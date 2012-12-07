@@ -51,6 +51,9 @@ struct userOptions
     /**@brief Was --version set? */
     bool isVersionRequested() const;
 
+    /**@brief Was --download set? */
+    bool downloadRequested() const;
+
     /**@brief Should we enumerate lines (like the -n option of 'cat')? */
     bool displayLineNumbers() const;
 
@@ -110,6 +113,7 @@ bool userOptions::isItNecessaryToParseLinksFile() const
 {
     return  ( m_vm.count( "is-linked-to" ) > 0 )		||
             ( m_vm.count( "translation-regex" ) > 0 )	||
+            ( m_vm.count( "display-first-translation") > 0 ) ||
             ( m_vm.count( "is-translatable-in" ) > 0 );
 }
 
@@ -159,6 +163,14 @@ inline
 bool userOptions::isVersionRequested() const
 {
     return m_vm.count( "version" ) > 0;
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+bool userOptions::downloadRequested() const
+{
+    return m_vm.count( "download" );
 }
 
 // -------------------------------------------------------------------------- //
