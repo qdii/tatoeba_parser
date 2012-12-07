@@ -4,6 +4,7 @@
 #include <cstdint> // for tagId
 #include <functional> // for struct hash<>
 #include <map>
+#include <vector>
 #include "namespace.h"
 #include "sentence.h"
 

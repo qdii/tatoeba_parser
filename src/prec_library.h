@@ -5,6 +5,21 @@
 
 #if HAVE_CONFIG_H
 #   include <config.h>
+#	ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+#		define TATO_USE_DELETE
+#	endif
+#	ifndef BOOST_NO_CXX11_NOEXCEPT
+#		define TATO_USE_NOEXCEPT
+#	endif
+#	ifndef BOOST_NO_CXX11_VARIADIC_TEMPLATES
+#		define TATO_USE_VARIADIC_TEMPLATES
+#	endif
+#endif
+
+#ifdef TATE_USE_DELETE
+#	define TATO_DELETE = delete
+#else
+#	define TATO_DELETE
 #endif
 
 // ___________________________ SYSTEM INCLUDES _________________________________
@@ -28,7 +43,7 @@
 
 // ___________________________ COMPATIBILITY ___________________________________
 
-#ifndef BOOST_NO_NOEXCEPT
+#ifdef TATO_USE_NOEXCEPT
 #   define TATO_NO_THROW noexcept
 #else
 #   define TATO_NO_THROW throw()
@@ -45,6 +60,7 @@
 
 // __________________________ LOGGING __________________________________________
 
+#define QLOG_USE_ASSERTS
 #define QLOG_NAMESPACE llog
 #include "qlog.hpp"
 

@@ -27,6 +27,7 @@ void startLog( bool _verbose );
 
 int main( int argc, char * argv[] )
 {
+	qlog::init();
     startLog( false );
     FilterVector allFilters; ///< the filter list
     ///< to select sentences based on the user options)
@@ -60,7 +61,7 @@ int main( int argc, char * argv[] )
     catch( const boost::regex_error & err )
     {
         qlog::error << "Invalid regular expression\n"
-                    << qlog::setBashColor() << err.what() << '\n';
+                    << qlog::color() << err.what() << '\n';
         return EXIT_FAILURE;
     }
 
@@ -85,7 +86,7 @@ int main( int argc, char * argv[] )
             ( options.isItNecessaryToParseTagFile() ? 0 : NO_TAGS ) |
             ( options.isVerbose() ? VERBOSE : 0 ) |
             ( options.isItNecessaryToParseDetailedFile() ? DETAILED : 0 )
-        );
+	        );
 
     if (libraryInit != EXIT_SUCCESS)
         return EXIT_FAILURE;
@@ -164,7 +165,8 @@ int main( int argc, char * argv[] )
         }
     }
 
-    terminate();
+    tato::terminate();
+	qlog::destroy();
 
     return EXIT_SUCCESS;
 }
@@ -173,7 +175,21 @@ int main( int argc, char * argv[] )
 
 void startLog( bool verbose )
 {
-    qlog::setLogLevel( verbose ? qlog::Loglevel::info : qlog::Loglevel::error );
-    qlog::setPrependedTextQdiiFlavourBashColors();
-    qlog::setOutput( std::cerr );
+	using namespace qlog;
+
+	qlog::set_loglevel( verbose ? qlog::loglevel::info : qlog::loglevel::error );
+
+	qlog::info.reset_decoration();
+	qlog::warning.reset_decoration();
+	qlog::error.reset_decoration();
+
+    // prepend markers
+    qlog::info.prepend() << "[..] ";
+    qlog::warning.prepend() << "[" << color(green) << "ww" << color() << "] ";
+    qlog::error.prepend() << "[" << color(red, true) << "EE" << color() << "] " << color(white, true);
+
+    // append just resets color
+    qlog::error.append() << color();
+
+    qlog::set_output( std::cerr );
 }

@@ -54,7 +54,7 @@ struct filterTranslationRegex : public filter
                 {
                     ret = matchAllRegex( *link );
                 }
-                catch( std::runtime_error & err )
+                catch( std::runtime_error & )
                 {
                     qlog::warning << "An error occurred while matching sentence " << linkId << " with one of the regex.\n";
                 }

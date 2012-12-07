@@ -100,7 +100,7 @@ private:
 inline
 bool userOptions::isItNecessaryToParseTagFile() const
 {
-    return m_vm.count( "has-tag" );
+    return m_vm.count( "has-tag" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -108,9 +108,9 @@ bool userOptions::isItNecessaryToParseTagFile() const
 inline
 bool userOptions::isItNecessaryToParseLinksFile() const
 {
-    return  m_vm.count( "is-linked-to" ) ||
-            m_vm.count( "translation-regex" ) ||
-            m_vm.count( "is-translatable-in" );
+    return  ( m_vm.count( "is-linked-to" ) > 0 )		||
+            ( m_vm.count( "translation-regex" ) > 0 )	||
+            ( m_vm.count( "is-translatable-in" ) > 0 );
 }
 
 // -------------------------------------------------------------------------- //
@@ -118,7 +118,7 @@ bool userOptions::isItNecessaryToParseLinksFile() const
 inline
 bool userOptions::isItNecessaryToParseDetailedFile() const
 {
-    return m_vm.count( "user" );
+    return m_vm.count( "user" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -126,7 +126,7 @@ bool userOptions::isItNecessaryToParseDetailedFile() const
 inline
 bool userOptions::isVerbose() const
 {
-    return m_vm.count( "verbose" );
+    return m_vm.count( "verbose" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -134,7 +134,7 @@ bool userOptions::isVerbose() const
 inline
 bool userOptions::isHelpRequested() const
 {
-    return m_vm.count( "help" );
+    return m_vm.count( "help" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -142,7 +142,7 @@ bool userOptions::isHelpRequested() const
 inline
 bool userOptions::displayLineNumbers() const
 {
-    return m_vm.count( "display-line-numbers" );
+    return m_vm.count( "display-line-numbers" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -150,7 +150,7 @@ bool userOptions::displayLineNumbers() const
 inline
 bool userOptions::displayIds() const
 {
-    return m_vm.count( "display-ids" );
+    return m_vm.count( "display-ids" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -158,7 +158,7 @@ bool userOptions::displayIds() const
 inline
 bool userOptions::isVersionRequested() const
 {
-    return m_vm.count( "version" );
+    return m_vm.count( "version" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -201,7 +201,7 @@ std::string userOptions::getFirstTranslationLanguage() const
 inline
 bool userOptions::justParse() const
 {
-    return m_vm.count( "just-parse" );
+    return m_vm.count( "just-parse" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -209,7 +209,7 @@ bool userOptions::justParse() const
 inline
 bool userOptions::displayFirstTranslation() const
 {
-    return m_vm.count( "display-first-translation" );
+    return m_vm.count( "display-first-translation" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //

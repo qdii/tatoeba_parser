@@ -24,18 +24,25 @@ static std::unique_ptr<fileMapper>  g_sentenceMap = nullptr;
 static
 bool isFlagSet( ParserFlag _flag )
 {
-    return g_parserFlags & _flag;
+    return (g_parserFlags & _flag) != 0;
 }
 
 
 // -------------------------------------------------------------------------- //
 
+#ifdef TATO_USE_VARIADIC_TEMPLATES
 template<typename T, typename ...Args> static
 std::unique_ptr<T> make_unique( Args&& ...args )
 {
     return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
 }
-
+#else
+template<typename T, typename Arg> static
+std::unique_ptr<T> make_unique( Arg && arg )
+{
+	return std::unique_ptr<T>( new T( std::forward<Arg>( arg ) ) );
+}
+#endif
 // -------------------------------------------------------------------------- //
 
 static
@@ -51,7 +58,7 @@ std::unique_ptr<fileMapper> mapFileToMemory( const std::string & _file )
     {
         llog::error << "Cannot open " << exception.m_filename << '\n';
     }
-    catch( const map_failed & exception )
+    catch( const map_failed & )
     {
         llog::error << "Failed to map " << _file << '\n';
     }
@@ -145,7 +152,7 @@ int parseLinks( const std::string & _linksPath, datainfo & _info_, linkset & all
 
             ret = EXIT_SUCCESS;
         }
-        catch( const std::bad_alloc & exception )
+        catch( const std::bad_alloc & )
         {
             llog::error << "Out of memory\n";
         }
@@ -261,6 +268,7 @@ int init( ParserFlag _flags )
 
     g_parserFlags = _flags;
 
+	llog::init();
     llog::set_output( std::cerr );
     startLogging( isFlagSet(VERBOSE) );
 
@@ -274,6 +282,7 @@ int terminate()
     g_sentenceMap = nullptr;
     g_parserFlags = 0;
 
+	llog::destroy();
     return EXIT_SUCCESS;
 }
 
@@ -302,7 +311,7 @@ int  parse( dataset & allSentences_,
             {
                 allSentences_.prepare( info );
             }
-            catch( const std::bad_alloc & exc )
+            catch( const std::bad_alloc & )
             {
                 llog::error << "Not enough memory.\n";
                 parsingSuccess = EXIT_FAILURE;

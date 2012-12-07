@@ -57,7 +57,7 @@ private:
     const char * m_author;
     const char * m_creationDate;
     const char * m_lastModifiedDate;
-} __attribute__( ( packed ) ) ;
+};
 
 // -------------------------------------------------------------------------- //
 

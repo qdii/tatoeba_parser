@@ -108,7 +108,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     using std::vector;
     using std::string;
 
-    qlog::warning( allFilters_.size() ) << "allFilters.size() > 0\n";
+    qlog::warning( allFilters_.size() > 0 ) << "allFilters.size() > 0\n";
 
     if( m_vm.count( "has-id" ) )
     {
@@ -234,11 +234,33 @@ void userOptions::printVersion()
 
 // -------------------------------------------------------------------------- //
 
+static 
+std::string getEnvironmentVariable( const char * _environmentVariable )
+{
+	std::string ret = "";
+#ifdef WIN32
+   char *pValue;
+   size_t len;
+   
+   errno_t err = _dupenv_s( &pValue, &len, _environmentVariable );
+   if ( err ) 
+	   return ret;
+
+   ret.assign( pValue, pValue + len );
+   free( pValue );
+
+#else
+	ret.assign( getenv( _environmentVariable ) );
+#endif
+
+	return ret;
+}
+
 void userOptions::treatConfigFile()
 {
     const std::string configFilePath =
         std::string( m_vm.count( "config-path" ) ?
-                     m_vm["config-path"].as<std::string>() : getenv( "HOME" ) ) + "/.tatoparser";
+                     m_vm["config-path"].as<std::string>() : getEnvironmentVariable( "HOME" ) ) + "/.tatoparser";
 
     qlog::info << "parsing config file in " << configFilePath << '\n';
 

@@ -24,8 +24,8 @@ struct dataset
 
     typedef std::vector<sentence> containerType;
 
-    typedef typename containerType::iterator iterator;
-    typedef typename containerType::const_iterator const_iterator;
+    typedef containerType::iterator iterator;
+    typedef containerType::const_iterator const_iterator;
 
     // fastAccessArray stores index of sentences
     typedef std::vector<std::size_t> fastAccessArray;
@@ -53,8 +53,8 @@ public:
     void prepare( const datainfo & _info );
 
 private:
-    dataset( const dataset & ) = delete;
-    dataset & operator=( const dataset & ) = delete;
+    dataset( const dataset & ) TATO_DELETE;
+    dataset & operator=( const dataset & ) TATO_DELETE;
 
 private:
     containerType   m_allSentences;

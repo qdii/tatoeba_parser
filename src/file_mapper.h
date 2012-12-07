@@ -58,8 +58,8 @@ private:
     char * m_region;
 
 private:
-    fileMapper( const fileMapper & ) = delete;
-    fileMapper & operator=( const fileMapper & ) = delete;
+    fileMapper( const fileMapper & ) TATO_DELETE;
+    fileMapper & operator=( const fileMapper & ) TATO_DELETE;
 };
 
 NAMESPACE_END

@@ -1,6 +1,9 @@
 #ifndef FILTER_H
 #define FILTER_H
 
+#include <memory>
+#include <vector>
+
 NAMESPACE_START
 
 struct sentence;

@@ -1,5 +1,5 @@
-#ifndef PREC_H
-#define PREC_H
+#ifndef TATO_PREC_H
+#define TATO_PREC_H
 
 // ___________________________ AUTOCONF ________________________________________
 
@@ -30,6 +30,9 @@
 #include <assert.h>
 #if HAVE_BOOST_CONFIG_HPP == 1
 #   include <boost/config.hpp>
+#	ifndef BOOST_NO_CXX11_DELETED_FUNCTIONS
+#		define TATO_USE_DELETE
+#	endif
 #endif
 // ___________________________ COMPATIBILITY ___________________________________
 
@@ -38,6 +41,20 @@
 #   define TATO_NO_THROW noexcept
 #else
 #   define TATO_NO_THROW throw()
+#endif
+
+#ifdef TATE_USE_DELETE
+#	define TATO_DELETE = delete
+#else
+#	define TATO_DELETE
+#endif
+
+#ifdef __GNUC__
+#	define TATO_LIKELY(condition) (__builtin_expect(condition, true))
+#	define TATO_UNLIKELY(condition) (__builtin_expect(condition, false))
+#else
+#	define TATO_LIKELY(condition) (condition)
+#	define TATO_UNLIKELY(condition) (condition)
 #endif
 
 /**@TODO find a way to know whether the compiler supports "override" */
@@ -62,15 +79,11 @@
 
 // __________________________ LOGGING __________________________________________
 
-#define QDIILOG_NAMESPACE qlog
-#define QDIILOG_NAME_LOGGER_DEBUG debug
-#define QDIILOG_NAME_LOGGER_TRACE trace
-#define QDIILOG_NAME_LOGGER_INFO info
-#define QDIILOG_NAME_LOGGER_WARNING warning
-#define QDIILOG_NAME_LOGGER_ERROR error
 #if HAVE_BOOST_CONFIG_HPP == 1
 #   define QDIILOG_WITHOUT_BOOST
 #endif
-#include "qdiilog.hpp"
 
-#endif // PREC_H
+#define QLOG_USE_ASSERTS
+#include "qlog.hpp"
+
+#endif // TATO_PREC_H

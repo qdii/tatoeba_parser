@@ -79,16 +79,20 @@ fileMapper::fileMapper( const std::string & _filename, bool /* _rdOnly */ )
         _filename.c_str(),
         std::ios_base::binary | std::ios_base::in | std::ios_base::ate
     );
-    filestream.exceptions( std::ifstream::failbit | std::ifstream::badbit );
-    const size_t filesize = filestream.tellg();
-    char * region = nullptr;
+
+	if (!filestream.is_open())
+		throw invalid_file( _filename );
+
+	filestream.exceptions( std::ifstream::failbit | std::ifstream::badbit );
+	const std::streamoff filesize = filestream.tellg();
+	char * region = nullptr;
 
     // copy the file to memory
     try
     {
         region = new char[filesize + 1];
     }
-    catch( const std::bad_alloc & exc )
+    catch( const std::bad_alloc & )
     {
         llog::warning << "Failed to allocate " << filesize  + 1<< " to map " << _filename << '\n';
         throw map_failed();
@@ -100,7 +104,7 @@ fileMapper::fileMapper( const std::string & _filename, bool /* _rdOnly */ )
         filestream.read( region, filesize );
         filestream.close();
     }
-    catch( const std::ifstream::failure & exc )
+    catch( const std::ifstream::failure & )
     {
         delete [] region;
         throw invalid_file( _filename );
@@ -110,6 +114,7 @@ fileMapper::fileMapper( const std::string & _filename, bool /* _rdOnly */ )
 
     // everything seems fine, lets build the object
     m_region = region;
+
     m_size = filesize;
 }
 
