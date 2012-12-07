@@ -165,7 +165,11 @@ int main( int argc, char * argv[] )
         }
     }
 
-    tato::terminate();
+    #ifdef NAMESPACE
+    NAMESPACE ::
+    #endif
+    terminate();
+
 	qlog::destroy();
 
     return EXIT_SUCCESS;
