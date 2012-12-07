@@ -23,6 +23,10 @@ AC_ARG_ENABLE([debug],
   [  --enable-debug	adds asserts and debug code to the build.],
   [debug_mode=${enableval}],
   [debug_mode=no])
+AC_ARG_ENABLE([download],
+  [  --enable-download  uses curl to download tatoeba material.],
+  [download_mode=${enableval}],
+  [download_mode=no])
 
 if test "$debug_mode" = "no"
 then
@@ -36,6 +40,12 @@ AC_PROG_INSTALL
 # Checks for libraries.
 AC_SEARCH_LIBS([_ZN5boost15program_options18option_descriptionC1Ev], [boost_program_options], , AC_MSG_ERROR([Unable to find Boost Program Options library]))
 AC_SEARCH_LIBS([_ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j], [boost_regex], , AC_MSG_ERROR([Unable to find Boost Regex]))
+
+if test "$download_mode" = "yes"
+then
+  AC_SEARCH_LIBS([curl_easy_setopt], [curl], , AC_MSG_ERROR([Unable to find libcurl]))
+  LDFLAGS="$LDFLAGS -lcurl"
+fi
 
 # ICU
 PKG_CHECK_MODULES([ICUUC], [icu-uc])
@@ -54,6 +64,10 @@ AC_CHECK_HEADERS([boost/regex.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex h
 AC_CHECK_HEADERS([boost/regex/icu.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex/icu.hpp)])])
 AC_CHECK_HEADERS([boost/spirit/include/qi.hpp], , [AC_MSG_ERROR([Unable to find Boost Spirit header (boost/spirit/include/qi.hpp)])])
 AC_CHECK_HEADERS([boost/config.hpp], , )
+if test "$download_mode" = "yes"
+then
+  AC_CHECK_HEADERS([curl/curl.h], , [AC_MSG_ERROR([Unable to find curl header (curl/curl.h)])])
+fi
 
 # Checks for memory limitation headers
 if test "x${limit_mem}" = xyes; then

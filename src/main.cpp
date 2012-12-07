@@ -8,6 +8,11 @@
 #include "filter_tag.h"
 #include "filter_regex.h"
 #include <iostream>
+#include <fstream>
+
+#ifdef HAVE_CURL_CURL_H
+#   include "hdownload.hpp"
+#endif
 
 USING_NAMESPACE
 
@@ -16,7 +21,16 @@ static const char DETAILED_FILENAME[] = "sentences_detailed.csv";
 static const char LINKS_FILENAME[] = "links.csv";
 static const char TAG_FILENAME[] = "tags.csv";
 
+static const char DETAILED_URL[] = "http://tatoeba.org/files/downloads/sentences_detailed.csv";
+static const char SENTENCES_URL[] = "http://tatoeba.org/files/downloads/sentences.csv";
+static const char LINKS_URL[] = "http://tatoeba.org/files/downloads/links.csv";
+static const char TAG_URL[] = "http://tatoeba.org/files/downloads/tags.csv";
+
 void startLog( bool _verbose );
+
+#ifdef HAVE_CURL_CURL_H
+bool downloadIf( bool _condition, std::string _url, std::string _destinationFile );
+#endif
 
 /// How does it work?
 ///
@@ -88,17 +102,28 @@ int main( int argc, char * argv[] )
             ( options.isItNecessaryToParseDetailedFile() ? DETAILED : 0 )
 	        );
 
-    if (libraryInit != EXIT_SUCCESS)
+    if( libraryInit != EXIT_SUCCESS )
         return EXIT_FAILURE;
+
+#ifdef HAVE_CURL_CURL_H
+    if( options.downloadRequested() )
+    {
+        // download files if they don't exist
+        downloadIf( !options.isItNecessaryToParseDetailedFile(), SENTENCES_URL, SENTENCES_FILENAME );
+        downloadIf( options.isItNecessaryToParseDetailedFile(), DETAILED_URL, DETAILED_FILENAME );
+        downloadIf( options.isItNecessaryToParseLinksFile(), LINKS_URL, LINKS_FILENAME );
+        downloadIf( options.isItNecessaryToParseTagFile(), TAG_URL, TAG_FILENAME );
+    }
+#endif
 
     const int libraryParsing =
         parse( allSentences, allLinks, allTags,
                options.isItNecessaryToParseDetailedFile() ?
-                    csvPath + '/' + DETAILED_FILENAME     :
-                    csvPath + '/' + SENTENCES_FILENAME,
-           csvPath + '/' + LINKS_FILENAME, csvPath + '/' + TAG_FILENAME );
+               csvPath + '/' + DETAILED_FILENAME     :
+               csvPath + '/' + SENTENCES_FILENAME,
+               csvPath + '/' + LINKS_FILENAME, csvPath + '/' + TAG_FILENAME );
 
-    if (libraryParsing != EXIT_SUCCESS)
+    if( libraryParsing != EXIT_SUCCESS )
         return EXIT_FAILURE;
 
 
@@ -197,3 +222,58 @@ void startLog( bool verbose )
 
     qlog::set_output( std::cerr );
 }
+
+// -------------------------------------------------------------------------- //
+
+#ifdef HAVE_CURL_CURL_H
+/**@brief Download an url to a file if a condition is met
+ * @param[in] _condition If this parameter evals to tru, then the download is started. 
+ * @param[in] _url The url to download the file from (This must
+ *            be a valid URL).
+ * @param[in] _filename The name of the file to download the data to. If the file exists, then
+ *            the download is skipped
+ * @return true if the download succeeds and the file is written, false otherwise
+ */
+bool downloadIf( bool _condition, std::string _url, std::string _filename )
+{
+    bool ret = false;
+
+    if( _condition )
+    {
+        std::fstream destinationFile( _filename, std::ios::out | std::ios::in );  // will not create file
+        if( destinationFile.is_open() )
+        {
+            qlog::info << "Found " << _filename.c_str() << ", not downloading it\n";
+        }
+        else
+        {
+            destinationFile.clear();
+            destinationFile.open( _filename.c_str(), std::ios::out );
+            qlog::info << "Downloading " << _filename.c_str() << "...\n";
+
+            try
+            {
+                hdl::downloader download( _url );
+
+                download.followRedirect( true );
+                download.throwExceptionOnDownloadFailure( false );
+
+                ret = download.stream( destinationFile );
+
+                qlog::info( ret ) << "Finished downloading " << _filename.c_str() << '\n';
+                qlog::warning( !ret ) << "Failed to download " << _filename.c_str() << '\n';
+            }
+            catch (const std::bad_alloc&)
+            {
+                qlog::error << "Out of memory.\n";
+            }
+            catch (const hdl::curl_exception& )
+            {
+                qlog::error << "Curl failed to initialize.\n";
+            }
+        }
+    }
+
+    return ret;
+}
+#endif
