@@ -47,6 +47,10 @@ public:
      * @return A pair of iterator (begin,end), traversing a sequence of sentence::ids */
     std::pair<const_iterator, const_iterator> getLinksOf( sentence::id _a ) const;
 
+    /**@brief Find the highest id in the list of links
+     * @return a sentence id */
+    sentence::id getHighestSentenceId() const;
+
 private:
     typedef std::vector<sentence::id> linksArray;
     /// A first idea was to create a matrix of bits, each line representing a

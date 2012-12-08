@@ -53,5 +53,12 @@ sentence::id getFirstSentenceTranslation(
     return sentence::INVALID_ID;
 }
 
+//---------------------------------------------------------------------------- //
+
+sentence::id linkset::getHighestSentenceId() const
+{
+    const auto highestIdIterator = std::max_element( m_links.begin(), m_links.end() );
+    return highestIdIterator == m_links.end() ? /* sentence::INVALID_ID */ 0 : *highestIdIterator;
+}
 
 NAMESPACE_END

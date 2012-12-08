@@ -109,12 +109,14 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
 
         _info_.m_nbSentences = sentenceParser.start( allSentences_ );
 
+        llog::info << "parsed " << _info_.m_nbSentences << "sentences.\n";
+
         // retrieve the sentence of highest id so as to be able to create containers
         // of the right size to store links and tags
         const sentence & sentenceOfHighestId =
             *std::max_element(
                 allSentences_.begin(), allSentences_.end(),
-        []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+                []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
             );
 
         llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
@@ -303,20 +305,6 @@ int  parse( dataset & allSentences_,
         parsingSuccess = isFlagSet( DETAILED ) ?
                          parseDetailed( sentencePath, info, allSentences_ ):
                          parseSentences( sentencePath, info, allSentences_ );
-
-        if ( parsingSuccess == EXIT_SUCCESS )
-        {
-            // create an container to retrieve sentences from id in a very fast manner
-            try
-            {
-                allSentences_.prepare( info );
-            }
-            catch( const std::bad_alloc & )
-            {
-                llog::error << "Not enough memory.\n";
-                parsingSuccess = EXIT_FAILURE;
-            }
-        }
     }
 
     if( parsingSuccess != EXIT_FAILURE && linksPath.size() && !isFlagSet( NO_LINKS ) )
@@ -324,6 +312,24 @@ int  parse( dataset & allSentences_,
 
     if( parsingSuccess != EXIT_FAILURE && tagPath.size() && !isFlagSet( NO_TAGS ) )
         parsingSuccess = parseTags( tagPath, info, allTags_ );
+
+    if ( parsingSuccess == EXIT_SUCCESS )
+    {
+        const sentence::id highestLinkId = allLinks_.getHighestSentenceId();
+        if ( highestLinkId > info.m_highestId )
+            info.m_highestId = highestLinkId;
+
+        // create an container to retrieve sentences from id in a very fast manner
+        try
+        {
+            allSentences_.prepare( info );
+        }
+        catch( const std::bad_alloc & )
+        {
+            llog::error << "Not enough memory.\n";
+            parsingSuccess = EXIT_FAILURE;
+        }
+    }
 
     return parsingSuccess;
 }

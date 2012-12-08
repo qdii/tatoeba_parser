@@ -99,7 +99,7 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
         }
     }
 
-    llog::info << "parsed all links.\n";
+    llog::info << "parsed " << nbLinks << " links.\n";
 
     return nbLinks;
 }

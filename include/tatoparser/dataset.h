@@ -67,6 +67,8 @@ inline
 sentence * dataset::operator[]( sentence::id _id )
 {
     assert( !m_fastAccess.empty() ); // if m_fastAccess is empty, it means that prepare() command has not been run before.
+    assert( static_cast<std::size_t>(_id) < m_fastAccess.size() );
+
     if (m_fastAccess[_id] == static_cast<std::size_t>(-1))
         return nullptr;
 
