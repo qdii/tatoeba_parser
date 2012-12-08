@@ -1,3 +1,12 @@
+v2.6
+	- Fixed a bug causing the parser to crash when a sentence of very high id was present in links.csv.
+	- The parser now works on windows
+	- Updated internal version of qlog
+	- Configure option --enable-download allows csv files to be downloaded via libcurl
+	- Fixed a crash when using display-first-translation
+	- ICU build options are now found through pkgconfig
+	- Internal symbols are no longer exported by the library
+
 v2.5	
 	- The code is now split into a library responsible for parsing the files into data structures, 
 	  and a binary using that library to filter the sentences in an appropriate way.
@@ -16,7 +25,6 @@ v2.4
 	- Fixed a bug causing an invalid memory access at the end of the linkset container.
 	- The project now uses <boost/config.hpp> if it is found on the machine
 	- Added --display-first-translation to output a translation in addition to the sentence.
-
 
 v2.3
 	- Fixed build when the user doesn’t have valgrind
