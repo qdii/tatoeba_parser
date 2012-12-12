@@ -11,6 +11,10 @@
 #   define TATO_RESTRICT
 #endif
 
+#ifndef TATO_DELETE
+#   define TATO_DELETE
+#endif
+
 NAMESPACE_START
 
 struct datainfo;
