@@ -258,6 +258,17 @@
  * }
  * @endcode
  *
+ *
+ * MULTITHREADING
+ * --------------
+ *
+ * qlog allows multiple threads to run on the same level of logging. When support is enabled, many threads
+ * can concurrently write on the same logger level. Pay attention that different level of logging
+ * will not be multithread-safe, they should write to different outputs.
+ *
+ * To enable multithread mode, you can define QLOG_MULTITHREAD and provide a class or a struct called
+ * mutex in the qlog namespace. Alternatively, defining QLOG_MULTITHREAD_PTHREAD lets you use pthread
+ * mutexes.
  */
 
 #include <ostream>
@@ -268,9 +279,29 @@
 #   define QLOG_ASSERT(a);
 #endif
 
+#ifdef QLOG_MULTITHREAD_PTHREAD
+#   include <pthread.h>
+#   ifndef QLOG_MULTITHREAD
+#       define QLOG_MULTITHREAD
+#   endif
+#endif
+
+#ifdef QLOG_MULTITHREAD_CPP11
+#   include <mutex>
+#   ifndef QLOG_MULTITHREAD
+#       define QLOG_MULTITHREAD
+#   endif
+#endif
+
 // windows color support
 #ifdef WIN32
 #	include <windows.h>
+#endif
+
+#ifdef QLOG_MULTITHREAD_WIN32
+#	ifndef QLOG_MULTITHREAD
+#		define QLOG_MULTITHREAD
+#	endif
 #endif
 
 #ifndef QLOG_MAX_DECORATIONS
@@ -290,6 +321,81 @@ namespace QLOG_NAMESPACE
 namespace qlog
 {
 #endif
+
+// -------------------------------------------------------------------------- //
+
+// mutex
+#ifdef QLOG_MULTITHREAD_PTHREAD
+struct cannot_create_mutex : std::exception
+{
+};
+
+struct mutex
+{
+    mutex()
+        :m_attr()
+        ,m_mutex()
+    {
+        if (pthread_mutexattr_init( &m_attr ) != 0)
+            throw cannot_create_mutex();
+
+        if (pthread_mutex_init( &m_mutex, &m_attr ) != 0)
+            throw cannot_create_mutex();
+    }
+
+    ~mutex()
+    {
+        pthread_mutex_destroy( &m_mutex );
+        pthread_mutexattr_destroy( &m_attr );
+    }
+
+    bool lock()
+    {
+        return pthread_mutex_lock( &m_mutex ) == 0;
+    }
+
+    bool unlock()
+    {
+        return pthread_mutex_unlock( &m_mutex ) == 0;
+    }
+
+private:
+    pthread_mutexattr_t m_attr;
+    pthread_mutex_t m_mutex;
+};
+#elif defined QLOG_MULTITHREAD_WIN32
+struct mutex
+{
+	mutex()
+		:m_section()
+	{
+		InitializeCriticalSection( &m_section );
+	}
+
+	~mutex()
+	{
+		DeleteCriticalSection( &m_section );
+	}
+
+	bool lock()
+	{
+		EnterCriticalSection( &m_section );
+		return true;
+	}
+
+	bool unlock()
+	{
+		LeaveCriticalSection( &m_section );
+		return true;
+	}
+
+private:
+	CRITICAL_SECTION m_section;
+};
+#elif defined QLOG_MULTITHREAD_CPP11
+using std::mutex;
+#endif
+
 // -------------------------------------------------------------------------- //
 // the different levels of logging
 
@@ -664,7 +770,12 @@ struct logger
         if( can_log() )
         {
             if( _first_message )
+            {
+#               ifdef QLOG_MULTITHREAD
+                lock();
+#               endif
                 m_prepend.apply_all( *m_output );
+            }
 
             _func( *m_output );
         }
@@ -681,8 +792,47 @@ struct logger
         if (0 == --m_nbReceivers)
         {
             signal_end();
+#           ifdef QLOG_MULTITHREAD
+            unlock();
+#           endif
         }
     }
+
+#   ifdef QLOG_MULTITHREAD
+    void lock() const
+    {
+        m_mutex->lock();
+    }
+
+    void unlock() const
+    {
+        m_mutex->unlock();
+    }
+
+    bool init_mutex()
+    {
+        bool ret = false;
+        QLOG_ASSERT( 0 == m_mutex );
+        try
+        {
+            m_mutex = new mutex();
+            ret = true;
+        } catch (...)
+        {
+            m_mutex = 0;
+            ret = false;
+        }
+
+        return ret;
+    }
+
+    void destroy_mutex()
+    {
+        QLOG_ASSERT( 0 != m_mutex );
+        delete m_mutex;
+        m_mutex = 0;
+    }
+#   endif
 
     /**@endcond*/
 
@@ -709,6 +859,9 @@ private:
     static std::ostream * m_output;
     static decorater<level, false> m_prepend;
     static decorater<level, true> m_append;
+#   ifdef QLOG_MULTITHREAD
+    static mutex * m_mutex;
+#   endif
 
 private:
     /**@brief Helper function to check that the logger can output messages
@@ -732,8 +885,14 @@ private:
     /** @endcond */
 };
 // -------------------------------------------------------------------------- //
+
+#ifdef QLOG_MULTITHREAD
 template< unsigned level >
-std::ostream * logger<level>::m_output;
+mutex * logger<level>::m_mutex = 0;
+#endif
+
+template< unsigned level >
+std::ostream * logger<level>::m_output = 0;
 
 template< unsigned level >
 decorater<level, true> logger<level>::m_append;
@@ -838,6 +997,9 @@ receiver<level> operator<<( const receiver<level> & _recv, standard_endline _fun
 template< unsigned level, typename T > inline
 receiver<level> operator << ( const logger<level> & _logger, const T & _message )
 {
+#   ifdef QLOG_MULTITHREAD
+    _logger.lock();
+#   endif
     return receiver<level>( &_logger ).treat( _message, true );
 }
 
@@ -890,62 +1052,89 @@ void set_output( std::ostream & _new_output )
 static inline
 void destroy()
 {
-    if( settings::initialized )
-    {
+    QLOG_ASSERT( settings::initialized );
 
-#		ifdef WIN32
-        settings::console_handle = 0;
-        settings::set_text_attribute = 0;
-#		endif
+#	ifdef WIN32
+    settings::console_handle = 0;
+    settings::set_text_attribute = 0;
+#   endif
 
-        QLOG_NAME_LOGGER_DEBUG . reset_decoration();
-        QLOG_NAME_LOGGER_TRACE . reset_decoration();
-        QLOG_NAME_LOGGER_INFO . reset_decoration();
-        QLOG_NAME_LOGGER_WARNING . reset_decoration();
-        QLOG_NAME_LOGGER_ERROR . reset_decoration();
+    QLOG_NAME_LOGGER_DEBUG . reset_decoration();
+    QLOG_NAME_LOGGER_TRACE . reset_decoration();
+    QLOG_NAME_LOGGER_INFO . reset_decoration();
+    QLOG_NAME_LOGGER_WARNING . reset_decoration();
+    QLOG_NAME_LOGGER_ERROR . reset_decoration();
 
-        QLOG_NAME_LOGGER_DEBUG . disable();
-        QLOG_NAME_LOGGER_TRACE . disable();
-        QLOG_NAME_LOGGER_INFO . disable();
-        QLOG_NAME_LOGGER_WARNING . disable();
-        QLOG_NAME_LOGGER_ERROR . disable();
+    QLOG_NAME_LOGGER_DEBUG . disable();
+    QLOG_NAME_LOGGER_TRACE . disable();
+    QLOG_NAME_LOGGER_INFO . disable();
+    QLOG_NAME_LOGGER_WARNING . disable();
+    QLOG_NAME_LOGGER_ERROR . disable();
 
-		// resetting decorations
-		QLOG_NAME_LOGGER_DEBUG . prepend().reset();
-		QLOG_NAME_LOGGER_DEBUG . append().reset();
-		QLOG_NAME_LOGGER_TRACE . prepend().reset();
-		QLOG_NAME_LOGGER_TRACE . append().reset();
-		QLOG_NAME_LOGGER_INFO . prepend().reset();
-		QLOG_NAME_LOGGER_INFO . append().reset();
-		QLOG_NAME_LOGGER_ERROR . prepend().reset();
-		QLOG_NAME_LOGGER_ERROR . append().reset();
-		QLOG_NAME_LOGGER_WARNING . prepend().reset();
-		QLOG_NAME_LOGGER_WARNING . append().reset();
+    // resetting decorations
+    QLOG_NAME_LOGGER_DEBUG . prepend().reset();
+    QLOG_NAME_LOGGER_DEBUG . append().reset();
+    QLOG_NAME_LOGGER_TRACE . prepend().reset();
+    QLOG_NAME_LOGGER_TRACE . append().reset();
+    QLOG_NAME_LOGGER_INFO . prepend().reset();
+    QLOG_NAME_LOGGER_INFO . append().reset();
+    QLOG_NAME_LOGGER_ERROR . prepend().reset();
+    QLOG_NAME_LOGGER_ERROR . append().reset();
+    QLOG_NAME_LOGGER_WARNING . prepend().reset();
+    QLOG_NAME_LOGGER_WARNING . append().reset();
 
-        settings::initialized = false;
-    }
+#   ifdef QLOG_MULTITHREAD
+    QLOG_NAME_LOGGER_DEBUG . destroy_mutex();
+    QLOG_NAME_LOGGER_TRACE . destroy_mutex();
+    QLOG_NAME_LOGGER_INFO . destroy_mutex();
+    QLOG_NAME_LOGGER_WARNING . destroy_mutex();
+    QLOG_NAME_LOGGER_ERROR . destroy_mutex();
+#   endif
+
+    settings::initialized = false;
 }
 // -------------------------------------------------------------------------- //
-/**@brief Initializes the library
- * @note This is only useful on Windows */
+/**@brief Initializes the library.
+ * @return true If the library in correctly initialized. If false is returned, then you should call
+ *         destroy and not use the library.
+ * @warning This should be called only once. */
 static inline
-void init()
+bool init()
 {
-    if( !settings::initialized )
-    {
-#		ifdef WIN32
-        settings::console_handle = GetStdHandle( STD_OUTPUT_HANDLE );
-        settings::set_text_attribute = static_cast<console_function>( get_console_function( "SetConsoleTextAttribute" ) );
-#		endif
+    QLOG_ASSERT( !settings::initialized );
 
-        QLOG_NAME_LOGGER_DEBUG . enable();
-        QLOG_NAME_LOGGER_TRACE . enable();
-        QLOG_NAME_LOGGER_INFO . enable();
-        QLOG_NAME_LOGGER_WARNING . enable();
-        QLOG_NAME_LOGGER_ERROR . enable();
+#   ifdef WIN32
+    settings::console_handle = GetStdHandle( STD_OUTPUT_HANDLE );
+    settings::set_text_attribute = static_cast<console_function>( get_console_function( "SetConsoleTextAttribute" ) );
+#   endif
 
-        settings::initialized = true;
-    }
+    QLOG_NAME_LOGGER_DEBUG . enable();
+    QLOG_NAME_LOGGER_TRACE . enable();
+    QLOG_NAME_LOGGER_INFO . enable();
+    QLOG_NAME_LOGGER_WARNING . enable();
+    QLOG_NAME_LOGGER_ERROR . enable();
+
+    bool init = true;
+
+#   ifdef QLOG_MULTITHREAD
+    init = QLOG_NAME_LOGGER_DEBUG . init_mutex();
+
+    if ( init )
+        init = QLOG_NAME_LOGGER_TRACE . init_mutex();
+
+    if ( init )
+        init = QLOG_NAME_LOGGER_INFO . init_mutex();
+
+    if ( init )
+        init = QLOG_NAME_LOGGER_WARNING . init_mutex();
+
+    if ( init )
+        init = QLOG_NAME_LOGGER_ERROR . init_mutex();
+#   endif
+
+    settings::initialized = init;
+
+    return settings::initialized;
 }
 
 static const unsigned black = 1;
@@ -1133,26 +1322,26 @@ receiver<level> operator <<( const receiver<level> & _recv, const color & _color
 template<unsigned level> inline
 receiver<level> operator <<( const logger<level> & _logger, const underline & )
 {
-    return _logger << "\e[4m";
+    return _logger << "\033[4m";
 }
 
 template<unsigned level> inline
 receiver<level> operator <<( const receiver<level> & _recv, const underline & )
 {
-    return _recv << "\e[4m";
+    return _recv << "\033[4m";
 }
 
 // -------------------------------------------------------------------------- //
 template<unsigned level> inline
 receiver<level> operator <<( const logger<level> & _logger, const blink & )
 {
-    return _logger << "\e[5m";
+    return _logger << "\033[5m";
 }
 
 template<unsigned level> inline
 receiver<level> operator <<( const receiver<level> & _recv, const blink & )
 {
-    return _recv << "\e[5m";
+    return _recv << "\033[5m";
 }
 
 #else // WIN32
@@ -1324,7 +1513,7 @@ struct blink_decoration : public decoration
     {
 
 #       ifndef WIN32
-        _ostr << "\e[5m";
+        _ostr << "\033[5m";
 #       else
         ( void )_ostr;
 #       endif
@@ -1356,7 +1545,7 @@ struct underline_decoration : public decoration
     {
 
 #       ifndef WIN32
-        _ostr << "\e[4m";;
+        _ostr << "\033[4m";;
 #       else
         ( void )_ostr;
 #       endif
