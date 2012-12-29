@@ -1,6 +1,14 @@
 tatoeba_parser
 ==============
 
+INSTALL
+	tatoeba_parser uses autotools to build on linux. Here is the four-step build procedure.
+
+    1.  autoreconf -i
+    2.  ./configure
+    3.  make
+    4.  make install
+
 DESCRIPTION
 	
 	tatoeba_parser is a program that parses the tatoeba database. It is helpful to retrieve all the sentences that match a given set of criterions. To make it work fully, 3 files are necessary: sentences.csv, links.csv and tags.csv. The three files can be freely retrieved from http://www.tatoeba.org .
