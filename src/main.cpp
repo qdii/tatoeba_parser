@@ -162,6 +162,10 @@ int main( int argc, char * argv[] )
                 if( options.displayIds() )
                     std::cout << sentence.getId() << separator;
 
+                // option --display-lang
+                if (options.displayLanguages() )
+                    std::cout << sentence.lang() << separator;
+
                 // display the sentence
                 std::cout << sentence.str();
 

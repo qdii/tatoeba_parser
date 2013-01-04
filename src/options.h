@@ -60,6 +60,9 @@ struct userOptions
     /**@brief Should we display the id of the matching sentences? */
     bool displayIds() const;
 
+    /**@brief Should we display the language of the matching sentences? */
+    bool displayLanguages() const;
+
     /**@brief Should we display the first translation? */
     bool displayFirstTranslation() const;
 
@@ -224,6 +227,13 @@ bool userOptions::displayFirstTranslation() const
     return m_vm.count( "display-first-translation" ) > 0;
 }
 
+// -------------------------------------------------------------------------- //
+
+inline
+bool userOptions::displayLanguages() const
+{
+    return m_vm.count( "display-lang" ) > 0;
+}
 // -------------------------------------------------------------------------- //
 
 inline
