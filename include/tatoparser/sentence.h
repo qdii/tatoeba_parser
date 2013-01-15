@@ -15,7 +15,10 @@ struct sentence
     /**@brief Constructs a sentence
      * @param[in] _id   An unique identifier for the sentence
      * @param[in] _lang The letters of the country
-     * @param[in] _data The text that coposes the sentence */
+     * @param[in] _data The text that coposes the sentence
+     * @param[in] _author The nickname of the creator of the sentence
+     * @param[in] _creationDate When the sentence was first entered
+     * @param[in] _lastModifiedDate When the sentence was last modified */
     explicit sentence(
         sentence::id _id   = INVALID_ID,
         const char * _lang = nullptr,
