@@ -24,7 +24,7 @@ static std::unique_ptr<fileMapper>  g_sentenceMap = nullptr;
 static
 bool isFlagSet( ParserFlag _flag )
 {
-    return (g_parserFlags & _flag) != 0;
+    return ( g_parserFlags & _flag ) != 0;
 }
 
 
@@ -34,13 +34,13 @@ bool isFlagSet( ParserFlag _flag )
 template<typename T, typename ...Args> static
 std::unique_ptr<T> make_unique( Args&& ...args )
 {
-    return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
+    return std::unique_ptr<T>( new T( std::forward<Args>( args )... ) );
 }
 #else
 template<typename T, typename Arg> static
 std::unique_ptr<T> make_unique( Arg && arg )
 {
-	return std::unique_ptr<T>( new T( std::forward<Arg>( arg ) ) );
+    return std::unique_ptr<T>( new T( std::forward<Arg>( arg ) ) );
 }
 #endif
 // -------------------------------------------------------------------------- //
@@ -251,13 +251,13 @@ void startLogging( bool verbose )
 
     // prepend markers
     llog::info.prepend() << "[..] ";
-    llog::warning.prepend() << "[" << color(green) << "ww" << color() << "] ";
-    llog::error.prepend() << "[" << color(red, true) << "EE" << color() << "] " << color(white, true);
+    llog::warning.prepend() << "[" << color( green ) << "ww" << color() << "] ";
+    llog::error.prepend() << "[" << color( red, true ) << "EE" << color() << "] " << color( white, true );
 
     // append just resets color
     llog::error.append() << color();
 
-    llog::set_loglevel( verbose ? loglevel::info : loglevel::error);
+    llog::set_loglevel( verbose ? loglevel::info : loglevel::error );
 }
 
 #pragma GCC visibility pop
@@ -270,9 +270,9 @@ int init( ParserFlag _flags )
 
     g_parserFlags = _flags;
 
-	llog::init();
+    llog::init();
     llog::set_output( std::cerr );
-    startLogging( isFlagSet(VERBOSE) );
+    startLogging( isFlagSet( VERBOSE ) );
 
     return EXIT_SUCCESS;
 }
@@ -284,39 +284,59 @@ int terminate()
     g_sentenceMap = nullptr;
     g_parserFlags = 0;
 
-	llog::destroy();
+    llog::destroy();
     return EXIT_SUCCESS;
 }
 
 // -------------------------------------------------------------------------- //
 
-int  parse( dataset & allSentences_,
+int parse_( dataset & allSentences_,
             linkset & allLinks_,
             tagset  & allTags_,
-            const std::string & sentencePath,
-            const std::string & linksPath,
-            const std::string & tagPath )
+            const char * _sentencePath,
+            const char * _linksPath,
+            const char * _tagPath )
+{
+    assert( _sentencePath );
+    assert( _linksPath );
+    assert( _tagPath );
+
+    const std::string sentencePath( _sentencePath );
+    const std::string linksPath( _linksPath );
+    const std::string tagPath( _tagPath );
+
+    return parse( allSentences_, allLinks_, allTags_, sentencePath, linksPath, tagPath );
+}
+
+// -------------------------------------------------------------------------- //
+
+int parse( dataset & allSentences_,
+           linkset & allLinks_,
+           tagset  & allTags_,
+           const std::string & _sentencePath,
+           const std::string & _linksPath,
+           const std::string & _tagPath )
 {
     datainfo info;
     int parsingSuccess = EXIT_SUCCESS;
 
-    if( sentencePath.size() )
+    if( _sentencePath.size() )
     {
         parsingSuccess = isFlagSet( DETAILED ) ?
-                         parseDetailed( sentencePath, info, allSentences_ ):
-                         parseSentences( sentencePath, info, allSentences_ );
+                         parseDetailed( _sentencePath, info, allSentences_ ):
+                         parseSentences( _sentencePath, info, allSentences_ );
     }
 
-    if( parsingSuccess != EXIT_FAILURE && linksPath.size() && !isFlagSet( NO_LINKS ) )
-        parsingSuccess = parseLinks( linksPath, info, allLinks_ );
+    if( parsingSuccess != EXIT_FAILURE && _linksPath.size() && !isFlagSet( NO_LINKS ) )
+        parsingSuccess = parseLinks( _linksPath, info, allLinks_ );
 
-    if( parsingSuccess != EXIT_FAILURE && tagPath.size() && !isFlagSet( NO_TAGS ) )
-        parsingSuccess = parseTags( tagPath, info, allTags_ );
+    if( parsingSuccess != EXIT_FAILURE && _tagPath.size() && !isFlagSet( NO_TAGS ) )
+        parsingSuccess = parseTags( _tagPath, info, allTags_ );
 
-    if ( parsingSuccess == EXIT_SUCCESS )
+    if( parsingSuccess == EXIT_SUCCESS )
     {
         const sentence::id highestLinkId = allLinks_.getHighestSentenceId();
-        if ( highestLinkId > info.m_highestId )
+        if( highestLinkId > info.m_highestId )
             info.m_highestId = highestLinkId;
 
         // create an container to retrieve sentences from id in a very fast manner
