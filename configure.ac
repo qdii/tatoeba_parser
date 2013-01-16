@@ -14,6 +14,8 @@ AC_SUBST([TATOPARSER_API_VERSION], [2.5])
 LT_PREREQ([2.2])
 LT_INIT()
 
+BOOST_REQUIRE
+
 # Debug mode
 AC_ARG_ENABLE([limit-mem],
   [  --enable-limit-mem    	provides an option to limitate the virtual memory (--limit-mem).],
@@ -38,9 +40,6 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 
 # Checks for libraries.
-AC_SEARCH_LIBS([_ZN5boost15program_options18option_descriptionC1Ev], [boost_program_options], , AC_MSG_ERROR([Unable to find Boost Program Options library]))
-AC_SEARCH_LIBS([_ZN5boost11basic_regexIiNS_16icu_regex_traitsEE9do_assignEPKiS4_j], [boost_regex], , AC_MSG_ERROR([Unable to find Boost Regex]))
-
 AS_IF([test "x$download_mode" = "xyes"], [
   PKG_CHECK_MODULES([CURL], [libcurl])
 ])
@@ -53,13 +52,8 @@ LDFLAGS="$LDFLAGS $ICUUC_LIBS $CURL_LIBS"
 AC_CHECK_HEADERS([fcntl.h string.h unistd.h])
 
 # Checks for boost headers
-AC_CHECK_HEADERS([boost/program_options.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
-AC_CHECK_HEADERS([boost/program_options/options_description.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
-AC_CHECK_HEADERS([boost/program_options/cmdline.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
-AC_CHECK_HEADERS([boost/program_options/variables_map.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
-AC_CHECK_HEADERS([boost/program_options/parsers.hpp], ,[AC_MSG_ERROR([Unable to find Boost Program Options header (boost/program_options.hpp)])])
-AC_CHECK_HEADERS([boost/regex.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex.hpp)])])
-AC_CHECK_HEADERS([boost/regex/icu.hpp], ,[AC_MSG_ERROR([Unable to find Boost Regex header (boost/regex/icu.hpp)])])
+BOOST_REGEX
+BOOST_PROGRAM_OPTIONS
 AC_CHECK_HEADERS([boost/spirit/include/qi.hpp], , [AC_MSG_ERROR([Unable to find Boost Spirit header (boost/spirit/include/qi.hpp)])])
 AC_CHECK_HEADERS([boost/config.hpp], , )
 if test "$download_mode" = "yes"
