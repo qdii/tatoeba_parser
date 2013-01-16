@@ -50,6 +50,21 @@ int init( ParserFlag _flags );
  * @param[in] _linksPath A path to links.csv
  * @param[in] _tagPath A path to tags.csv
  * @return EXIT_SUCCESS on success, EXIT_FAILURE otherwise */
+int parse_( dataset & allSentences_,
+           linkset & allLinks_,
+           tagset  & allTags_,
+           const char * _sentencePath,
+           const char * _linksPath,
+           const char * _tagPath );
+
+/**@brief Parses the database
+ * @param[out] allSentences_ A structure which will be filled with all the sentences
+ * @param[out] allLinks_ A structure which will be filled with information about links.
+ * @param[out] allTags_ A structure which will be filled with information about tags.
+ * @param[in] _sentencePath A path to sentences.csv
+ * @param[in] _linksPath A path to links.csv
+ * @param[in] _tagPath A path to tags.csv
+ * @return EXIT_SUCCESS on success, EXIT_FAILURE otherwise */
 int parse( dataset & allSentences_,
            linkset & allLinks_,
            tagset  & allTags_,

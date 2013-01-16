@@ -49,6 +49,13 @@ public:
                       const char * _lastModifiedDate = nullptr  );
 
 public:
+    // python interface
+    sentence * getBySentenceId( sentence::id _id ) { return operator[](_id); }
+    sentence * getByIndex( size_t _index ) { assert( _index < m_allSentences.size() ); return &m_allSentences[_index]; }
+    size_t const size() { return m_allSentences.size(); }
+
+public:
+    // iterator interface
     sentence * operator[]( sentence::id );
     const sentence * operator[]( sentence::id ) const;
 
