@@ -311,16 +311,17 @@
 // hide symbols on linux
 #if __GNUC__ >= 4
 #   pragma GCC visibility push(hidden)
+#   define QLOG_PURE __attribute__((pure))
+#else
+#   define QLOG_PURE
 #endif
 
 // let the user defines his own namespace
-#ifdef QLOG_NAMESPACE
+#ifndef QLOG_NAMESPACE
+#   define QLOG_NAMESPACE qlog
+#endif
 namespace QLOG_NAMESPACE
 {
-#else
-namespace qlog
-{
-#endif
 
 // -------------------------------------------------------------------------- //
 
@@ -655,10 +656,9 @@ struct logger
     {
     }
 
-    ~logger()
+    ~logger() QLOG_PURE
     {
         QLOG_ASSERT( 0 == m_nbReceivers );
-        reset_decoration();
     }
 
     /**@brief Removes all prepending or appending text */
@@ -1568,6 +1568,12 @@ decorater<loglevel, append> & operator << ( decorater<loglevel, append> & _dec, 
 
     return _dec;
 }
+// -------------------------------------------------------------------------- //
+struct initializer
+{
+    initializer() { QLOG_NAMESPACE :: init(); }
+    ~initializer() { QLOG_NAMESPACE :: destroy(); }
+};
 
 } // namespace
 #if __GNUC__ >= 4
