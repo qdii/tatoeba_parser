@@ -133,7 +133,7 @@ int main( int argc, char * argv[] )
                    csvPath + '/' + TAG_FILENAME,
                    csvPath + '/' + LIST_FILENAME );
 
-        skipFiltering = ( libraryParsing != EXIT_SUCCESS );
+        skipFiltering |= ( libraryParsing != EXIT_SUCCESS );
     }
     else
         skipFiltering = true;
