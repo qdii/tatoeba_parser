@@ -44,10 +44,10 @@ bool downloadIf( bool _condition, std::string _url, std::string _destinationFile
 
 int main( int argc, char * argv[] )
 {
-	qlog::init();
+	qlog::initializer log_init;
     startLog( false );
     FilterVector allFilters; ///< the filter list
-    ///< to select sentences based on the user options)
+                             ///< to select sentences based on the user options)
 
     // create the filters with respect to the user options
     allFilters.reserve( 5 );
@@ -220,8 +220,6 @@ int main( int argc, char * argv[] )
     NAMESPACE ::
     #endif
     terminate();
-
-	qlog::destroy();
 
     return EXIT_SUCCESS;
 }
