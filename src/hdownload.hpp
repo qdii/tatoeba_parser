@@ -370,6 +370,8 @@ basic_downloader & basic_downloader::operator=( basic_downloader && _obj )
 {
     curl_wrapper::operator=( std::move( _obj ) );
     m_uri = std::move( _obj.m_uri );
+
+    return *this;
 }
 
 // -------------------------------------------------------------------------- //
