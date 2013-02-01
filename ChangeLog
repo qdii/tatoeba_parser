@@ -1,3 +1,13 @@
+v3.0
+	- Added support for lists.cv
+	- Fixed a bug in hdownloader.hpp
+	- Added python support
+	- Using boost.m4 in autoconf
+	- Added pkg-config for libcurl
+	- Added display-lang to output the language a sentence is written into
+	- Lowered autoconf requirements to 2.68
+	- Fixed unittests when DESTDIR was not /
+
 v2.6
 	- Fixed a bug causing the parser to crash when a sentence of very high id was present in links.csv.
 	- The parser now works on windows

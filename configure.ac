@@ -2,14 +2,14 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT([tatoparser], 2.6, [victor.lavaud@gmail.com])
+AC_INIT([tatoparser], 3.0, [victor.lavaud@gmail.com])
 AM_INIT_AUTOMAKE
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 
-AC_SUBST([TATOPARSER_SO_VERSION], [2:5:0])
-AC_SUBST([TATOPARSER_API_VERSION], [2.5])
+AC_SUBST([TATOPARSER_SO_VERSION], [3:0:0])
+AC_SUBST([TATOPARSER_API_VERSION], [3.0])
 
 LT_PREREQ([2.2])
 LT_INIT()
