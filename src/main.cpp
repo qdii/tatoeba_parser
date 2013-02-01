@@ -2,6 +2,7 @@
 #include <tatoparser/dataset.h>
 #include <tatoparser/linkset.h>
 #include <tatoparser/tagset.h>
+#include <tatoparser/listset.h>
 #include <tatoparser/interface_lib.h>
 #include "options.h"
 #include "filter_id.h"
@@ -20,11 +21,13 @@ static const char SENTENCES_FILENAME[] = "sentences.csv";
 static const char DETAILED_FILENAME[] = "sentences_detailed.csv";
 static const char LINKS_FILENAME[] = "links.csv";
 static const char TAG_FILENAME[] = "tags.csv";
+static const char LIST_FILENAME[] = "lists.csv";
 
 static const char DETAILED_URL[] = "http://tatoeba.org/files/downloads/sentences_detailed.csv";
 static const char SENTENCES_URL[] = "http://tatoeba.org/files/downloads/sentences.csv";
 static const char LINKS_URL[] = "http://tatoeba.org/files/downloads/links.csv";
 static const char TAG_URL[] = "http://tatoeba.org/files/downloads/tags.csv";
+static const char LIST_URL[] = "http://tatoeba.org/files/downloads/lists.csv";
 
 void startLog( bool _verbose );
 
@@ -67,10 +70,11 @@ int main( int argc, char * argv[] )
     linkset allLinks;
     tagset allTags;
     dataset allSentences; ///< data will contain the sentences
+    listset allLists;
 
     try
     {
-        options.getFilters( allSentences, allLinks, allTags, allFilters );
+        options.getFilters( allSentences, allLinks, allTags, allLists, allFilters );
     }
     catch( const boost::regex_error & err )
     {
@@ -93,44 +97,62 @@ int main( int argc, char * argv[] )
         return EXIT_FAILURE;
     }
 
+    bool skipFiltering = options.justParse();
+
+
     // call the parsing library
     const int libraryInit =
         init(
             ( options.isItNecessaryToParseLinksFile() ? 0 : NO_LINKS ) |
             ( options.isItNecessaryToParseTagFile() ? 0 : NO_TAGS ) |
             ( options.isVerbose() ? VERBOSE : 0 ) |
-            ( options.isItNecessaryToParseDetailedFile() ? DETAILED : 0 )
+            ( options.isItNecessaryToParseDetailedFile() ? DETAILED : 0 ) |
+            ( options.isItNecessaryToParseListFile() ? 0 : NO_LISTS )
 	        );
 
-    if( libraryInit != EXIT_SUCCESS )
-        return EXIT_FAILURE;
-
-#ifdef HAVE_CURL_CURL_H
-    if( options.downloadRequested() )
+    if( libraryInit == EXIT_SUCCESS )
     {
-        // download files if they don't exist
-        downloadIf( !options.isItNecessaryToParseDetailedFile(), SENTENCES_URL, SENTENCES_FILENAME );
-        downloadIf( options.isItNecessaryToParseDetailedFile(), DETAILED_URL, DETAILED_FILENAME );
-        downloadIf( options.isItNecessaryToParseLinksFile(), LINKS_URL, LINKS_FILENAME );
-        downloadIf( options.isItNecessaryToParseTagFile(), TAG_URL, TAG_FILENAME );
+#       ifdef HAVE_CURL_CURL_H
+        if( options.downloadRequested() )
+        {
+            // download files if they don't exist
+            downloadIf( !options.isItNecessaryToParseDetailedFile(), SENTENCES_URL, SENTENCES_FILENAME );
+            downloadIf( options.isItNecessaryToParseDetailedFile(), DETAILED_URL, DETAILED_FILENAME );
+            downloadIf( options.isItNecessaryToParseLinksFile(), LINKS_URL, LINKS_FILENAME );
+            downloadIf( options.isItNecessaryToParseTagFile(), TAG_URL, TAG_FILENAME );
+            downloadIf( options.isItNecessaryToParseListFile(), LIST_URL, LIST_FILENAME );
+        }
+#       endif
+
+        const int libraryParsing =
+            parse( allSentences, allLinks, allTags, allLists,
+                   options.isItNecessaryToParseDetailedFile() ?
+                   csvPath + '/' + DETAILED_FILENAME     :
+                   csvPath + '/' + SENTENCES_FILENAME,
+                   csvPath + '/' + LINKS_FILENAME,
+                   csvPath + '/' + TAG_FILENAME,
+                   csvPath + '/' + LIST_FILENAME );
+
+        skipFiltering = ( libraryParsing != EXIT_SUCCESS );
     }
-#endif
+    else
+        skipFiltering = true;
 
-    const int libraryParsing =
-        parse( allSentences, allLinks, allTags,
-               options.isItNecessaryToParseDetailedFile() ?
-               csvPath + '/' + DETAILED_FILENAME     :
-               csvPath + '/' + SENTENCES_FILENAME,
-               csvPath + '/' + LINKS_FILENAME, csvPath + '/' + TAG_FILENAME );
-
-    if( libraryParsing != EXIT_SUCCESS )
-        return EXIT_FAILURE;
-
+    // if a list has beeg given, check if the list exists
+    if ( !skipFiltering )
+    {
+        const std::string listName = options.getListName();
+        if ( listName.size() && allLists.doesListExist( listName ) == false )
+        {
+            qlog::error << "list \"" << listName << "\" does not exist in lists.csv" << qlog::color() << '\n';
+            skipFiltering = true;
+        }
+    }
 
     ///////////////////////////
     //  filtering sentences  //
     ///////////////////////////
-    if( !options.justParse() )
+    if( !skipFiltering )
     {
         // go through every sentence and see if it matches the filter
         auto endFilter = allFilters.end();

@@ -11,6 +11,7 @@ NAMESPACE_START
 struct dataset;
 struct linkset;
 struct tagset;
+struct listset;
 // -------------------------------------------------------------------------- //
 typedef uint32_t ParserFlag;
 
@@ -31,9 +32,12 @@ static const ParserFlag NO_TAGS    = 1<<2;
 // partially parses the corpus  (omitting links.csv)
 static const ParserFlag NO_LINKS   = 1<<3;
 
+// partially parses the corpus (omitting lists.csv)
+static const ParserFlag NO_LISTS   = 1<<4;
+
 // expects a sentences_detailed.csv file and parses the author of the sentences along with
 // the rest of the data
-static const ParserFlag DETAILED   = 1<<4;
+static const ParserFlag DETAILED   = 1<<5;
 
 
 // -------------------------------------------------------------------------- //
@@ -49,13 +53,16 @@ int init( ParserFlag _flags );
  * @param[in] _sentencePath A path to sentences.csv
  * @param[in] _linksPath A path to links.csv
  * @param[in] _tagPath A path to tags.csv
+ * @param[in] _listPath A path to lists.csv
  * @return EXIT_SUCCESS on success, EXIT_FAILURE otherwise */
 int parse_( dataset & allSentences_,
            linkset & allLinks_,
            tagset  & allTags_,
+           listset & allLists_,
            const char * _sentencePath,
            const char * _linksPath,
-           const char * _tagPath );
+           const char * _tagPath,
+           const char * _listPath );
 
 /**@brief Parses the database
  * @param[out] allSentences_ A structure which will be filled with all the sentences
@@ -64,13 +71,16 @@ int parse_( dataset & allSentences_,
  * @param[in] _sentencePath A path to sentences.csv
  * @param[in] _linksPath A path to links.csv
  * @param[in] _tagPath A path to tags.csv
+ * @param[in] _listPath A path to lists.csv
  * @return EXIT_SUCCESS on success, EXIT_FAILURE otherwise */
 int parse( dataset & allSentences_,
            linkset & allLinks_,
            tagset  & allTags_,
+           listset & allLists_,
            const std::string & _sentencePath,
            const std::string & _linksPath,
-           const std::string & _tagPath );
+           const std::string & _tagPath,
+           const std::string & _listPath );
 
 /**@brief Destroys the parser
  * @return EXIT_SUCCESS on success */

@@ -4,6 +4,7 @@
 #include "filter_regex.h"
 #include "filter_translation_regex.h"
 #include "filter_link.h"
+#include "filter_list.h"
 #include "filter_lang.h"
 #include "filter_tag.h"
 #include "filter_translatable_in_language.h"
@@ -62,6 +63,7 @@ userOptions::userOptions()
           "regular expressions are provided, a sentence will be kept if any of its "
           "translations matches them all." )
         ( "user,u", po::value<std::string>(), "Keep the sentences which belong to this user only.")
+        ( "in-list", po::value<std::string>(), "Keep the sentences which belong to a given list." );
     ;
     m_desc.add( filteringOptions );
     m_visibleOptions.add( filteringOptions );
@@ -106,7 +108,7 @@ void userOptions::treatCommandLine( int argc, char * argv[] )
 // -------------------------------------------------------------------------- //
 
 /**@brief Populate the passed list of filters with certain filters */
-void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset, FilterVector & allFilters_ )
+void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset, listset & _listset, FilterVector & allFilters_ )
 {
     using std::shared_ptr;
     using std::vector;
@@ -205,6 +207,17 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
                 new filterTranslationRegex(
                     _dataset, _linkset,
                     m_vm["translation-regex"].as<vector<string>>() )
+            )
+        );
+    }
+
+    if ( m_vm.count( "in-list" ) )
+    {
+        allFilters_.push_back(
+            shared_ptr<filter>(
+                new filterList(
+                    _listset, m_vm["in-list"].as<std::string>()
+                )
             )
         );
     }

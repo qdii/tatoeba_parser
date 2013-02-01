@@ -3,10 +3,12 @@
 #include "tatoparser/dataset.h"
 #include "tatoparser/tagset.h"
 #include "tatoparser/linkset.h"
+#include "tatoparser/listset.h"
 #include "datainfo.h"
 #include "fast_sentence_adv_parser.h"
 #include "fast_sentence_parser.h"
 #include "fast_link_parser.h"
+#include "fast_list_parser.h"
 #include "fast_tag_parser.h"
 #include "file_mapper.h"
 
@@ -242,6 +244,15 @@ int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, datase
 
     return ret;
 }
+// -------------------------------------------------------------------------- //
+static
+int parseLists( const std::string & _listPath, datainfo & _info, listset & allLists_ )
+{
+    std::unique_ptr<fileMapper> linksMap = std::move( mapFileToMemory( _listPath ) );
+
+    fastListParser<char*> parser( linksMap->begin(), linksMap->end() );
+    return parser.start( allLists_ ) != 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+}
 
 // -------------------------------------------------------------------------- //
 static
@@ -293,19 +304,23 @@ int terminate()
 int parse_( dataset & allSentences_,
             linkset & allLinks_,
             tagset  & allTags_,
+            listset & allLists_,
             const char * _sentencePath,
             const char * _linksPath,
-            const char * _tagPath )
+            const char * _tagPath,
+            const char * _listPath )
 {
     assert( _sentencePath );
     assert( _linksPath );
     assert( _tagPath );
+    assert( _listPath );
 
     const std::string sentencePath( _sentencePath );
     const std::string linksPath( _linksPath );
     const std::string tagPath( _tagPath );
+    const std::string listPath( _listPath );
 
-    return parse( allSentences_, allLinks_, allTags_, sentencePath, linksPath, tagPath );
+    return parse( allSentences_, allLinks_, allTags_, allLists_, sentencePath, linksPath, tagPath, listPath );
 }
 
 // -------------------------------------------------------------------------- //
@@ -313,9 +328,11 @@ int parse_( dataset & allSentences_,
 int parse( dataset & allSentences_,
            linkset & allLinks_,
            tagset  & allTags_,
+           listset & allLists_,
            const std::string & _sentencePath,
            const std::string & _linksPath,
-           const std::string & _tagPath )
+           const std::string & _tagPath,
+           const std::string & _listPath )
 {
     datainfo info;
     int parsingSuccess = EXIT_SUCCESS;
@@ -332,6 +349,9 @@ int parse( dataset & allSentences_,
 
     if( parsingSuccess != EXIT_FAILURE && _tagPath.size() && !isFlagSet( NO_TAGS ) )
         parsingSuccess = parseTags( _tagPath, info, allTags_ );
+
+    if( parsingSuccess != EXIT_FAILURE && _listPath.size() && !isFlagSet( NO_LISTS ) )
+        parsingSuccess = parseLists( _listPath, info, allLists_ );
 
     if( parsingSuccess == EXIT_SUCCESS )
     {

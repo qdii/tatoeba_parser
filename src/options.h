@@ -11,6 +11,7 @@ NAMESPACE_START
 struct dataset;
 struct linkset;
 struct tagset;
+struct listset;
 
 static const char DEFAULT_CONFIG_FILE_PATH[] = "~/.tatoparser";
 
@@ -30,7 +31,7 @@ struct userOptions
      * @param[in] _linkset The list of links
      * @param[in] _tagset The list of tags
      * @param[out] allFilters_ The filter list that will be filled in by the call */
-    void getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset,
+    void getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset, listset & _listset,
                      FilterVector & allFilters_ );
 
     /**@brief Checks if any argument the user specified needs the links.csv to be parsed */
@@ -41,6 +42,9 @@ struct userOptions
 
     /**@brief Checks if any argument the user specified needs the sentence_detailed.csv to be parsed */
     bool isItNecessaryToParseDetailedFile() const;
+
+    /**@brief Checks if any argument the user specified needs the list.csv to be parsed */
+    bool isItNecessaryToParseListFile() const;
 
     /**@brief Has -v been specified? */
     bool isVerbose() const;
@@ -71,6 +75,9 @@ struct userOptions
 
     /**@brief Gets the separator character */
     std::string getSeparator() const;
+
+    /**@brief Gets the name of the list to look the sentence into */
+    std::string getListName() const;
 
 
 public:
@@ -126,6 +133,14 @@ inline
 bool userOptions::isItNecessaryToParseDetailedFile() const
 {
     return m_vm.count( "user" ) > 0;
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+bool userOptions::isItNecessaryToParseListFile() const
+{
+    return m_vm.count( "in-list" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -241,5 +256,13 @@ std::string userOptions::getSeparator() const
 {
     return m_separator;
 }
+// -------------------------------------------------------------------------- //
+
+inline
+std::string userOptions::getListName() const
+{
+    return m_vm.count( "in-list" ) > 0 ? m_vm[ "in-list" ].as<std::string>() : "";
+}
+
 NAMESPACE_END
 #endif //TATOPARSER_OPTIONS_H
