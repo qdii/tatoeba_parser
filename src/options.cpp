@@ -1,6 +1,7 @@
 #include "prec.h"
 #include "options.h"
 #include "filter_id.h"
+#include "filter_idlist.h"
 #include "filter_regex.h"
 #include "filter_translation_regex.h"
 #include "filter_link.h"
@@ -63,7 +64,8 @@ userOptions::userOptions()
           "regular expressions are provided, a sentence will be kept if any of its "
           "translations matches them all." )
         ( "user,u", po::value<std::string>(), "Keep the sentences which belong to this user only.")
-        ( "in-list", po::value<std::string>(), "Keep the sentences which belong to a given list." );
+        ( "in-list", po::value<std::string>(), "Keep the sentences which belong to a given list." )
+        ( "translates,t", po::value<sentence::id>(), "Keep the indirect and direct translations of a given sentence." )
     ;
     m_desc.add( filteringOptions );
     m_visibleOptions.add( filteringOptions );
@@ -325,5 +327,34 @@ void userOptions::declareConfigFileValidOptions()
 }
 
 // -------------------------------------------------------------------------- //
+
+void userOptions::addTranslationFilters( sentence::id _id, const linkset & _allLinks, std::vector<sentence::id> & allTranslations_ )
+{
+    qlog::debug << "adding translation: " << qlog::color( qlog::yellow ) << _id << qlog::color() << '\n';
+    allTranslations_.push_back( _id );
+    auto iterators = _allLinks.getLinksOf( _id );
+    for( linkset::const_iterator current = iterators.first; current != iterators.second; ++current )
+    {
+        if( std::find( allTranslations_.begin(), allTranslations_.end(), *current ) == allTranslations_.end() )
+            addTranslationFilters( *current, _allLinks, allTranslations_ );
+    }
+}
+
+// -------------------------------------------------------------------------- //
+
+void userOptions::treatTranslations( const linkset & _allLinks, FilterVector & allFilters_ )
+{
+    if( m_vm.count( "translates" ) > 0 )
+    {
+        sentence::id sentenceToTranslate = m_vm["translates"].as<sentence::id>();
+        std::vector<sentence::id> allTranslations;
+        addTranslationFilters( sentenceToTranslate, _allLinks, allTranslations );
+
+        assert( allTranslations.empty() == false );
+
+        std::shared_ptr<filter> translationIdFilter( new filterIdList( std::move( allTranslations ) ) );
+        allFilters_.push_back( translationIdFilter );
+    }
+}
 
 NAMESPACE_END

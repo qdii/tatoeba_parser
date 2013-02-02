@@ -4,6 +4,7 @@
 #include <iostream>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <tatoparser/sentence.h>
 #include "filter.h"
 
 NAMESPACE_START
@@ -79,16 +80,19 @@ struct userOptions
     /**@brief Gets the name of the list to look the sentence into */
     std::string getListName() const;
 
-
+    /**@brief Adds filters for a particular command that retrieves direct and indirect translations */
+    void treatTranslations( const linkset & _allLinks, FilterVector & allFilters_ );
 public:
     void printHelp();
     void printVersion();
-
 
     std::string getCsvPath() const;
     std::string getFirstTranslationLanguage() const;
 
 private:
+    /**@brief Add filter corresponding to the direct translations of a sentence */
+    void addTranslationFilters( sentence::id _id, const linkset & _allLinks, std::vector<sentence::id> & allTranslations_ );
+
     boost::program_options::options_description m_desc, m_visibleOptions;
     boost::program_options::variables_map       m_vm;
     std::string                                 m_separator;
@@ -121,10 +125,11 @@ bool userOptions::isItNecessaryToParseTagFile() const
 inline
 bool userOptions::isItNecessaryToParseLinksFile() const
 {
-    return  ( m_vm.count( "is-linked-to" ) > 0 )		||
-            ( m_vm.count( "translation-regex" ) > 0 )	||
-            ( m_vm.count( "display-first-translation") > 0 ) ||
-            ( m_vm.count( "is-translatable-in" ) > 0 );
+    return ( m_vm.count( "is-linked-to" ) > 0 )		||
+           ( m_vm.count( "translation-regex" ) > 0 )	||
+           ( m_vm.count( "display-first-translation" ) > 0 ) ||
+           ( m_vm.count( "is-translatable-in" ) > 0 ) ||
+           ( m_vm.count( "translates" ) > 0 );
 }
 
 // -------------------------------------------------------------------------- //

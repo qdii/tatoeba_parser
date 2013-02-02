@@ -138,9 +138,11 @@ int main( int argc, char * argv[] )
     else
         skipFiltering = true;
 
-    // if a list has beeg given, check if the list exists
     if ( !skipFiltering )
     {
+        options.treatTranslations( allLinks, allFilters );
+
+        // if a list has beeg given, check if the list exists
         const std::string listName = options.getListName();
         if ( listName.size() && allLists.doesListExist( listName ) == false )
         {
