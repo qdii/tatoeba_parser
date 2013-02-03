@@ -47,6 +47,13 @@ public:
      * @return A pair of iterator (begin,end), traversing a sequence of sentence::ids */
     std::pair<const_iterator, const_iterator> getLinksOf( sentence::id _a ) const;
 
+    /**@brief retrieves all the ids of the sentences linked to a sentence in a safe way
+     * @param[in] _a A sentence
+     * @note This is different from getLinksOf in that it checks that the id exists in the database
+     *       before trying to find its links.
+     * @return A pair of iterator (begin,end), traversing a sequence of sentence::ids */
+    std::pair<const_iterator, const_iterator> getLinksOfSafe( sentence::id _a ) const;
+
     /**@brief Find the highest id in the list of links
      * @return a sentence id */
     sentence::id getHighestSentenceId() const;
@@ -145,6 +152,19 @@ linkset::getLinksOf( sentence::id _a ) const
     return std::pair<linkset::const_iterator, linkset::const_iterator>(
                m_links.data() + sentenceOffsets.first, m_links.data() + sentenceOffsets.second
            );
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+std::pair<linkset::const_iterator, linkset::const_iterator>
+linkset::getLinksOfSafe( sentence::id _a ) const
+{
+    return ( m_offsets.empty() || _a < m_offsets.size() ) ?
+        getLinksOf( _a ) :
+        std::make_pair<linkset::const_iterator, linkset::const_iterator>(
+            linkset::const_iterator(), linkset::const_iterator()
+        );
 }
 
 NAMESPACE_END

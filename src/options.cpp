@@ -332,7 +332,7 @@ void userOptions::addTranslationFilters( sentence::id _id, const linkset & _allL
 {
     qlog::debug << "adding translation: " << qlog::color( qlog::yellow ) << _id << qlog::color() << '\n';
     allTranslations_.push_back( _id );
-    auto iterators = _allLinks.getLinksOf( _id );
+    auto iterators = _allLinks.getLinksOfSafe( _id );
     for( linkset::const_iterator current = iterators.first; current != iterators.second; ++current )
     {
         if( std::find( allTranslations_.begin(), allTranslations_.end(), *current ) == allTranslations_.end() )
