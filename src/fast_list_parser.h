@@ -25,7 +25,7 @@ struct fastListParser
     }
 
     /**@brief Parses the file
-     * @return The number of links parsed
+     * @return The number of lists parsed
      * @param[in] allLists A container that will be filled with the links */
     size_t start( listset & allLinks_ ) TATO_NO_THROW;
 

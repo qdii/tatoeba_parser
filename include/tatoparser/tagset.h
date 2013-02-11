@@ -34,7 +34,7 @@ struct tagset
     bool isSentenceTagged( sentence::id _id, tagId _tag );
 
 private:
-    void tagSentence( sentence::id _id, tagId _tag);
+    void tagSentence( sentence::id _id, tagId _tag );
 
     typedef std::vector<sentence::id> sentenceList;
     typedef std::map<tagId, sentenceList> tagToSentencesMap;

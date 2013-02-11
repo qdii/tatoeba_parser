@@ -38,29 +38,50 @@ public:
     void allocate( const datainfo & _info );
 
 public:
-    iterator begin() { return m_allSentences.begin(); }
-    const_iterator begin() const { return m_allSentences.begin(); }
+    iterator begin()
+    {
+        return m_allSentences.begin();
+    }
+    const_iterator begin() const
+    {
+        return m_allSentences.begin();
+    }
 
-    iterator end() { return m_allSentences.end(); }
-    const_iterator end() const { return m_allSentences.end(); }
+    iterator end()
+    {
+        return m_allSentences.end();
+    }
+    const_iterator end() const
+    {
+        return m_allSentences.end();
+    }
     void addSentence( sentence::id _a, const char * _lang, const char * _data,
                       const char * _author = nullptr,
                       const char * _creationnDate = nullptr,
-                      const char * _lastModifiedDate = nullptr  );
+                      const char * _lastModifiedDate = nullptr );
 
 public:
     // python interface
-    sentence * getBySentenceId( sentence::id _id ) { return operator[](_id); }
-    sentence * getByIndex( size_t _index ) { assert( _index < m_allSentences.size() ); return &m_allSentences[_index]; }
-    size_t const size() { return m_allSentences.size(); }
+    sentence * getBySentenceId( sentence::id _id )
+    {
+        return operator[]( _id );
+    }
+    sentence * getByIndex( size_t _index )
+    {
+        assert( _index < m_allSentences.size() );
+        return &m_allSentences[_index];
+    }
+    size_t size() const
+    {
+        return m_allSentences.size();
+    }
 
 public:
     // iterator interface
     sentence * operator[]( sentence::id );
     const sentence * operator[]( sentence::id ) const;
 
-    /**@brief Should be run before any sentence is retrieved using operator[]
-     */
+    /**@brief Should be run before any sentence is retrieved using operator[] */
     void prepare( const datainfo & _info );
 
 private:
@@ -78,9 +99,9 @@ inline
 sentence * dataset::operator[]( sentence::id _id )
 {
     assert( !m_fastAccess.empty() ); // if m_fastAccess is empty, it means that prepare() command has not been run before.
-    assert( static_cast<std::size_t>(_id) < m_fastAccess.size() );
+    assert( static_cast<std::size_t>( _id ) < m_fastAccess.size() );
 
-    if (m_fastAccess[_id] == static_cast<std::size_t>(-1))
+    if( m_fastAccess[_id] == static_cast<std::size_t>( -1 ) )
         return nullptr;
 
     return & ( m_allSentences[ m_fastAccess[_id] ] );
@@ -92,7 +113,7 @@ inline
 const sentence * dataset::operator[]( sentence::id _id ) const
 {
     assert( !m_fastAccess.empty() );
-    if (m_fastAccess[_id] == static_cast<std::size_t>(-1))
+    if( m_fastAccess[_id] == static_cast<std::size_t>( -1 ) )
         return nullptr;
 
     return & ( m_allSentences[ m_fastAccess[_id] ] );
@@ -101,12 +122,12 @@ const sentence * dataset::operator[]( sentence::id _id ) const
 // -------------------------------------------------------------------------- //
 
 inline
-void dataset::addSentence(  sentence::id _id, const char * _lang, const char * _data,
-                            const char * _author,
-                            const char * _creationDate,
-                            const char * _lastModifiedDate )
+void dataset::addSentence( sentence::id _id, const char * _lang, const char * _data,
+                           const char * _author,
+                           const char * _creationDate,
+                           const char * _lastModifiedDate )
 {
-    m_allSentences.push_back( sentence( _id, _lang, _data, _author, _creationDate, _lastModifiedDate  ) );
+    m_allSentences.push_back( sentence( _id, _lang, _data, _author, _creationDate, _lastModifiedDate ) );
 }
 
 NAMESPACE_END

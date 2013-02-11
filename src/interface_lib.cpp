@@ -334,7 +334,9 @@ int parse( dataset & allSentences_,
            const std::string & _tagPath,
            const std::string & _listPath )
 {
-    datainfo info;
+    datainfo info; //holds information about the number of sentences, of links, etc.
+                   //then dataset and linkset can allocate memory in one shot.
+
     int parsingSuccess = EXIT_SUCCESS;
 
     if( _sentencePath.size() )

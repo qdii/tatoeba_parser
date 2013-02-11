@@ -75,7 +75,7 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
         {
             _tagset.tagSentence( sentenceId, tagName );
         }
-        catch ( const std::bad_alloc & )
+        catch( const std::bad_alloc & )
         {
             llog::error << "Out of memory.\n";
             break;

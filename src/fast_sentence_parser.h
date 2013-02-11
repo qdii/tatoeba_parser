@@ -64,7 +64,7 @@ template<typename iterator>
 size_t fastSentenceParser<iterator>::countLinesFast() const
 {
     const size_t nbChars =
-        reinterpret_cast<size_t>(&*m_end) - reinterpret_cast<size_t>(&*m_begin);
+        reinterpret_cast<size_t>( &*m_end ) - reinterpret_cast<size_t>( &*m_begin );
     static const size_t AVERAGE_NB_BYTES_PER_SENTENCE = 56;
     llog::info << "estimated number of sentences: " << nbChars / AVERAGE_NB_BYTES_PER_SENTENCE << '\n';
     return nbChars / AVERAGE_NB_BYTES_PER_SENTENCE;
@@ -93,38 +93,44 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
     while(true) {
         // try to parse a sentence... (note: it will simply fail when at the
         // end of file)
-        if (qi::parse(begin, end, (
+        if( qi::parse( begin, end, (
             // grammar for a single line of CSV
             // sentence ID
             qi::uint_ >> '\t' >>
 
             // language: 3- or 4-character code, "\N" or nothing
-            qi::raw[qi::repeat(3,4)[qi::ascii::lower] | "\\N" | qi::eps] >> '\t' >>
+            qi::raw[qi::repeat( 3,4 )[qi::ascii::lower] | "\\N" | qi::eps] >> '\t' >>
 
             // sentence: a non-empty string of characters till the next end of line
-            qi::raw[+~qi::char_('\n')] >> '\n'
-        ), id, langRange, sentenceRange)) {
+            qi::raw[+~qi::char_( '\n' )] >> '\n'
+        ), id, langRange, sentenceRange ) )
+        {
             // ok, we managed to parse a sentence.
             // change separators into string endings
-            *(langRange.end()) = '\0';
-            *(sentenceRange.end()) = '\0';
+            *( langRange.end() ) = '\0';
+            *( sentenceRange.end() ) = '\0';
 
             try {
                 _data.addSentence(id, langRange.begin(), sentenceRange.begin());
                 nbSentences++;
             }
-            catch ( const std::bad_alloc & ) {
+            catch( const std::bad_alloc & )
+            {
                 llog::error << "Not enough memory.\n";
                 break;
             }
-        } else if (begin != end) {
+        }
+        else if( begin != end )
+        {
             // we failed at parsing the sentence, and we're not at the end of
             // the file yet
             llog::warning << "Failed to parse sentence from line " << line << std::endl;
 
             // skip over the nearest \n and try again.
-            while (*(begin++) != '\n');
-        } else {
+            while( *( begin++ ) != '\n' );
+        }
+        else
+        {
             // we're at the end of file. finish the job
             break;
         }

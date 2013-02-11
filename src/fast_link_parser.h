@@ -69,7 +69,7 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
             assert( c >= '0' && c <= '9');
 
             // if the line is 125\t234\n
-            // then we "build" id in the following manner:
+            // then we "build" id the following way:
             // c = '1'   ->    id = 10 * 0 + 1  = 1
             // c = '2'   ->    id = 10 * 1 + 2  = 12
             // c = '5'   ->    id = 10 * 12 + 5 = 125
