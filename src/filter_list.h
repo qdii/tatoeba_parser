@@ -25,8 +25,8 @@ struct filterList : public filter
     }
 
 private:
-    listset::list_hash m_hash;
     const listset & m_listset;
+    listset::list_hash m_hash;
 };
 NAMESPACE_END
 

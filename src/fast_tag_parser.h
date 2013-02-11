@@ -42,16 +42,17 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
 
     sentence::id sentenceId = sentence::INVALID_ID;
     char * tagName = nullptr;
+    tagset temporaryTagContainer;
 
     while( cursor != end )
     {
-        sentenceId = *cursor++ - '0';
+        sentenceId = static_cast<sentence::id>( *cursor++ - '0' );
 
         // parsing the sentence id
         while( *cursor != '\t' )
         {
             assert( *cursor >= '0' && *cursor <= '9' );
-            sentenceId = sentenceId * 10 + ( *cursor++ - '0' );
+            sentenceId = sentenceId * 10 + static_cast<sentence::id>( *cursor++ - '0' );
         }
 
         // skip '\t'

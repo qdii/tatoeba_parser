@@ -64,7 +64,7 @@ size_t fastListParser<iterator>::start( listset & TATO_RESTRICT allLists_ ) TATO
         if( ( c != '\t' ) && ( c != '\n' ) )
         {
             if( parsingId )
-                current_id = 10 * current_id + ( c - '0' );
+                current_id = 10 * current_id + static_cast<sentence::id>( c - '0' );
         }
         else if( c == '\t' )
         {

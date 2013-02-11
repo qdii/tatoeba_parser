@@ -41,7 +41,8 @@ private:
 template<typename iterator> inline
 size_t fastLinkParser<iterator>::countLines() const
 {
-    return std::count( m_begin, m_end, '\n' );
+#   pragma warning "fix this in the next major version"
+    return static_cast<size_t>( std::count( m_begin, m_end, '\n' ) );
 }
 
 // -------------------------------------------------------------------------- //
@@ -73,7 +74,7 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
             // c = '1'   ->    id = 10 * 0 + 1  = 1
             // c = '2'   ->    id = 10 * 1 + 2  = 12
             // c = '5'   ->    id = 10 * 12 + 5 = 125
-            id = 10 * id + c - '0';
+            id = 10 * id + static_cast<sentence::id>(c - '0');
         }
         else
         {
