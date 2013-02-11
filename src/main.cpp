@@ -67,6 +67,12 @@ int main( int argc, char * argv[] )
         qlog::error << "The parameter " << err.tokens() << " was expecting a value\n";
         return EXIT_FAILURE;
     }
+    catch( const boost::program_options::invalid_option_value & err )
+    {
+        qlog::error << "Invalid parameter value\n";
+        return EXIT_FAILURE;
+    }
+
 
     startLog( options.isVerbose() );
     options.treatConfigFile();
