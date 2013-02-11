@@ -62,6 +62,11 @@ int main( int argc, char * argv[] )
         qlog::error << "Unknown option: " << err.get_option_name() << '\n';
         return EXIT_FAILURE;
     }
+    catch( const boost::program_options::invalid_command_line_syntax & err )
+    {
+        qlog::error << "The parameter " << err.tokens() << " was expecting a value\n";
+        return EXIT_FAILURE;
+    }
 
     startLog( options.isVerbose() );
     options.treatConfigFile();
