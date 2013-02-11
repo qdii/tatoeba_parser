@@ -15,6 +15,7 @@ NAMESPACE_START
 struct tagset
 {
     tagset();
+    tagset & operator=( tagset && ) = default;
 
     // An unique identifier representing the tag of the sentence
     typedef uint16_t tagId;

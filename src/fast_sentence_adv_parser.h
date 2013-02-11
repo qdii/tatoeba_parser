@@ -64,6 +64,9 @@ size_t fastDetailedParser<iterator>::start( dataset & _data ) TATO_NO_THROW
     boost::iterator_range<iterator> creationDateRange;
     boost::iterator_range<iterator> lastModifiedDateRange;
 
+    dataset temporarySentenceContainer;
+    bool parsingFailed = false;
+
     while( true )
     {
         if( qi::parse( begin, end, (
@@ -98,13 +101,16 @@ size_t fastDetailedParser<iterator>::start( dataset & _data ) TATO_NO_THROW
 
             try
             {
-                _data.addSentence( id, langRange.begin(), sentenceRange.begin(),
-                authorRange.begin(), creationDateRange.begin(),
-                lastModifiedDateRange.begin() );
+                temporarySentenceContainer.addSentence(
+                    id, langRange.begin(), sentenceRange.begin(),
+                    authorRange.begin(), creationDateRange.begin(),
+                    lastModifiedDateRange.begin()
+                );
             }
             catch( const std::bad_alloc & )
             {
                 llog::error << "Not enough memory.\n";
+                parsingFailed = true;
                 break;
             }
 
@@ -127,6 +133,9 @@ size_t fastDetailedParser<iterator>::start( dataset & _data ) TATO_NO_THROW
 
         line++;
     }
+
+    if( !parsingFailed )
+        _data = std::move( temporarySentenceContainer );
 
     return nbSentences;
 }

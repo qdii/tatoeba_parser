@@ -10,6 +10,9 @@ NAMESPACE_START
 
 struct listset
 {
+    listset() = default;
+    listset & operator=( listset&& ) = default;
+
     // a list is a group of sentence::id
     typedef std::vector< sentence::id > list;
     typedef std::vector< list > ctn;

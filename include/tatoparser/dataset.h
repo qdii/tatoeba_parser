@@ -26,6 +26,9 @@ struct dataset
     /**@brief Constructs a dataset */
     dataset();
 
+    /**@brief Assigns a moved object to this */
+    dataset & operator=( dataset && ) = default;
+
     typedef std::vector<sentence> containerType;
 
     typedef containerType::iterator iterator;

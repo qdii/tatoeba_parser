@@ -53,6 +53,7 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
     size_t nbLinks = 0;
     register iterator ptr = m_begin;
     iterator ptrEnd = m_end;
+    linkset temporaryLinkContainer;
 
     if( ptr == nullptr || ptr == ptrEnd )
         return 0;
@@ -86,7 +87,7 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
             {
                 try
                 {
-                    allLinks_.addLink( firstId, id );
+                    temporaryLinkContainer.addLink( firstId, id );
                     ++nbLinks;
                 }
                 catch ( std::bad_alloc & )
@@ -98,6 +99,12 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
 
             id = 0;
         }
+    }
+
+    // if no error occurred, we swap containers
+    if ( ptrEnd == ptr )
+    {
+        allLinks_ = std::move( temporaryLinkContainer );
     }
 
     llog::info << "parsed " << nbLinks << " links.\n";

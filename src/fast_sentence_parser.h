@@ -77,6 +77,7 @@ template<typename iterator>
 size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO_NO_THROW
 {
     namespace qi = boost::spirit::qi;
+    bool parsingFailed = false;
 
     size_t nbSentences = 0;
     size_t line = 1;
@@ -90,7 +91,10 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
     boost::iterator_range<iterator> langRange;
     boost::iterator_range<iterator> sentenceRange;
 
-    while(true) {
+    dataset temporarySentenceContainer;
+
+    while( true )
+    {
         // try to parse a sentence... (note: it will simply fail when at the
         // end of file)
         if( qi::parse( begin, end, (
@@ -110,13 +114,15 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
             *( langRange.end() ) = '\0';
             *( sentenceRange.end() ) = '\0';
 
-            try {
-                _data.addSentence(id, langRange.begin(), sentenceRange.begin());
+            try
+            {
+                temporarySentenceContainer.addSentence( id, langRange.begin(), sentenceRange.begin() );
                 nbSentences++;
             }
             catch( const std::bad_alloc & )
             {
                 llog::error << "Not enough memory.\n";
+                parsingFailed = true;
                 break;
             }
         }
@@ -137,6 +143,9 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
 
         line++;
     }
+
+    if( !parsingFailed )
+        _data = std::move( temporarySentenceContainer );
 
     return nbSentences;
 }

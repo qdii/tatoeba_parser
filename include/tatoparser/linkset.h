@@ -23,7 +23,8 @@ public:
 
     /**@brief Constructs a linkset object
      * @throw std::bad_alloc */
-    linkset() ;
+    linkset();
+    linkset& operator=( linkset && ) = default;
 
     /**@brief allocates memory to store the links in
       *@param[in] _datainfo Informations about the number of links that will be stored

@@ -53,6 +53,7 @@ size_t fastListParser<iterator>::start( listset & TATO_RESTRICT allLists_ ) TATO
 
     size_t lineCount = 0;
     bool parsingId = true;
+    listset temporaryListContainer;
 
     sentence::id current_id = 0;
     iterator current_pos, name_begin;
@@ -78,7 +79,7 @@ size_t fastListParser<iterator>::start( listset & TATO_RESTRICT allLists_ ) TATO
             *current_pos = '\0';
             try
             {
-                allLists_.addSentenceToList( current_id, std::string( name_begin, current_pos ) );
+                temporaryListContainer.addSentenceToList( current_id, std::string( name_begin, current_pos ) );
                 ++lineCount;
             }
             catch( std::bad_alloc & )
@@ -90,6 +91,10 @@ size_t fastListParser<iterator>::start( listset & TATO_RESTRICT allLists_ ) TATO
             parsingId = true;
         }
     }
+
+    // if no error occurred, we switch containers
+    if ( current_pos == m_end )
+        allLists_ = std::move( temporaryListContainer );
 
     llog::info << "parsed " << lineCount << " lines.\n";
     return lineCount;

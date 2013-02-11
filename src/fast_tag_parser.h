@@ -74,7 +74,7 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
         // add an entry
         try
         {
-            _tagset.tagSentence( sentenceId, tagName );
+            temporaryTagContainer.tagSentence( sentenceId, tagName );
         }
         catch( const std::bad_alloc & )
         {
@@ -82,6 +82,9 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
             break;
         }
     }
+
+    if( cursor == end )
+        _tagset = std::move( temporaryTagContainer );
 
     return 0;
 }
