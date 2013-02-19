@@ -29,7 +29,7 @@ struct filterTranslatableInLanguage : public filter
     bool parse( const sentence & TATO_RESTRICT _sentence ) TATO_RESTRICT TATO_NO_THROW TATO_OVERRIDE
     {
         // get the ids of the translations of this sentence
-        auto allLinksOfSentence = m_linkset.getLinksOf( _sentence.getId() );
+        auto allLinksOfSentence = m_linkset.getLinksOfSafe( _sentence.getId() );
 
         // go through the translations and check if any of them matches the language the user set
         for (auto iter = allLinksOfSentence.first; iter != allLinksOfSentence.second; ++iter)

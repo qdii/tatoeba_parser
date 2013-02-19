@@ -137,7 +137,7 @@ bool linkset::areLinked( sentence::id _a, sentence::id _b ) const TATO_RESTRICT
     assert( _a != sentence::INVALID_ID );
     assert( _b != sentence::INVALID_ID );
     const std::pair< const_iterator, const_iterator > & translationsOfA =
-        getLinksOf( _a );
+        getLinksOfSafe( _a );
 
     return std::find( translationsOfA.first, translationsOfA.second, _b )
            != translationsOfA.second;

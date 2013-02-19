@@ -37,7 +37,7 @@ struct filterTranslationRegex : public filter
     {
         bool ret = false;
 
-        auto links = m_linkset.getLinksOf( _sentence.getId() );
+        auto links = m_linkset.getLinksOfSafe( _sentence.getId() );
         sentence::id linkId = sentence::INVALID_ID;
 
         // match every translation against the set of regular expressions

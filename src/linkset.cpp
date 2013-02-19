@@ -39,7 +39,7 @@ sentence::id getFirstSentenceTranslation(
     const std::string & _lang
 )
 {
-    auto allTranslations = _linkset.getLinksOf( _sentence );
+    auto allTranslations = _linkset.getLinksOfSafe( _sentence );
 
     for( auto iter = allTranslations.first; iter != allTranslations.second; ++iter )
     {
