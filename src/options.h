@@ -56,6 +56,9 @@ struct userOptions
     /**@brief Was --version set? */
     bool isVersionRequested() const;
 
+    /**@brief Was --color set? */
+    bool isColored() const;
+
     /**@brief Was --download set? */
     bool downloadRequested() const;
 
@@ -186,6 +189,14 @@ inline
 bool userOptions::isVersionRequested() const
 {
     return m_vm.count( "version" ) > 0;
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+bool userOptions::isColored() const
+{
+    return m_vm.count( "color" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //

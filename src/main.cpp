@@ -189,20 +189,22 @@ int main( int argc, char * argv[] )
             // display the sentence if it is seleted by all the filters
             if( shouldDisplay )
             {
+                using namespace qlog;
+
                 // option -n
                 if( options.displayLineNumbers() )
-                    std::cout << ++printedLineNumber << separator;
+                    qlog::cout << ++printedLineNumber << separator;
 
                 // option -i
                 if( options.displayIds() )
-                    std::cout << sentence.getId() << separator;
+                    qlog::cout << ( options.isColored() ? color(yellow) : color() ) << sentence.getId() << color() << separator;
 
                 // option --display-lang
                 if (options.displayLanguages() )
-                    std::cout << sentence.lang() << separator;
+                    qlog::cout << ( options.isColored() ? color(red) : color() ) << sentence.lang() << color() << separator;
 
                 // display the sentence
-                std::cout << sentence.str();
+                qlog::cout << sentence.str();
 
                 // display a translation if it was requested
                 if( options.displayFirstTranslation() )
@@ -220,11 +222,11 @@ int main( int argc, char * argv[] )
                             && allSentences[firstTranslationId] )
                     {
                         // display the translation
-                        std::cout << separator << allSentences[firstTranslationId]->str();
+                        qlog::cout << separator << ( options.isColored() ? color(cyan) : color() ) << allSentences[firstTranslationId]->str() << color();
                     }
                 }
 
-                std::cout << '\n';
+                qlog::cout << '\n';
             }
         }
     }
@@ -243,7 +245,7 @@ void startLog( bool verbose )
 {
 	using namespace qlog;
 
-	qlog::set_loglevel( verbose ? qlog::loglevel::info : qlog::loglevel::error );
+	qlog::set_loglevel( verbose ? qlog::loglevel::trace : qlog::loglevel::error );
 
 	qlog::info.reset_decoration();
 	qlog::warning.reset_decoration();
@@ -258,6 +260,7 @@ void startLog( bool verbose )
     qlog::error.append() << color();
 
     qlog::set_output( std::cerr );
+    qlog::cout.set_output( std::cout );
 }
 
 // -------------------------------------------------------------------------- //

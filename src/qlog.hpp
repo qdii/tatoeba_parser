@@ -522,8 +522,16 @@ struct text_decoration : public decoration
     explicit
     text_decoration( const char * _txt )
         :m_txt( _txt )
+        ,m_nb( 0 )
     {
         QLOG_ASSERT( _txt );
+    }
+
+    explicit
+    text_decoration( unsigned _nb )
+        :m_txt( 0 )
+        ,m_nb( _nb )
+    {
     }
 
     text_decoration( text_decoration & _copy )
@@ -534,22 +542,26 @@ struct text_decoration : public decoration
     text_decoration & operator=( text_decoration & _obj )
     {
         m_txt = _obj.m_txt;
+        m_nb = _obj.m_nb;
         return *this;
     }
 
     /**@todo can std::ostream << throw? what does it do if ostr has a bad bit set */
     virtual void apply( std::ostream & _ostr )
     {
-        _ostr << m_txt;
+        if (m_txt)
+            _ostr << m_txt;
+        else
+            _ostr << m_nb;
     }
 
     virtual ~text_decoration() throw()
     {
-        QLOG_ASSERT( m_txt );
     }
 
 private:
     const char * m_txt;
+    unsigned m_nb;
 };
 
 // -------------------------------------------------------------------------- //
@@ -617,6 +629,25 @@ decorater<loglevel, append> & operator << ( decorater<loglevel, append> & _dec, 
     try
     {
         decoration * const newdeco = new text_decoration( _txt );
+        _dec.add_decoration( *newdeco );
+    }
+    catch( const std::bad_alloc & )
+    {
+        QLOG_ASSERT( 0 && "std::bad_alloc" );
+    }
+
+    return _dec;
+}
+
+// -------------------------------------------------------------------------- //
+template< unsigned loglevel, bool append > inline
+decorater<loglevel, append> & operator << ( decorater<loglevel, append> & _dec, unsigned _nb )
+{
+    QLOG_ASSERT( 0 != _nb );
+
+    try
+    {
+        decoration * const newdeco = new text_decoration( _nb );
         _dec.add_decoration( *newdeco );
     }
     catch( const std::bad_alloc & )

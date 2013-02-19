@@ -84,6 +84,10 @@
 #endif
 
 #define QLOG_USE_ASSERTS
+#define QLOG_NAME_LOGGER_TRACE info
+#define QLOG_NAME_LOGGER_INFO warning
+#define QLOG_NAME_LOGGER_WARNING error
+#define QLOG_NAME_LOGGER_ERROR cout
 #include "qlog.hpp"
 
 #endif // TATO_PREC_H

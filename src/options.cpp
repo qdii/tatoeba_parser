@@ -78,6 +78,7 @@ userOptions::userOptions()
         ( "display-first-translation", po::value<std::string>(), "Display the first translation of the sentence in a given language." )
         ( "display-lang", "Displays the language of the sentence." )
         ( "separator", po::value<std::string>( &m_separator ), "Sets the separator character ('\\t' by default)." )
+        ( "color,c", "Add color to the output." )
     ;
     m_desc.add( displayOptions );
     m_visibleOptions.add( displayOptions );
