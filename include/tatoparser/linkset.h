@@ -165,10 +165,10 @@ std::pair<linkset::const_iterator, linkset::const_iterator>
 linkset::getLinksOfSafe( sentence::id _a ) const
 {
     return ( m_offsets.empty() || _a < m_offsets.size() ) ?
-        getLinksOf( _a ) :
-        std::make_pair<linkset::const_iterator, linkset::const_iterator>(
-            linkset::const_iterator(), linkset::const_iterator()
-        );
+           getLinksOf( _a ) :
+           std::make_pair<linkset::const_iterator, linkset::const_iterator>(
+               linkset::const_iterator( nullptr ), linkset::const_iterator( nullptr )
+           );
 }
 
 NAMESPACE_END
