@@ -110,14 +110,17 @@ sentence::id getFirstSentenceTranslation(
 inline
 void linkset::addLink( sentence::id _a, sentence::id _b ) TATO_RESTRICT
 {
+    assert( sentence::INVALID_ID != _a );
+    assert( sentence::INVALID_ID != _b );
+
     static sentence::id lastIdValue = sentence::INVALID_ID;
 
     if( lastIdValue != _a )
     {
         lastIdValue = _a;
-        while ( _a >= static_cast<sentence::id>( m_offsets.size() ) )
+        while( _a >= static_cast<sentence::id>( m_offsets.size() ) )
         {
-            m_offsets.resize( 2 * m_offsets.size() );
+            m_offsets.resize( 2 * m_offsets.size() + 1 );
         }
         m_offsets[_a].first = m_links.size();
     }
