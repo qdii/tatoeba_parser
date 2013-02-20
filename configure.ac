@@ -29,11 +29,20 @@ AC_ARG_ENABLE([download],
   [  --enable-download  uses curl to download tatoeba material.],
   [download_mode=${enableval}],
   [download_mode=no])
+AC_ARG_ENABLE([python],
+  [  --enable-python    adds python wrappers.],
+  [python_mode=${enableval}],
+  [python_mode=no])
 
 if test "$debug_mode" = "no"
 then
   CXXFLAGS="$CXXFLAGS -DNDEBUG"
 fi
+
+if test "$python_mode" = "yes"
+then
+  CXXFLAGS="$CXXFLAGS -DUSE_PYTHON_WRAPPER"
+fi	
 
 # Checks for programs.
 AC_PROG_CXX

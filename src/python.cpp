@@ -1,5 +1,5 @@
-//#ifdef HAVE_BOOST_PYTHON_HPP
 #include "prec_library.h"
+#ifdef USE_PYTHON_WRAPPER
 #include "tatoparser/dataset.h"
 #include "tatoparser/linkset.h"
 #include "tatoparser/tagset.h"
@@ -45,4 +45,4 @@ BOOST_PYTHON_MODULE( tatoparser )
     def( "parse", NAMESPACE :: parse_ );
 }
 
-//#endif // HAVE_BOOST_PYTHON_HPP
+#endif // USE_PYTHON_WRAPPER
