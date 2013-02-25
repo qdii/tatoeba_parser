@@ -80,7 +80,7 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
     int ret = EXIT_FAILURE;
 
     // map "sentences.csv" to some address in our virtual space
-    g_sentenceMap = std::move( mapFileToMemory( _sentencesPath ) );
+    g_sentenceMap = mapFileToMemory( _sentencesPath );
 
     if( g_sentenceMap != nullptr )
     {
@@ -138,7 +138,7 @@ int parseLinks( const std::string & _linksPath, datainfo & _info_, linkset & all
     int ret = EXIT_FAILURE;
 
     // we map tags.csv to somewhere in our virtual space
-    std::unique_ptr<fileMapper> linksMap = std::move( mapFileToMemory( _linksPath ) );
+    std::unique_ptr<fileMapper> linksMap = mapFileToMemory( _linksPath );
 
     if( linksMap != nullptr )
     {
@@ -172,8 +172,7 @@ int parseTags( const std::string & _tagPath, datainfo &, tagset & allTags_ )
 {
     int ret = EXIT_FAILURE;
 
-    std::unique_ptr<fileMapper> tagMap =
-        std::move( mapFileToMemory( _tagPath ) );
+    std::unique_ptr<fileMapper> tagMap = mapFileToMemory( _tagPath );
 
     if( tagMap != nullptr )
     {
@@ -200,7 +199,7 @@ int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, datase
     int ret = EXIT_FAILURE;
 
     // map "sentences_detailed.csv" to some address in our virtual space
-    g_sentenceMap = std::move( mapFileToMemory( _sentencesPath ) );
+    g_sentenceMap = mapFileToMemory( _sentencesPath );
 
     if( g_sentenceMap != nullptr )
     {
@@ -249,7 +248,7 @@ static
 int parseLists( const std::string & _listPath, datainfo & _info, listset & allLists_ )
 {
     int ret = EXIT_FAILURE;
-    std::unique_ptr<fileMapper> linksMap = std::move( mapFileToMemory( _listPath ) );
+    std::unique_ptr<fileMapper> linksMap = mapFileToMemory( _listPath );
 
     if ( nullptr != linksMap )
     {
