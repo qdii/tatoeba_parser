@@ -248,10 +248,18 @@ int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, datase
 static
 int parseLists( const std::string & _listPath, datainfo & _info, listset & allLists_ )
 {
+    int ret = EXIT_FAILURE;
     std::unique_ptr<fileMapper> linksMap = std::move( mapFileToMemory( _listPath ) );
 
-    fastListParser<char*> parser( linksMap->begin(), linksMap->end() );
-    return parser.start( allLists_ ) != 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+    if ( nullptr != linksMap )
+    {
+        fastListParser<char*> parser( linksMap->begin(), linksMap->end() );
+        const int parsingSuccess = parser.start( allLists_ );
+        if ( 0 == parsingSuccess )
+            ret = EXIT_SUCCESS;
+    }
+
+    return ret;
 }
 
 // -------------------------------------------------------------------------- //
