@@ -253,9 +253,8 @@ int parseLists( const std::string & _listPath, datainfo & _info, listset & allLi
     if ( nullptr != linksMap )
     {
         fastListParser<char*> parser( linksMap->begin(), linksMap->end() );
-        const int parsingSuccess = parser.start( allLists_ );
-        if ( 0 == parsingSuccess )
-            ret = EXIT_SUCCESS;
+        parser.start( allLists_ );
+        ret = EXIT_SUCCESS;
     }
 
     return ret;
