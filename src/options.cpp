@@ -165,17 +165,6 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         );
     }
 
-    if( m_vm.count( "has-tag" ) )
-    {
-        allFilters_.push_back(
-
-            shared_ptr<filter>(
-                new filterTag( _tagset, m_vm["has-tag"].as<string>() )
-
-            )
-        );
-    }
-
     if( m_vm.count( "is-translatable-in" ) )
     {
         allFilters_.push_back(
@@ -221,6 +210,17 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
                 new filterList(
                     _listset, m_vm["in-list"].as<std::string>()
                 )
+            )
+        );
+    }
+
+    if( m_vm.count( "has-tag" ) )
+    {
+        allFilters_.push_back(
+
+            shared_ptr<filter>(
+                new filterTag( _tagset, m_vm["has-tag"].as<string>() )
+
             )
         );
     }
