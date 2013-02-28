@@ -28,7 +28,7 @@ struct filterTag  : public filter
     {
         // if we didn’t check the tag id yet, we do it now
         if( TATO_UNLIKELY(m_tag == tagset::INVALID_TAGID) )
-            m_tag = m_allTags.getTagId( m_name );
+            m_tag = m_allTags.getTagId( toLower( m_name ) );
 
         return m_allTags.isSentenceTagged( _sentence.getId(), m_tag );
     }
