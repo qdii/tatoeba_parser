@@ -154,9 +154,7 @@ int main( int argc, char * argv[] )
         options.treatTranslations( allLinks, allFilters );
 
         // if a list has beeg given, check if the list exists
-        const std::string & listName = options.getListName();
-        std::string lowerCaseListName;
-        std::transform( listName.begin(), listName.end(), lowerCaseListName.begin(), ::tolower );
+        const std::string & lowerCaseListName = toLower( options.getListName() );
 
         if ( lowerCaseListName.size() && allLists.doesListExist( lowerCaseListName ) == false )
         {
