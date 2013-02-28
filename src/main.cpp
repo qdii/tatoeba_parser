@@ -246,7 +246,7 @@ void startLog( bool verbose )
 {
 	using namespace qlog;
 
-	qlog::set_loglevel( verbose ? qlog::loglevel::trace : qlog::loglevel::error );
+	qlog::set_loglevel( verbose ? qlog::loglevel::trace : qlog::loglevel::warning );
 
 	qlog::info.reset_decoration();
 	qlog::warning.reset_decoration();
