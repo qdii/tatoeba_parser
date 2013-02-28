@@ -5,11 +5,11 @@
 #include <string> // tolower
 
 NAMESPACE_START
-static
+
 std::string toLower( const std::string & _name )
 {
     std::string lower;
-    std::transform( _name.begin(), _name.end(), std::back_inserter(lower), ::tolower );
+    std::transform( _name.begin(), _name.end(), std::back_inserter( lower ), ::tolower );
     return lower;
 }
 
@@ -109,7 +109,7 @@ bool listset::doesListExist( const std::string & _listName ) const
 
     const list_hash hash = computeHash( _listName );
     const offset off = findOffset( hash );
-    return off != static_cast< offset > (-1);
+    return off != static_cast< offset >( -1 );
 }
 
 NAMESPACE_END
