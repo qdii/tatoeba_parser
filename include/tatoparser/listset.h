@@ -22,7 +22,7 @@ struct listset
 
     /**@brief Checks if a sentence belongs to a list
      * @param[in] _id An identifier for the sentence
-     * @param[in] _listName The name of the list
+     * @param[in] _listName The name of the list, there should not be any capital letters in.
      * @return true if the sentence is part of the list */
     bool isSentenceInList( sentence::id _id, const std::string & _listName ) const;
 
@@ -43,7 +43,7 @@ public:
     void addSentenceToList( sentence::id _id, const std::string & _listName );
 
     /**@brief Computes a hash from the name of a list
-     * @param[in] _listName the name of the list
+     * @param[in] _listName the name of the list. There should not be any capital letters in.
      * @return An hash corresponding to that name */
     static list_hash computeHash( const std::string & _listName );
 

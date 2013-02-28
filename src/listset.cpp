@@ -1,16 +1,27 @@
 #include "prec_library.h"
 #include "tatoparser/sentence.h"
 #include "tatoparser/listset.h"
+#include <algorithm> // transform
+#include <string> // tolower
 
 NAMESPACE_START
-
+static
+std::string toLower( const std::string & _name )
+{
+    std::string lower;
+    std::transform( _name.begin(), _name.end(), std::back_inserter(lower), ::tolower );
+    return lower;
+}
 
 // -------------------------------------------------------------------------- //
-void listset::addSentenceToList( sentence::id _id, const std::string & _listName )
+void listset::addSentenceToList( sentence::id _id, const std::string & _name )
 {
     using namespace llog;
-    const list_hash & hash = computeHash( _listName );
-    llog::debug << "adding sentence " << color(green) << _id << color() << " to list " << color(yellow) << _listName << color() << " (hash: " << color(cyan) << hash << color() << ")\n";
+
+    const std::string & lowerCaseName = toLower( _name );
+
+    const list_hash & hash = computeHash( lowerCaseName );
+    llog::debug << "adding sentence " << color( green ) << _id << color() << " to list " << color( yellow ) << lowerCaseName << color() << " (hash: " << color( cyan ) << hash << color() << ")\n";
     offset off = findOffset( hash );
 
     // the offset has not been found, so we create an entry
@@ -25,9 +36,9 @@ void listset::addSentenceToList( sentence::id _id, const std::string & _listName
 }
 
 // -------------------------------------------------------------------------- //
-bool listset::isSentenceInList( sentence::id _id, const std::string & _listName ) const
+bool listset::isSentenceInList( sentence::id _id, const std::string & _name ) const
 {
-    return isSentenceInList( _id, computeHash( _listName ) );
+    return isSentenceInList( _id, computeHash( toLower( _name ) ) );
 }
 
 // -------------------------------------------------------------------------- //
@@ -62,10 +73,12 @@ void listset::addNewList( list_hash _hash )
 }
 
 // -------------------------------------------------------------------------- //
-listset::list_hash listset::computeHash( const std::string & _listName )
+listset::list_hash listset::computeHash( const std::string & _name )
 {
+    assert( toLower( _name ) == _name ); // prerequisite
+
     static std::hash<std::string> hasher;
-    return hasher( _listName );
+    return hasher( _name );
 }
 
 // -------------------------------------------------------------------------- //
@@ -92,6 +105,8 @@ listset::list & listset::getList( const offset & _offset )
 // -------------------------------------------------------------------------- //
 bool listset::doesListExist( const std::string & _listName ) const
 {
+    assert( toLower( _listName ) == _listName ); // prerequisite
+
     const list_hash hash = computeHash( _listName );
     const offset off = findOffset( hash );
     return off != static_cast< offset > (-1);

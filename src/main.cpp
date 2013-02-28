@@ -154,10 +154,13 @@ int main( int argc, char * argv[] )
         options.treatTranslations( allLinks, allFilters );
 
         // if a list has beeg given, check if the list exists
-        const std::string listName = options.getListName();
-        if ( listName.size() && allLists.doesListExist( listName ) == false )
+        const std::string & listName = options.getListName();
+        std::string lowerCaseListName;
+        std::transform( listName.begin(), listName.end(), lowerCaseListName.begin(), ::tolower );
+
+        if ( lowerCaseListName.size() && allLists.doesListExist( lowerCaseListName ) == false )
         {
-            qlog::error << "list \"" << listName << "\" does not exist in lists.csv" << qlog::color() << '\n';
+            qlog::error << "list \"" << lowerCaseListName << "\" does not exist in lists.csv" << qlog::color() << '\n';
             skipFiltering = true;
         }
     }
