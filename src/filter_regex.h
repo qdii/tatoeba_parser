@@ -14,9 +14,11 @@ struct filterRegex : public filter
 {
     /**@brief Construct a filterRegex
      * @throw boost::regex_error If the regular expression is invalid
-     * @param[in] _regex The regular expression to match the sentence against */
-    filterRegex( const std::string & _regex )
-        :m_compiledRegex( boost::make_u32regex( _regex ) )
+     * @param[in] _regex The regular expression to match the sentence against
+     * @param[in] _cs A boolean set to true if the match is case-sensitive */
+    explicit
+    filterRegex( const std::string & _regex, bool _cs = true )
+        :m_compiledRegex( boost::make_u32regex( _regex, _cs ? boost::regex_constants::normal : boost::regex_constants::normal | boost::regex_constants::icase ) )
     {
     }
 

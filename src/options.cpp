@@ -54,7 +54,8 @@ userOptions::userOptions()
     po::options_description filteringOptions( "Use those options to select the sentences to display" );
     filteringOptions.add_options()
         ( "has-id", po::value<sentence::id>(), "Filters out sentences which ids are different to this one." )
-        ( "regex,r", po::value<std::vector<std::string> >()->composing(), "A regular expression that the sentence should match entirely." )
+        ( "regex,r", po::value<std::vector<std::string> >()->composing(), "One or more regular expressions that the sentence should match entirely." )
+        ( "regex-nocs", po::value<std::vector<std::string> >()->composing(), "One or more regular expressions that the sentence should match entirely regardless of the case." )
         ( "is-linked-to", po::value<sentence::id>(), "Filters only sentences that are a translation of the given id." )
         ( "is-translatable-in", po::value<std::string>(), "Keep the sentence if it has a translation in a given language." )
         ( "language,l", po::value<std::vector<std::string>>(), "Filter out sentences which languages is different from the ones given. Accept multiple values." )
@@ -188,6 +189,19 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         {
             shared_ptr<filter> newFilter =
                 shared_ptr<filter>( new filterRegex( regex ) );
+            allFilters_.push_back( newFilter );
+        }
+    }
+
+    if( m_vm.count( "regex-nocs" ) )
+    {
+        // for each regex, we create a filter
+        const vector< string > & allRegex = m_vm["regex-nocs"].as<vector<string>>();
+
+        for( auto regex : allRegex )
+        {
+            shared_ptr<filter> newFilter =
+                shared_ptr<filter>( new filterRegex( regex, false ) );
             allFilters_.push_back( newFilter );
         }
     }
