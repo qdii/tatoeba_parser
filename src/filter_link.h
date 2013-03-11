@@ -14,9 +14,9 @@ struct filterLink : public filter
     /**@brief Constructs a filterLink
      * @param[in] _linkset A list of the links of the sentences
      * @param[in] _id The id of the first sentence. */
-    filterLink(linkset& _linkset, sentence::id _id)
-        :m_linkset(_linkset)
-        ,m_id(_id)
+    filterLink( sentence::id _id, linkset & _linkset )
+        :m_linkset( _linkset )
+        ,m_id( _id )
     {
     }
 

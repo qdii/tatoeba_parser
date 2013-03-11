@@ -15,7 +15,7 @@ struct filterTag  : public filter
     /**@brief Constructs a filterTag object
      * @param[in] _allTags A container that stores all the tags
      * @param[in] _name The name of the tag to check for */
-    filterTag( tagset & _allTags, const std::string & _name )
+    filterTag( const std::string & _name, tagset & _allTags )
         :m_name( _name )
         ,m_tag( tagset::INVALID_TAGID )
         ,m_allTags( _allTags )

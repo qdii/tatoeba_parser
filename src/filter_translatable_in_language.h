@@ -17,7 +17,7 @@ struct filterTranslatableInLanguage : public filter
      * @param[in] _dataset Contains the sentences
      * @param[in] _linkset Contains the data about links
      * @param[in] _lang The language in which the sentence should be translatable */
-    filterTranslatableInLanguage( dataset & _dataset, linkset & _linkset, const std::string & _lang )
+    filterTranslatableInLanguage( const std::string & _lang, dataset & _dataset, linkset & _linkset )
         :m_dataset( _dataset )
         ,m_linkset( _linkset )
         ,m_lang( _lang )

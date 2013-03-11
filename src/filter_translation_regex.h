@@ -20,7 +20,7 @@ struct filterTranslationRegex : public filter
      * @param[in] _linkset A container that knows which links a sentence has
      * @param[in] _regexList Many regular expressions
      * @throw boost::regex_error if any of the regex is invalid */
-    filterTranslationRegex( dataset & _dataset, linkset & _linkset, const std::vector<std::string> & _regexList )
+    filterTranslationRegex( const std::vector<std::string> & _regexList, dataset & _dataset, linkset & _linkset )
         :m_dataset( _dataset )
         ,m_linkset( _linkset )
         ,m_allRegex() // will contain the COMPILED versions of the regular expressions

@@ -111,6 +111,26 @@ void userOptions::treatCommandLine( int argc, char * argv[] )
 
 // -------------------------------------------------------------------------- //
 
+template< typename OPTION_TYPE, typename FILTER_TYPE, typename ... ARGS >
+static bool addNewFilterToList( boost::program_options::variables_map _vm, const std::string & _option, FilterVector & allFilters_, ARGS && ... args )
+{
+    const bool optionWasSelected = _vm.count( _option.c_str() );
+
+    if( optionWasSelected )
+    {
+        qlog::info << "Adding filter for option: " << qlog::color( qlog::blue ) << _option << qlog::color() << '\n';
+        allFilters_.push_back(
+            std::shared_ptr<filter>(
+                new FILTER_TYPE( _vm[_option.c_str()].as<OPTION_TYPE>(), args... )
+            )
+        );
+    }
+
+    return optionWasSelected;
+}
+
+// -------------------------------------------------------------------------- //
+
 /**@brief Populate the passed list of filters with certain filters */
 void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _tagset, listset & _listset, FilterVector & allFilters_ )
 {
@@ -120,36 +140,15 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
 
     qlog::warning( allFilters_.size() > 0 ) << "allFilters.size() > 0\n";
 
-    if( m_vm.count( "has-id" ) )
-    {
-        allFilters_.push_back(
-            shared_ptr<filter>(
-                new filterId( m_vm["has-id"].as<sentence::id>() )
-            )
-        );
-    }
-
-    if( m_vm.count( "user" ) )
-    {
-        allFilters_.push_back(
-            shared_ptr<filter>(
-                new filterUser( m_vm["user"].as<std::string>() )
-            )
-        );
-    }
+    addNewFilterToList<sentence::id, filterId>( m_vm, "has-id", allFilters_ );
+    addNewFilterToList<std::string, filterUser>( m_vm, "user", allFilters_ );
 
     // The various filters will be applied in order. The language filter is
     // very light so we want it first to discard as many sentences as possible
-    if( m_vm.count( "language" ) )
+
+    if( addNewFilterToList<vector<string>, filterLang>( m_vm, "language", allFilters_ ) == false && m_configFileAcceptedLanguages.size() )
     {
-        allFilters_.push_back(
-            shared_ptr<filter>(
-                new filterLang( m_vm["language"].as<vector<string>>() )
-            )
-        );
-    }
-    else if ( m_configFileAcceptedLanguages.size() )
-    {
+        qlog::info << "Adding filter for option: " << qlog::color( qlog::blue ) << "--language" << qlog::color() << '\n';
         allFilters_.push_back(
             shared_ptr<filter>(
                 new filterLang( m_configFileAcceptedLanguages )
@@ -157,26 +156,8 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         );
     }
 
-    if( m_vm.count( "is-linked-to" ) )
-    {
-        allFilters_.push_back(
-            shared_ptr<filter>(
-                new filterLink( _linkset, m_vm["is-linked-to"].as<sentence::id>() )
-            )
-        );
-    }
-
-    if( m_vm.count( "is-translatable-in" ) )
-    {
-        allFilters_.push_back(
-            shared_ptr<filter>(
-                new filterTranslatableInLanguage(
-                    _dataset, _linkset,
-                    m_vm["is-translatable-in"].as<string>()
-                )
-            )
-        );
-    }
+    addNewFilterToList<sentence::id, filterLink>( m_vm, "is-linked-to", allFilters_, _linkset );
+    addNewFilterToList<std::string, filterTranslatableInLanguage>( m_vm, "is-translatable-in", allFilters_, _dataset, _linkset );
 
     // regular expression filters are added last as each of those filters is
     // relatively heavy.
@@ -184,7 +165,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     {
         // for each regex, we create a filter
         const vector< string > & allRegex = m_vm["regex"].as<vector<string>>();
-
+        qlog::info << "Adding filter for options: " << qlog::color( qlog::blue ) << "--regex" << qlog::color() << '\n';
         for( auto regex : allRegex )
         {
             shared_ptr<filter> newFilter =
@@ -195,6 +176,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
 
     if( m_vm.count( "regex-nocs" ) )
     {
+        qlog::info << "Adding filter for options: " << qlog::color( qlog::blue ) << "--regex-nocs" << qlog::color() << '\n';
         // for each regex, we create a filter
         const vector< string > & allRegex = m_vm["regex-nocs"].as<vector<string>>();
 
@@ -206,38 +188,9 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
         }
     }
 
-    if( m_vm.count( "translation-regex" ) )
-    {
-        allFilters_.push_back(
-            shared_ptr<filter>(
-                new filterTranslationRegex(
-                    _dataset, _linkset,
-                    m_vm["translation-regex"].as<vector<string>>() )
-            )
-        );
-    }
-
-    if ( m_vm.count( "in-list" ) )
-    {
-        allFilters_.push_back(
-            shared_ptr<filter>(
-                new filterList(
-                    _listset, m_vm["in-list"].as<std::string>()
-                )
-            )
-        );
-    }
-
-    if( m_vm.count( "has-tag" ) )
-    {
-        allFilters_.push_back(
-
-            shared_ptr<filter>(
-                new filterTag( _tagset, m_vm["has-tag"].as<string>() )
-
-            )
-        );
-    }
+    addNewFilterToList<vector<string>, filterTranslationRegex>( m_vm, "translation-regex", allFilters_, _dataset, _linkset );
+    addNewFilterToList<std::string, filterList>( m_vm, "in-list", allFilters_, _listset );
+    addNewFilterToList<std::string, filterTag>( m_vm, "has-tag", allFilters_, _tagset );
 
 #ifdef HAVE_SYS_RESOURCE_H
 

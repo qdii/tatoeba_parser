@@ -14,7 +14,7 @@ struct filterList : public filter
 {
     /**@brief Constructs a filterList
      * @param[in] _listName The name of the list */
-    filterList( const listset & _listset, const std::string & _listName )
+    filterList( const std::string & _listName, const listset & _listset )
         :m_listset( _listset )
         ,m_hash()
     {
