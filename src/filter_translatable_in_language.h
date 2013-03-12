@@ -32,7 +32,7 @@ struct filterTranslatableInLanguage : public filter
         auto allLinksOfSentence = m_linkset.getLinksOfSafe( _sentence.getId() );
 
         // go through the translations and check if any of them matches the language the user set
-        for (auto iter = allLinksOfSentence.first; iter != allLinksOfSentence.second; ++iter)
+        for( auto iter = allLinksOfSentence.first; iter != allLinksOfSentence.second; ++iter )
         {
             // sometimes links.csv references sentences that just don’t exist
             if( m_dataset[*iter] != nullptr )

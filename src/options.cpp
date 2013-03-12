@@ -64,7 +64,7 @@ userOptions::userOptions()
           "Filters only sentences which translations match this regex. If many "
           "regular expressions are provided, a sentence will be kept if any of its "
           "translations matches them all." )
-        ( "user,u", po::value<std::string>(), "Keep the sentences which belong to this user only.")
+        ( "user,u", po::value<std::string>(), "Keep the sentences which belong to this user only." )
         ( "in-list", po::value<std::string>(), "Keep the sentences which belong to a given list." )
         ( "translates,t", po::value<sentence::id>(), "Keep the indirect and direct translations of a given sentence." )
     ;
@@ -221,26 +221,26 @@ void userOptions::printVersion()
 
 // -------------------------------------------------------------------------- //
 
-static 
+static
 std::string getEnvironmentVariable( const char * _environmentVariable )
 {
-	std::string ret = "";
+    std::string ret = "";
 #ifdef WIN32
-   char *pValue;
-   size_t len;
-   
-   errno_t err = _dupenv_s( &pValue, &len, _environmentVariable );
-   if ( err ) 
-	   return ret;
+    char * pValue;
+    size_t len;
 
-   ret.assign( pValue, pValue + len );
-   free( pValue );
+    errno_t err = _dupenv_s( &pValue, &len, _environmentVariable );
+    if( err )
+        return ret;
+
+    ret.assign( pValue, pValue + len );
+    free( pValue );
 
 #else
-	ret.assign( getenv( _environmentVariable ) );
+    ret.assign( getenv( _environmentVariable ) );
 #endif
 
-	return ret;
+    return ret;
 }
 
 void userOptions::treatConfigFile()
@@ -265,7 +265,7 @@ void userOptions::treatConfigFile()
                 qlog::info << "csv-path: " << opt.value[opt.value.size()-1] << '\n';
                 m_configFileCsvPath = opt.value[opt.value.size()-1];
             }
-            else if ( opt.string_key == "lang" )
+            else if( opt.string_key == "lang" )
             {
                 for( size_t languageIndex = 0; languageIndex < opt.value.size(); ++languageIndex )
                     m_configFileAcceptedLanguages.push_back( opt.value[languageIndex] );

@@ -20,10 +20,10 @@ struct filterList : public filter
     {
         using namespace qlog;
         std::string lowerCaseName;
-        std::transform( _listName.begin(), _listName.end(), std::back_inserter(lowerCaseName), ::tolower );
+        std::transform( _listName.begin(), _listName.end(), std::back_inserter( lowerCaseName ), ::tolower );
         assert( lowerCaseName.size() != 0 );
         m_hash = listset::computeHash( lowerCaseName );
-        qlog::info << "Computing hash for " << color(yellow) << lowerCaseName << color() << ": " << color( blue ) << m_hash << color() << '\n';
+        qlog::info << "Computing hash for " << color( yellow ) << lowerCaseName << color() << ": " << color( blue ) << m_hash << color() << '\n';
     }
 
     bool parse( const sentence & _sentence ) TATO_NO_THROW TATO_OVERRIDE

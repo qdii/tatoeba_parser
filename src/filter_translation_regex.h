@@ -41,7 +41,7 @@ struct filterTranslationRegex : public filter
         sentence::id linkId = sentence::INVALID_ID;
 
         // match every translation against the set of regular expressions
-        for ( auto linkIter = links.first; linkIter != links.second; ++linkIter )
+        for( auto linkIter = links.first; linkIter != links.second; ++linkIter )
         {
             linkId = *linkIter;
 

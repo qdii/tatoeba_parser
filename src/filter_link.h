@@ -24,9 +24,9 @@ struct filterLink : public filter
      * @param[in] _sentence The second sentence.
      * @return True if the passed sentence is linked to the sentence passed in
      * the filterLink constructor */
-    bool parse(const sentence & _sentence) throw () TATO_OVERRIDE
+    bool parse( const sentence & _sentence ) throw() TATO_OVERRIDE
     {
-        return m_linkset.areLinked( _sentence.getId(), m_id);
+        return m_linkset.areLinked( _sentence.getId(), m_id );
     }
 
 private:
