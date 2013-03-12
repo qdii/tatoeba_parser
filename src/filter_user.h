@@ -10,11 +10,14 @@ NAMESPACE_START
  */
 struct filterUser : public filter
 {
-    /**@brief Constructs a filterLink
-     * @param[in] _linkset A list of the links of the sentences
-     * @param[in] _id The id of the first sentence. */
-    filterUser( const std::string & _user )
+    /**@brief Constructs a filterUser
+     * @param[in] _user The name of the user to check
+     * @param[in] _orphansOnly Checks for sentences belonging to no-one.
+     * @note Setting _orphansOnly to true results in the first parameter being ignored */
+    explicit
+    filterUser( const std::string & _user, bool _orphansOnly = false )
         :m_user( _user )
+        ,m_orphansOnly( _orphansOnly )
     {
     }
 
@@ -23,12 +26,21 @@ struct filterUser : public filter
      * @return True if the passed sentence belongs to the user */
     bool parse( const sentence & _sentence ) throw() TATO_OVERRIDE
     {
-        return _sentence.belongsTo( m_user );
+        bool ret = false;
+        if ( m_orphansOnly )
+        {
+            ret = _sentence.belongsTo( "" ) || _sentence.belongsTo( "\\N" );
+        }
+        else
+            ret = _sentence.belongsTo( m_user );
+
+        return ret;
     }
 
 
 private:
     std::string m_user;
+    bool m_orphansOnly;
 };
 NAMESPACE_END
 

@@ -56,6 +56,9 @@ struct userOptions
     /**@brief Was --version set? */
     bool isVersionRequested() const;
 
+    /**@brief Was --orphan set? */
+    bool orphansOnly() const;
+
     /**@brief Was --color set? */
     bool isColored() const;
 
@@ -140,7 +143,7 @@ bool userOptions::isItNecessaryToParseLinksFile() const
 inline
 bool userOptions::isItNecessaryToParseDetailedFile() const
 {
-    return m_vm.count( "user" ) > 0;
+    return m_vm.count( "user" ) > 0 || m_vm.count( "orphan" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //
@@ -204,7 +207,15 @@ bool userOptions::isColored() const
 inline
 bool userOptions::downloadRequested() const
 {
-    return m_vm.count( "download" );
+    return m_vm.count( "download" ) > 0;
+}
+
+// -------------------------------------------------------------------------- //
+
+inline
+bool userOptions::orphansOnly() const
+{
+    return m_vm.count( "orphan" ) > 0;
 }
 
 // -------------------------------------------------------------------------- //

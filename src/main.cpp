@@ -101,7 +101,7 @@ int main( int argc, char * argv[] )
     }
 
     if( argc == 1
-            || ( argc == 2 && !options.justParse() )
+            || ( argc == 2 && !options.justParse() && !options.orphansOnly() )
             || options.isHelpRequested() )
     {
         options.printHelp();

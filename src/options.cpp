@@ -66,6 +66,7 @@ userOptions::userOptions()
           "translations matches them all." )
         ( "user,u", po::value<std::string>(), "Keep the sentences which belong to this user only." )
         ( "in-list", po::value<std::string>(), "Keep the sentences which belong to a given list." )
+        ( "orphan", "Keep sentences that belong to no-one." )
         ( "translates,t", po::value<sentence::id>(), "Keep the indirect and direct translations of a given sentence." )
     ;
     m_desc.add( filteringOptions );
@@ -111,22 +112,33 @@ void userOptions::treatCommandLine( int argc, char * argv[] )
 
 // -------------------------------------------------------------------------- //
 
-template< typename OPTION_TYPE, typename FILTER_TYPE, typename ... ARGS >
-static bool addNewFilterToList( boost::program_options::variables_map _vm, const std::string & _option, FilterVector & allFilters_, ARGS && ... args )
+template< typename FILTER_TYPE, typename ... ARGS >
+static
+bool addNewFilterToListGeneric( boost::program_options::variables_map & _vm, const std::string & _option, FilterVector & allFilters_, ARGS && ... args )
 {
-    const bool optionWasSelected = _vm.count( _option.c_str() );
+    const bool optionWasSelected = _vm.count( _option.c_str() ) > 0;
 
     if( optionWasSelected )
     {
         qlog::info << "Adding filter for option: " << qlog::color( qlog::blue ) << _option << qlog::color() << '\n';
         allFilters_.push_back(
             std::shared_ptr<filter>(
-                new FILTER_TYPE( _vm[_option.c_str()].as<OPTION_TYPE>(), args... )
+                new FILTER_TYPE( args... )
             )
         );
     }
 
     return optionWasSelected;
+}
+
+// -------------------------------------------------------------------------- //
+
+template< typename OPTION_TYPE, typename FILTER_TYPE, typename ... ARGS >
+static inline
+bool addNewFilterToList( boost::program_options::variables_map & _vm, const std::string & _option, FilterVector & allFilters_, ARGS && ... args )
+{
+    return _vm.count( _option.c_str() ) > 0 &&
+        addNewFilterToListGeneric<FILTER_TYPE>( _vm, _option, allFilters_, _vm[_option.c_str()].as<OPTION_TYPE>(), args... );
 }
 
 // -------------------------------------------------------------------------- //
@@ -142,6 +154,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
 
     addNewFilterToList<sentence::id, filterId>( m_vm, "has-id", allFilters_ );
     addNewFilterToList<std::string, filterUser>( m_vm, "user", allFilters_ );
+    addNewFilterToListGeneric< filterUser >( m_vm, "orphan", allFilters_, "", true );
 
     // The various filters will be applied in order. The language filter is
     // very light so we want it first to discard as many sentences as possible
