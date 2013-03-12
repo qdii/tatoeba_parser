@@ -114,11 +114,9 @@ void userOptions::treatCommandLine( int argc, char * argv[] )
 
 template< typename FILTER_TYPE, typename ... ARGS >
 static
-bool addNewFilterToListGeneric( boost::program_options::variables_map & _vm, const std::string & _option, FilterVector & allFilters_, ARGS && ... args )
+bool addNewFilterToListGeneric( boost::program_options::variables_map & _vm, const std::string & _option, FilterVector & allFilters_, bool _condition, ARGS && ... args )
 {
-    const bool optionWasSelected = _vm.count( _option.c_str() ) > 0;
-
-    if( optionWasSelected )
+    if( _condition )
     {
         qlog::info << "Adding filter for option: " << qlog::color( qlog::blue ) << _option << qlog::color() << '\n';
         allFilters_.push_back(
@@ -128,7 +126,7 @@ bool addNewFilterToListGeneric( boost::program_options::variables_map & _vm, con
         );
     }
 
-    return optionWasSelected;
+    return _condition;
 }
 
 // -------------------------------------------------------------------------- //
@@ -137,8 +135,9 @@ template< typename OPTION_TYPE, typename FILTER_TYPE, typename ... ARGS >
 static inline
 bool addNewFilterToList( boost::program_options::variables_map & _vm, const std::string & _option, FilterVector & allFilters_, ARGS && ... args )
 {
-    return _vm.count( _option.c_str() ) > 0 &&
-        addNewFilterToListGeneric<FILTER_TYPE>( _vm, _option, allFilters_, _vm[_option.c_str()].as<OPTION_TYPE>(), args... );
+    const bool optionWasSelected = _vm.count( _option.c_str() ) > 0;
+    return optionWasSelected &&
+        addNewFilterToListGeneric<FILTER_TYPE>( _vm, _option, allFilters_, optionWasSelected, _vm[_option.c_str()].as<OPTION_TYPE>(), args... );
 }
 
 // -------------------------------------------------------------------------- //
@@ -154,19 +153,14 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
 
     addNewFilterToList<sentence::id, filterId>( m_vm, "has-id", allFilters_ );
     addNewFilterToList<std::string, filterUser>( m_vm, "user", allFilters_ );
-    addNewFilterToListGeneric< filterUser >( m_vm, "orphan", allFilters_, "", true );
+    addNewFilterToListGeneric< filterUser >( m_vm, "orphan", allFilters_, m_vm.count("orphan") > 0, "", true );
 
     // The various filters will be applied in order. The language filter is
     // very light so we want it first to discard as many sentences as possible
 
-    if( addNewFilterToList<vector<string>, filterLang>( m_vm, "language", allFilters_ ) == false && m_configFileAcceptedLanguages.size() )
+    if( addNewFilterToList<vector<string>, filterLang>( m_vm, "language", allFilters_ ) == false )
     {
-        qlog::info << "Adding filter for option: " << qlog::color( qlog::blue ) << "--language" << qlog::color() << '\n';
-        allFilters_.push_back(
-            shared_ptr<filter>(
-                new filterLang( m_configFileAcceptedLanguages )
-            )
-        );
+        addNewFilterToListGeneric<filterLang>( m_vm, "language", allFilters_, m_configFileAcceptedLanguages.size(), m_configFileAcceptedLanguages );
     }
 
     addNewFilterToList<sentence::id, filterLink>( m_vm, "is-linked-to", allFilters_, _linkset );
