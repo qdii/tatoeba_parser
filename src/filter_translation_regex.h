@@ -7,13 +7,14 @@
 #include <tatoparser/linkset.h>
 #include <tatoparser/sentence.h>
 #include "filter.h"
+#include "filter_helper_translation.h"
 
 NAMESPACE_START
 
 /**@struct filterTranslationRegex
  * @brief Checks that any of the translations of a sentence matches every regex
  *        in a given set of regular expressions */
-struct filterTranslationRegex : public filter
+struct filterTranslationRegex : public filter, protected filterHelperTranslation
 {
     /**@brief Constructs a filterTranslationRegex
      * @param[in] _dataset A container that has information about the sentences
@@ -21,8 +22,7 @@ struct filterTranslationRegex : public filter
      * @param[in] _regexList Many regular expressions
      * @throw boost::regex_error if any of the regex is invalid */
     filterTranslationRegex( const std::vector<std::string> & _regexList, dataset & _dataset, linkset & _linkset )
-        :m_dataset( _dataset )
-        ,m_linkset( _linkset )
+        :filterHelperTranslation( _dataset, _linkset )
         ,m_allRegex() // will contain the COMPILED versions of the regular expressions
     {
         // compile the regex and store it for later use
@@ -35,33 +35,20 @@ struct filterTranslationRegex : public filter
      * @return true if one of the sentence translation matches all the regular expressions */
     bool parse( const sentence & TATO_RESTRICT _sentence ) TATO_OVERRIDE
     {
-        bool ret = false;
-
-        auto links = m_linkset.getLinksOfSafe( _sentence.getId() );
-        sentence::id linkId = sentence::INVALID_ID;
-
-        // match every translation against the set of regular expressions
-        for( auto linkIter = links.first; linkIter != links.second; ++linkIter )
-        {
-            linkId = *linkIter;
-
-            // the i-th translation
-            sentence * TATO_RESTRICT link = m_dataset[linkId];
-
-            if( link ) // the sentence might not exist if sentences.csv and links.csv are inconsistent
+        return doesAnyTranslationRespectCondition<true>( _sentence.getId(),
+            [this]( const sentence & _translation ) -> bool
             {
+                bool doesTranslationMatch = false;
                 try
                 {
-                    ret = matchAllRegex( *link );
+                    doesTranslationMatch = matchAllRegex( _translation );
                 }
                 catch( std::runtime_error & )
                 {
-                    qlog::warning << "An error occurred while matching sentence " << linkId << " with one of the regex.\n";
+                    qlog::warning << "An error occurred while matching sentence " << _translation.getId() << " with one of the regex.\n";
                 }
-            }
-        }
-
-        return ret;
+                return doesTranslationMatch;
+            });
     }
 
     /**@brief Match a sentence against the set of regular expression
@@ -83,8 +70,6 @@ struct filterTranslationRegex : public filter
 
 
 private:
-    dataset & m_dataset; // gives the text of the sentences to match against the regex
-    linkset & m_linkset; // contains info about the translations of the sentence
     std::vector<boost::u32regex> m_allRegex; // a vector of compiled regex
 };
 

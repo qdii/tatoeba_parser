@@ -11,15 +11,12 @@ NAMESPACE_START
 
 /**@struct filterTranslatableInLanguage
  * @brief Keep sentences that are translatable in a given language */
-struct filterTranslatableInLanguage : public filter
+struct filterTranslatableInLanguage : public filter, public filterHelperTranslation
 {
     /**@brief Constructs a filterTranslatableInLanguage object
-     * @param[in] _dataset Contains the sentences
-     * @param[in] _linkset Contains the data about links
      * @param[in] _lang The language in which the sentence should be translatable */
     filterTranslatableInLanguage( const std::string & _lang, dataset & _dataset, linkset & _linkset )
-        :m_dataset( _dataset )
-        ,m_linkset( _linkset )
+        :filterHelperTranslation( _dataset, _linkset )
         ,m_lang( _lang )
     {
     }
@@ -28,28 +25,15 @@ struct filterTranslatableInLanguage : public filter
      * @param[in] _sentence The sentence to check */
     bool parse( const sentence & TATO_RESTRICT _sentence ) TATO_RESTRICT TATO_NO_THROW TATO_OVERRIDE
     {
-        // get the ids of the translations of this sentence
-        auto allLinksOfSentence = m_linkset.getLinksOfSafe( _sentence.getId() );
-
-        // go through the translations and check if any of them matches the language the user set
-        for( auto iter = allLinksOfSentence.first; iter != allLinksOfSentence.second; ++iter )
-        {
-            // sometimes links.csv references sentences that just don’t exist
-            if( m_dataset[*iter] != nullptr )
+        return doesAnyTranslationRespectCondition<true>( _sentence.getId(),
+            [this]( const sentence & _translation ) -> bool
             {
-                assert( m_dataset[*iter]->lang() );
-
-                if( m_lang == m_dataset[*iter]->lang() )
-                    return true;
+                return m_lang == _translation.lang();
             }
-        }
-
-        return false;
+        );
     }
 
 private:
-    dataset  &  m_dataset; // contains info about the sentence (namely, its language)
-    linkset  &  m_linkset; // contains info about the translations of a sentenc
     std::string m_lang;    // The language to check for
 };
 
