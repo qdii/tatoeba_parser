@@ -23,13 +23,25 @@ myboost_lib_directory="/home/qdii/Documents/Geek/Android/Boost/Boost-for-Android
 Android.mk: Makefile.am
 	./androgenizer -:PROJECT tatoparser -:REL_TOP $(top_srcdir) -:ABS_TOP $(abs_top_srcdir)	\
 		       -:SHARED tatoparser \
-		       -:SOURCES $(libtatoparser_la_SOURCES) \
+		       -:SOURCES $(libtatoparser_la_SOURCES) android.cpp \
 		       -:LDFLAGS $(libtestlib_la_LDFLAGS) \
 		       -:PASSTHROUGH \
 		       		"LOCAL_CXXFLAGS	:= -std=c++0x" \
 				"LOCAL_C_INCLUDES	:= $(top_srcdir) $(top_srcdir)/include $(top_srcdir)/src $(includedir) ${myboost_include}" \
-				"LOCAL_CPPFLAGS	:= $(BOOST_CPPFLAGS)" "LOCAL_CPP_FEATURES	:= exceptions rtti" \
+				"LOCAL_CPPFLAGS	:= $(BOOST_CPPFLAGS) -DTATO_ANDROID" "LOCAL_CPP_FEATURES	:= exceptions rtti" \
 				"LOCAL_LDFLAGS := -l${myboost_lib} -L${myboost_lib_directory}"> $@
 
-android: Android.mk
+android-ndk: Android.mk
 	ndk-build NDK_PROJECT_PATH=$(top_srcdir)/src APP_BUILD_SCRIPT=$(top_srcdir)/src/Android.mk APP_STL=gnustl_static V=1
+
+JAVAC=javac
+ANDROID_CLASSPATH=/opt/android-sdk-update-manager/platforms/android-17/android.jar
+ANDROID_FLAGS=-classpath "$(ANDROID_CLASSPATH):./obj" -sourcepath $(top_srcdir)/src/java -d ./obj
+ANDROID_R_FILE=java/gen/com/qdii/tatoparser/R.class
+ANDROID_SRC=java/gen/com/qdii/tatoparser/BuildConfig.java java/com/qdii/tatoparser/ActivitySearch.java
+ANDROID_OBJ=$(ANDROID_SRC:.java=.class)
+
+android-src: $(ANDROID_R_FILE) $(ANDROID_OBJ)
+
+%.class:
+	$(JAVAC) $(ANDROID_FLAGS) $*.java
