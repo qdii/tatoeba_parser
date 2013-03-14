@@ -76,6 +76,7 @@ then
 	then
 		AC_MSG_ERROR([Unable to find keytool, this should come with the android sdk.])
 	fi
+	AC_SUBST([TATOPARSER_TARGET_ID],[android-17])
 fi
 
 # Checks for libraries.
