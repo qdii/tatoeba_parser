@@ -19,6 +19,9 @@ TARGET_VM_SOURCE = 1.6
 ANDROID_CLASSPATH = $(ANDROID_SDK_PATH)/platforms/$(TARGET_ID)/android.jar
 ANDROID_FLAGS = -classpath "$(ANDROID_CLASSPATH):$(OBJ)" -sourcepath $(srcdir) -d $(OBJ) -target $(TARGET_VM) -source $(TARGET_VM_SOURCE)
 
+update-project:
+	$(ANDROID) update project --name "$(PROJECT_NAME)" --target "$(TARGET_ID)" --path $(srcdir)
+
 %.class:
 	$(JAVAC) $(ANDROID_FLAGS) $*.java
 
