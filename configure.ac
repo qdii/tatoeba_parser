@@ -33,6 +33,10 @@ AC_ARG_ENABLE([python],
   [  --enable-python    adds python wrappers.],
   [python_mode=${enableval}],
   [python_mode=no])
+AC_ARG_ENABLE([android],
+  [  --enable-android   compiles android source code.],
+  [android_mode=${enableval}],
+  [android_mode=no])
 
 if test "$debug_mode" = "no"
 then
@@ -47,6 +51,32 @@ fi
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_INSTALL
+
+if test "x$android_mode" = "xyes"
+then
+	AC_PROG_JAVAC
+
+	AC_PATH_PROG([ANDROID],[android],[notfound])
+	if test "x$ANDROID" = "xnotfound"
+	then
+		AC_MSG_ERROR([Unable to find a program called android, this should come with the android sdk.])
+	else
+		android_sdk_path_=$(dirname "$ANDROID")/..
+		AC_SUBST([ANDROID_SDK_PATH],[$android_sdk_path_])
+	fi
+
+	AC_PATH_PROG([DX],[dx],[notfound])
+	if test "x$DX" = "xnotfound"
+	then
+		AC_MSG_ERROR([Unable to find dx, this should come with the android sdk.])
+	fi
+
+	AC_PATH_PROG([KEYTOOL],[keytool],[notfound])
+	if test "x$KEYTOOL" = "xnotfound"
+	then
+		AC_MSG_ERROR([Unable to find keytool, this should come with the android sdk.])
+	fi
+fi
 
 # Checks for libraries.
 AS_IF([test "x$download_mode" = "xyes"], [
@@ -88,6 +118,7 @@ AC_TYPE_UINT16_T
 # Checks for library functions.
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+		 src/java/Makefile
 		 include/Makefile
 		 unittests/Makefile])
 AC_OUTPUT
