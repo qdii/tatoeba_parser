@@ -1,0 +1,36 @@
+JAVAC = @JAVAC@
+ANDROID = @ANDROID@
+ANDROID_SDK_PATH = @ANDROID_SDK_PATH@
+DX = @DX@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+prefix = @prefix@
+
+RDNS = "com/qdii/tatoparser"
+RRDNS = $(srcdir)/src/$(RDNS)
+OBJ = "."
+LIB = "."
+SDK_VERSION = 17
+TARGET_VM = 1.6
+TARGET_VM_SOURCE = 1.6
+
+ANDROID_CLASSPATH = $(ANDROID_SDK_PATH)/platforms/android-$(SDK_VERSION)/android.jar
+ANDROID_FLAGS = -classpath "$(ANDROID_CLASSPATH):$(OBJ)" -sourcepath $(srcdir) -d $(OBJ) -target $(TARGET_VM) -source $(TARGET_VM_SOURCE)
+
+%.class:
+	$(JAVAC) $(ANDROID_FLAGS) $*.java
+
+SOURCE_FILES = $(RRDNS)/ActivitySearch.java	$(RRDNS)/Sentence.java
+
+OBJ_FILES = $(SOURCE_FILES:.java=.class)
+
+compile-r-file: $(srcdir)/gen/$(RDNS)/R.class	$(srcdir)/gen/$(RDNS)/BuildConfig.class
+
+dexify:
+	$(DX) --dex --output=$(OBJ)/classes.dex $(OBJ) $(LIB)
+
+all: compile-r-file $(OBJ_FILES) dexify
+
+clean:
+	$(RM) -f $(OBJ)/*.class
