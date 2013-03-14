@@ -1,13 +1,14 @@
 JAVAC = @JAVAC@
 ANDROID = @ANDROID@
 ANDROID_SDK_PATH = @ANDROID_SDK_PATH@
+PROJECT_NAME = @PACKAGE_NAME@
 DX = @DX@
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 prefix = @prefix@
 
-RDNS = "com/qdii/tatoparser"
+RDNS = "com/qdii/$(PROJECT_NAME)"
 RRDNS = $(srcdir)/src/$(RDNS)
 OBJ = "."
 LIB = "."
