@@ -22,7 +22,7 @@ ANDROID_FLAGS = -classpath "$(ANDROID_CLASSPATH):$(OBJ)" -sourcepath $(srcdir) -
 all: update-project compile-r-file $(OBJ_FILES) dexify
 
 update-project:
-	$(ANDROID) update project --no-ui --name "$(PROJECT_NAME)" --target "$(TARGET_ID)" --path $(srcdir)
+	$(ANDROID) update project --name "$(PROJECT_NAME)" --target "$(TARGET_ID)" --path $(srcdir)
 
 %.class:
 	$(JAVAC) $(ANDROID_FLAGS) $*.java
