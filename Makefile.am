@@ -1,2 +1,2 @@
-ACLOCAL_AMFLAGS = -I.
+ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src unittests include
