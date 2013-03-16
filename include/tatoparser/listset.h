@@ -36,6 +36,13 @@ struct listset
      * @param[in] _listName The name of the list */
     bool doesListExist( const std::string & _listName ) const;
 
+#ifdef USE_PYTHON_WRAPPER
+    bool pythonIsSentenceInList( sentence::id _id, const std::string & _listName ) const
+    {
+        return isSentenceInList( _id, _listName );
+    }
+#endif
+
 public:
     /**@brief Inserts a sentence into a list
      * @param[in] _id the sentence id

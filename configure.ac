@@ -42,7 +42,25 @@ fi
 
 if test "$python_mode" = "yes"
 then
-  CXXFLAGS="$CXXFLAGS -DUSE_PYTHON_WRAPPER"
+  AC_PATH_PROG([PYTHON_CONFIG],[python-config],[no])
+  AS_IF([test "x$PYTHON_CONFIG" = "xno"], [
+	AC_MSG_ERROR([Unable to find python-config in PATH.])
+  ])
+
+  MY_PYTHON_VERSION=$("$PYTHON_CONFIG" --libs | grep -o '[[23]]\.[[0-9]]')
+  MY_BOOST_PYTHON="boost_python-$MY_PYTHON_VERSION"
+
+  CFLAGS_PYTHON_=$("$PYTHON_CONFIG" --cflags)
+  LDFLAGS_PYTHON_=$("$PYTHON_CONFIG" --ldflags)
+  LIBS_PYTHON_=$("$PYTHON_CONFIG" --libs)
+  INCLUDE_PYTHON_=$("$PYTHON_CONFIG" --includes)
+  CPPFLAGS_PYTHON_="-DUSE_PYTHON_WRAPPER"
+
+  AC_SUBST([CFLAGS_PYTHON], [$CFLAGS_PYTHON_])
+  AC_SUBST([LDFLAGS_PYTHON], ["$LDFLAGS_PYTHON_ -l$MY_BOOST_PYTHON"])
+  AC_SUBST([LIBS_PYTHON], [$LIBS_PYTHON_])
+  AC_SUBST([INCLUDE_PYTHON], [$INCLUDE_PYTHON_])
+  AC_SUBST([CPPFLAGS_PYTHON], [$CPPFLAGS_PYTHON_])
 fi	
 
 # Checks for programs.

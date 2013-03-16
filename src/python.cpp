@@ -2,6 +2,7 @@
 #ifdef USE_PYTHON_WRAPPER
 #include "tatoparser/dataset.h"
 #include "tatoparser/linkset.h"
+#include "tatoparser/listset.h"
 #include "tatoparser/tagset.h"
 #include "tatoparser/sentence.h"
 #include "tatoparser/interface_lib.h"
@@ -24,6 +25,11 @@ BOOST_PYTHON_MODULE( tatoparser )
     // __ LINKSET _________________________________________________________________________________________________________
     class_<NAMESPACE :: linkset, boost::noncopyable>( "linkset" )
         .def( "areLinked", & NAMESPACE ::linkset::areLinked )
+    ;
+
+    // __ LISTSET _________________________________________________________________________________________________________
+    class_<NAMESPACE :: listset, boost::noncopyable>( "listset" )
+        .def( "isSentenceInList", & NAMESPACE ::listset::pythonIsSentenceInList )
     ;
 
     // __ TAGSET __________________________________________________________________________________________________________
