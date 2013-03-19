@@ -13,7 +13,7 @@ using namespace boost::python;
 #ifndef NAMESPACE
 #   define NAMESPACE
 #endif
-BOOST_PYTHON_MODULE( tatoparser )
+BOOST_PYTHON_MODULE( libtatoparser )
 {
     // __ DATASET _________________________________________________________________________________________________________
     class_<NAMESPACE :: dataset, boost::noncopyable>( "dataset" )
