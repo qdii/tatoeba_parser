@@ -33,15 +33,3 @@ Android.mk: Makefile.am
 
 android-ndk: Android.mk
 	ndk-build NDK_PROJECT_PATH=$(top_srcdir)/src APP_BUILD_SCRIPT=$(top_srcdir)/src/Android.mk APP_STL=gnustl_static V=1
-
-JAVAC=javac
-ANDROID_CLASSPATH=/opt/android-sdk-update-manager/platforms/android-17/android.jar
-ANDROID_FLAGS=-classpath "$(ANDROID_CLASSPATH):./obj" -sourcepath $(top_srcdir)/src/java -d ./obj
-ANDROID_R_FILE=java/gen/com/qdii/tatoparser/R.class
-ANDROID_SRC=java/gen/com/qdii/tatoparser/BuildConfig.java java/com/qdii/tatoparser/ActivitySearch.java
-ANDROID_OBJ=$(ANDROID_SRC:.java=.class)
-
-android-src: $(ANDROID_R_FILE) $(ANDROID_OBJ)
-
-%.class:
-	$(JAVAC) $(ANDROID_FLAGS) $*.java
