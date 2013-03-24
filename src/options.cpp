@@ -155,7 +155,7 @@ bool addNewFilterToList( boost::program_options::variables_map & _vm, const std:
 {
     const bool optionWasSelected = _vm.count( _option.c_str() ) > 0;
     return optionWasSelected &&
-        addNewFilterToListGeneric<FILTER_TYPE>( _vm, _option, allFilters_, optionWasSelected, _vm[_option.c_str()].as<OPTION_TYPE>(), args... );
+           addNewFilterToListGeneric<FILTER_TYPE>( _vm, _option, allFilters_, optionWasSelected, _vm[_option.c_str()].as<OPTION_TYPE>(), args... );
 }
 
 // -------------------------------------------------------------------------- //
@@ -171,7 +171,7 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
 
     addNewFilterToList<sentence::id, filterId>( m_vm, "has-id", allFilters_ );
     addNewFilterToList<std::string, filterUser>( m_vm, "user", allFilters_ );
-    addNewFilterToListGeneric< filterUser >( m_vm, "orphan", allFilters_, m_vm.count("orphan") > 0, "", true );
+    addNewFilterToListGeneric< filterUser >( m_vm, "orphan", allFilters_, m_vm.count( "orphan" ) > 0, "", true );
 
     // The various filters will be applied in order. The language filter is
     // very light so we want it first to discard as many sentences as possible

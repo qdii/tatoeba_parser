@@ -46,10 +46,10 @@ bool downloadIf( bool _condition, std::string _url, std::string _destinationFile
 
 int main( int argc, char * argv[] )
 {
-	qlog::initializer log_init;
+    qlog::initializer log_init;
     startLog( false );
     FilterVector allFilters; ///< the filter list
-                             ///< to select sentences based on the user options)
+    ///< to select sentences based on the user options)
 
     // create the filters with respect to the user options
     allFilters.reserve( 5 );
@@ -121,7 +121,7 @@ int main( int argc, char * argv[] )
             ( options.isVerbose() ? VERBOSE : 0 ) |
             ( options.isItNecessaryToParseDetailedFile() ? DETAILED : 0 ) |
             ( options.isItNecessaryToParseListFile() ? 0 : NO_LISTS )
-	        );
+        );
 
     if( libraryInit == EXIT_SUCCESS )
     {
@@ -151,14 +151,14 @@ int main( int argc, char * argv[] )
     else
         skipFiltering = true;
 
-    if ( !skipFiltering )
+    if( !skipFiltering )
     {
         options.treatTranslations( allLinks, allFilters );
 
         // if a list has beeg given, check if the list exists
         const std::string & lowerCaseListName = toLower( options.getListName() );
 
-        if ( lowerCaseListName.size() && allLists.doesListExist( lowerCaseListName ) == false )
+        if( lowerCaseListName.size() && allLists.doesListExist( lowerCaseListName ) == false )
         {
             qlog::error << "list \"" << lowerCaseListName << "\" does not exist in lists.csv" << qlog::color() << '\n';
             skipFiltering = true;
@@ -232,18 +232,18 @@ int main( int argc, char * argv[] )
 
 void startLog( bool verbose )
 {
-	using namespace qlog;
+    using namespace qlog;
 
-	qlog::set_loglevel( verbose ? qlog::loglevel::trace : qlog::loglevel::warning );
+    qlog::set_loglevel( verbose ? qlog::loglevel::trace : qlog::loglevel::warning );
 
-	qlog::info.reset_decoration();
-	qlog::warning.reset_decoration();
-	qlog::error.reset_decoration();
+    qlog::info.reset_decoration();
+    qlog::warning.reset_decoration();
+    qlog::error.reset_decoration();
 
     // prepend markers
     qlog::info.prepend() << "[..] ";
-    qlog::warning.prepend() << "[" << color(green) << "ww" << color() << "] ";
-    qlog::error.prepend() << "[" << color(red, true) << "EE" << color() << "] " << color(white, true);
+    qlog::warning.prepend() << "[" << color( green ) << "ww" << color() << "] ";
+    qlog::error.prepend() << "[" << color( red, true ) << "EE" << color() << "] " << color( white, true );
 
     // append just resets color
     qlog::error.append() << color();
@@ -256,7 +256,7 @@ void startLog( bool verbose )
 
 #ifdef HAVE_CURL_CURL_H
 /**@brief Download an url to a file if a condition is met
- * @param[in] _condition If this parameter evals to tru, then the download is started. 
+ * @param[in] _condition If this parameter evals to tru, then the download is started.
  * @param[in] _url The url to download the file from (This must
  *            be a valid URL).
  * @param[in] _filename The name of the file to download the data to. If the file exists, then
@@ -292,11 +292,11 @@ bool downloadIf( bool _condition, std::string _url, std::string _filename )
                 qlog::info( ret ) << "Finished downloading " << _filename.c_str() << '\n';
                 qlog::warning( !ret ) << "Failed to download " << _filename.c_str() << '\n';
             }
-            catch (const std::bad_alloc&)
+            catch( const std::bad_alloc & )
             {
                 qlog::error << "Out of memory.\n";
             }
-            catch (const hdl::curl_exception& )
+            catch( const hdl::curl_exception & )
             {
                 qlog::error << "Curl failed to initialize.\n";
             }
