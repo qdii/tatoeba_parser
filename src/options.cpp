@@ -8,6 +8,7 @@
 #include "filter_list.h"
 #include "filter_lang.h"
 #include "filter_tag.h"
+#include "filter_fuzzy.h"
 #include "filter_translatable_in_language.h"
 #include "filter_user.h"
 #include <tatoparser/dataset.h>
@@ -25,6 +26,22 @@
 NAMESPACE_START
 
 namespace po = boost::program_options;
+
+static
+void validate( boost::any & _v,
+               const std::vector<std::string> & _values,
+               fuzzyFilterOption * _options, int )
+{
+    // Make sure no previous assignment to 'a' was made.
+    po::validators::check_first_occurrence( _v );
+
+    fuzzyFilterOption temporaryOptions;
+
+    temporaryOptions.numberOfMatch = boost::lexical_cast<unsigned int>( _values.at( 0 ) );
+    temporaryOptions.expression = _values.at( 1 );
+
+    _v = temporaryOptions;
+}
 
 userOptions::userOptions()
     :m_desc( "" )
@@ -68,6 +85,7 @@ userOptions::userOptions()
         ( "in-list", po::value<std::string>(), "Keep the sentences which belong to a given list." )
         ( "orphan", "Keep sentences that belong to no-one." )
         ( "translates,t", po::value<sentence::id>(), "Keep the indirect and direct translations of a given sentence." )
+        ( "fuzzy,f", po::value<fuzzyFilterOption>()->multitoken(), "Looks for the N sentences that look like the given expression." )
     ;
     m_desc.add( filteringOptions );
     m_visibleOptions.add( filteringOptions );
@@ -106,7 +124,7 @@ userOptions::userOptions()
 /**@brief let boost::program_options treat the user command line arguments */
 void userOptions::treatCommandLine( int argc, char * argv[] )
 {
-    po::store( po::parse_command_line( argc, argv, m_desc ), m_vm );
+    po::store( po::command_line_parser( argc, argv ).options(m_desc).run(), m_vm );
     po::notify( m_vm );
 }
 
@@ -198,6 +216,9 @@ void userOptions::getFilters( dataset & _dataset, linkset & _linkset, tagset & _
     addNewFilterToList<vector<string>, filterTranslationRegex>( m_vm, "translation-regex", allFilters_, _dataset, _linkset );
     addNewFilterToList<std::string, filterList>( m_vm, "in-list", allFilters_, _listset );
     addNewFilterToList<std::string, filterTag>( m_vm, "has-tag", allFilters_, _tagset );
+
+    if( m_vm.count( "fuzzy" ) > 0 )
+        addNewFilterToListGeneric<filterFuzzy>( m_vm, "fuzzy", allFilters_, true, m_vm["fuzzy"].as<fuzzyFilterOption>() );
 
 #ifdef HAVE_SYS_RESOURCE_H
 

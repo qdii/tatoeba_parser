@@ -8,6 +8,7 @@
 #include "filter_id.h"
 #include "filter_tag.h"
 #include "filter_regex.h"
+#include "filter_fuzzy.h"
 #include <iostream>
 #include <fstream>
 
@@ -30,6 +31,7 @@ static const char TAG_URL[] = "http://tatoeba.org/files/downloads/tags.csv";
 static const char LIST_URL[] = "http://tatoeba.org/files/downloads/lists.csv";
 
 void startLog( bool _verbose );
+void displaySentence( userOptions & _options, dataset & _allSentences, linkset & _allLinks, const sentence & _sentence, unsigned _lineNumber );
 
 #ifdef HAVE_CURL_CURL_H
 bool downloadIf( bool _condition, std::string _url, std::string _destinationFile );
@@ -168,66 +170,52 @@ int main( int argc, char * argv[] )
     ///////////////////////////
     if( !skipFiltering )
     {
+        std::vector<const sentence *> filteredSentences;
+
         // go through every sentence and see if it matches the filter
         auto endFilter = allFilters.end();
         unsigned printedLineNumber = 0;
-        std::string translationLanguage = options.getFirstTranslationLanguage();
-        const std::string & separator = options.getSeparator();
-        bool shouldDisplay = true;
 
-        for( sentence sentence : allSentences )
+        bool shouldDisplay = true, keepSentence = true;
+
+        for( const sentence & sentence : allSentences )
         {
             if( sentence.getId() == sentence::INVALID_ID )
                 continue;
 
+            keepSentence = true;
+
+            for( auto filter = allFilters.begin(); shouldDisplay && filter != endFilter; ++filter )
+            {
+                keepSentence &= ( *filter )->parse( sentence );
+            }
+
+            // display the sentence if it is seleted by all the filters
+            if( keepSentence )
+            {
+                filteredSentences.push_back( &sentence );
+            }
+        }
+
+        /////////////////////////////////////
+        //  processing filtered sentences  //
+        /////////////////////////////////////
+        for( const sentence * sentence : filteredSentences )
+        {
+            assert(nullptr != sentence);
+
+            if( sentence->getId() == sentence::INVALID_ID )
+                continue;
             shouldDisplay = true;
 
             for( auto filter = allFilters.begin(); shouldDisplay && filter != endFilter; ++filter )
             {
-                shouldDisplay &= ( *filter )->parse( sentence );
+                shouldDisplay &= ( *filter )->postProcess( *sentence );
             }
 
-            // display the sentence if it is seleted by all the filters
             if( shouldDisplay )
             {
-                using namespace qlog;
-
-                // option -n
-                if( options.displayLineNumbers() )
-                    qlog::cout << ++printedLineNumber << separator;
-
-                // option -i
-                if( options.displayIds() )
-                    qlog::cout << ( options.isColored() ? color(yellow) : color() ) << sentence.getId() << color() << separator;
-
-                // option --display-lang
-                if (options.displayLanguages() )
-                    qlog::cout << ( options.isColored() ? color(red) : color() ) << sentence.lang() << color() << separator;
-
-                // display the sentence
-                qlog::cout << sentence.str();
-
-                // display a translation if it was requested
-                if( options.displayFirstTranslation() )
-                {
-                    // find a suitable translation
-                    const sentence::id firstTranslationId =
-                        getFirstSentenceTranslation(
-                            allSentences,
-                            allLinks,
-                            sentence.getId(),
-                            translationLanguage
-                        );
-
-                    if( firstTranslationId != sentence::INVALID_ID
-                            && allSentences[firstTranslationId] )
-                    {
-                        // display the translation
-                        qlog::cout << separator << ( options.isColored() ? color(cyan) : color() ) << allSentences[firstTranslationId]->str() << color();
-                    }
-                }
-
-                qlog::cout << '\n';
+                displaySentence( options, allSentences, allLinks, *sentence, ++printedLineNumber );
             }
         }
     }
@@ -318,3 +306,50 @@ bool downloadIf( bool _condition, std::string _url, std::string _filename )
     return ret;
 }
 #endif
+
+
+// -------------------------------------------------------------------------- //
+
+void displaySentence( userOptions & _options, dataset & _allSentences, linkset & _allLinks, const sentence & _sentence, unsigned _lineNumber )
+{
+    using namespace qlog;
+    const std::string & separator = _options.getSeparator();
+    std::string translationLanguage = _options.getFirstTranslationLanguage();
+
+    // option -n
+    if( _options.displayLineNumbers() )
+        qlog::cout << _lineNumber << separator;
+
+    // option -i
+    if( _options.displayIds() )
+        qlog::cout << ( _options.isColored() ? color( yellow ) : color() ) << _sentence.getId() << color() << separator;
+
+    // option --display-lang
+    if( _options.displayLanguages() )
+        qlog::cout << ( _options.isColored() ? color( red ) : color() ) << _sentence.lang() << color() << separator;
+
+    // display the sentence
+    qlog::cout << _sentence.str();
+
+    // display a translation if it was requested
+    if( _options.displayFirstTranslation() )
+    {
+        // find a suitable translation
+        const sentence::id firstTranslationId =
+            getFirstSentenceTranslation(
+                _allSentences,
+                _allLinks,
+                _sentence.getId(),
+                translationLanguage
+            );
+
+        if( firstTranslationId != sentence::INVALID_ID
+                && _allSentences[firstTranslationId] )
+        {
+            // display the translation
+            qlog::cout << separator << ( _options.isColored() ? color( cyan ) : color() ) << _allSentences[firstTranslationId]->str() << color();
+        }
+    }
+
+    qlog::cout << '\n';
+}
