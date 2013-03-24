@@ -19,7 +19,7 @@ TARGET_VM_SOURCE = 1.6
 ANDROID_CLASSPATH = $(ANDROID_SDK_PATH)/platforms/$(TARGET_ID)/android.jar
 ANDROID_FLAGS = -classpath "$(ANDROID_CLASSPATH):$(OBJ)" -sourcepath $(srcdir) -d $(OBJ) -target $(TARGET_VM) -source $(TARGET_VM_SOURCE)
 
-all: update-project compile-r-file $(OBJ_FILES) dexify
+all: update-project compile-r-file $(OBJ_FILES) dexify compile-native
 
 update-project:
 	$(ANDROID) update project --name "$(PROJECT_NAME)" --target "$(TARGET_ID)" --path $(srcdir)
@@ -38,3 +38,6 @@ dexify:
 
 clean:
 	$(RM) -f $(OBJ)/*.class
+
+compile-native:
+	cd $(top_srcdir)/src && make android-ndk
