@@ -1,3 +1,13 @@
+v3.1
+	- Added --translates, which outputs direct and indirect translations
+	- Added --orphan, which only outputs sentences that don’t belong to anyone
+	- Fixed misbehaviours --just-parse
+	- Added colored output, using --color
+	- Configure now has a --enable-python switch to add python bindings to the shared object
+	- Added --fuzzy N EXPR, which outputs the N sentences closest to EXPR.
+	- Numerous bug fixes.
+	- Changed behavior of --has-tag --in-list to treat names case-insensitively
+
 v3.0
 	- Added support for lists.cv
 	- Fixed a bug in hdownloader.hpp
