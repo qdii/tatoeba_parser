@@ -3,23 +3,41 @@ ANDROID = @ANDROID@
 ANDROID_SDK_PATH = @ANDROID_SDK_PATH@
 PROJECT_NAME = @PACKAGE_NAME@
 DX = @DX@
+AAPT = @AAPT@
+JARSIGNER = @JARSIGNER@
+ZIPALIGN = @ZIPALIGN@
 
 srcdir = @srcdir@
+builddir = @builddir@
 top_srcdir = @top_srcdir@
 prefix = @prefix@
 
 RDNS = "com/qdii/$(PROJECT_NAME)"
 RRDNS = $(srcdir)/src/$(RDNS)
-OBJ = "."
+OBJ = $(builddir)
 LIB = $(srcdir)/libs
 TARGET_ID = @TATOPARSER_TARGET_ID@
 TARGET_VM = 1.6
 TARGET_VM_SOURCE = 1.6
 
-ANDROID_CLASSPATH = $(ANDROID_SDK_PATH)/platforms/$(TARGET_ID)/android.jar
-ANDROID_FLAGS = -classpath "$(ANDROID_CLASSPATH):$(OBJ)" -sourcepath $(srcdir) -d $(OBJ) -target $(TARGET_VM) -source $(TARGET_VM_SOURCE)
+KEYSTORE_PASSWORD = "android"
+KEYSTORE_ALIAS = "androiddebugkey"
+KEYSTORE_FILE = "$(srcdir)/$(PROJECT_NAME).keystore"
 
-all: update-project compile-r-file $(OBJ_FILES) dexify compile-native
+ANDROID_CLASSPATH = "$(ANDROID_SDK_PATH)/platforms/$(TARGET_ID)/android.jar"
+ANDROID_FLAGS = -classpath "$(ANDROID_CLASSPATH):$(OBJ)" -sourcepath "$(srcdir)" -d "$(OBJ)" -target $(TARGET_VM) -source $(TARGET_VM_SOURCE)
+
+all: update-project compile-r-file $(OBJ_FILES) dexify compile-native create-apk sign-apk
+
+create-apk: $(PROJECT_NAME).unsigned.apk
+
+$(PROJECT_NAME).unsigned.apk:
+	$(AAPT) package -M $(srcdir)/AndroidManifest.xml -S $(srcdir)/res -I $(ANDROID_CLASSPATH) -F $@
+
+sign-apk: $(PROJECT_NAME).apk
+
+$(PROJECT_NAME).apk:
+	$(JARSIGNER) -keystore $(KEYSTORE_FILE) -storepass $(KEYSTORE_PASSWORD) -keypass $(KEYSTORE_PASSWORD) -signedjar "$(PROJECT_NAME).apk" "$(PROJECT_NAME).unsigned.apk" $(KEYSTORE_ALIAS)
 
 update-project:
 	$(ANDROID) update project --name "$(PROJECT_NAME)" --target "$(TARGET_ID)" --path $(srcdir)
@@ -37,7 +55,21 @@ dexify:
 	$(DX) --dex --output=$(OBJ)/classes.dex $(OBJ) $(LIB)
 
 clean:
-	$(RM) -f $(OBJ)/*.class
+	$(RM) $(OBJ)/*.class
+	$(RM) $(PROJECT_NAME).unsigned.apk
+	$(RM) $(PROJECT_NAME).apk
 
 compile-native:
-	cd $(top_srcdir)/src && make android-ndk
+	cd $(top_srcdir)/src && $(MAKE) android-ndk
+
+install:
+	install -d $(prefix)/bin
+	install -m 0755 $(PROJECT_NAME).apk $(prefix)/bin
+
+uninstall:
+	$(RM) $(prefix)/bin/$(PROJECT_NAME).apk
+
+Makefile: Makefile.in
+	cd $(top_srcdir) && ./config.status $@
+
+.PHONY: clean dexify compile-native all install uninstall create-apk sign-apk

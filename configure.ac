@@ -66,17 +66,36 @@ then
 		AC_SUBST([ANDROID_SDK_PATH],[$android_sdk_path_])
 	fi
 
-	AC_PATH_PROG([DX],[dx],[notfound])
+	AC_PATH_PROG([DX],[dx],[notfound],[$ANDROID_SDK_PATH:$PATH])
 	if test "x$DX" = "xnotfound"
 	then
 		AC_MSG_ERROR([Unable to find dx, this should come with the android sdk.])
 	fi
 
-	AC_PATH_PROG([KEYTOOL],[keytool],[notfound])
+	AC_PATH_PROG([KEYTOOL],[keytool],[notfound],[$ANDROID_SDK_PATH:$PATH])
 	if test "x$KEYTOOL" = "xnotfound"
 	then
 		AC_MSG_ERROR([Unable to find keytool, this should come with the android sdk.])
 	fi
+
+	AC_PATH_PROG([AAPT],[aapt],[notfound],[$ANDROID_SDK_PATH:$PATH])
+        if test "x$AAPT" = "xnotfound"
+	then
+	        AC_MSG_ERROR([Unable to find aapt, this should come with the android sdk.])
+	fi
+
+	AC_PATH_PROG([JARSIGNER],[jarsigner],[notfound],[$ANDROID_SDK_PATH:$PATH])
+	if test "x$JARSIGNER" = "xnotfound"
+	then
+		AC_MSG_ERROR([Unable to find jarsigner, this should come with the android sdk.])
+	fi
+
+	AC_PATH_PROG([ZIPALIGN],[zipalign],[notfound],[$ANDROID_SDK_PATH:$PATH])
+	if test "x$ZIPALIGN" = "xnotfound"
+	then
+		AC_MSG_ERROR([Unable to find zipalign, this should come with the android sdk.])
+	fi
+
 	AC_SUBST([TATOPARSER_TARGET_ID],[android-17])
 fi
 
