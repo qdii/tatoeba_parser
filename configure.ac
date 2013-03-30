@@ -38,6 +38,15 @@ AC_ARG_ENABLE([android],
   [  --enable-android   compiles android source code.],
   [android_mode=${enableval}],
   [android_mode=no])
+AC_ARG_WITH([android-boost-lib], 
+  [AS_HELP_STRING([--with-android-boost-lib=/path/to/boost/lib	Specify the path to boost libraries for android])], 
+  [android_boost_lib_path="$withval"])
+AC_ARG_WITH([android-boost-include],
+  [AS_HELP_STRING([--with-android-boost-include=/path/to/boost/include  Specify the path to boost includes for android])],
+  [android_boost_include_path="$withval"])
+AC_ARG_WITH([android-boost-version],
+  [AS_HELP_STRING([--with-android-boost-version=1.49	Specify the version of boost for android])],
+  [android_boost_version="$withval"])
 
 if test "$debug_mode" = "no"
 then
@@ -56,6 +65,12 @@ AC_PROG_INSTALL
 if test "x$android_mode" = "xyes"
 then
 	AC_PROG_JAVAC
+	android_boost_CPPFLAGS="-I $android_boost_include_path"
+	android_boost_LIBS="-L $android_boost_lib_path"
+	android_boost_version=${android_boost_version/./_}
+	AC_SUBST([android_boost_CPPFLAGS])
+	AC_SUBST([android_boost_LIBS])
+	AC_SUBST([android_boost_version])
 
 	AC_PATH_PROG([ANDROID],[android],[notfound])
 	if test "x$ANDROID" = "xnotfound"
