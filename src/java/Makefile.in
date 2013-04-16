@@ -6,6 +6,7 @@ DX = @DX@
 AAPT = @AAPT@
 JARSIGNER = @JARSIGNER@
 ZIPALIGN = @ZIPALIGN@
+KEYTOOL = @KEYTOOL@
 
 srcdir = @srcdir@
 builddir = @builddir@
@@ -27,17 +28,27 @@ KEYSTORE_FILE = "$(srcdir)/$(PROJECT_NAME).keystore"
 ANDROID_CLASSPATH = "$(ANDROID_SDK_PATH)/platforms/$(TARGET_ID)/android.jar"
 ANDROID_FLAGS = -classpath "$(ANDROID_CLASSPATH):$(OBJ)" -sourcepath "$(srcdir)" -d "$(OBJ)" -target $(TARGET_VM) -source $(TARGET_VM_SOURCE)
 
-all: update-project compile-r-file $(OBJ_FILES) dexify compile-native create-apk sign-apk
+all: update-project compile-r-file $(OBJ_FILES) dexify compile-native create-apk generate-keystore sign-apk align-apk
 
 create-apk: $(PROJECT_NAME).unsigned.apk
+
+generate-keystore: $(PROJECT_NAME).keystore
+
+$(PROJECT_NAME).keystore:
+	$(KEYTOOL) -genkeypair -v -keystore $(KEYSTORE_FILE) -alias $(KEYSTORE_ALIAS) -keyalg RSA -keysize 2048 -validity 20000 -storepass $(KEYSTORE_PASSWORD)
 
 $(PROJECT_NAME).unsigned.apk:
 	$(AAPT) package -M $(srcdir)/AndroidManifest.xml -S $(srcdir)/res -I $(ANDROID_CLASSPATH) -F $@
 
-sign-apk: $(PROJECT_NAME).apk
+sign-apk: $(PROJECT_NAME).unsigned.apk $(PROJECT_NAME).unaligned.apk
+
+$(PROJECT_NAME).unaligned.apk:
+	$(JARSIGNER) -keystore $(KEYSTORE_FILE) -storepass $(KEYSTORE_PASSWORD) -keypass $(KEYSTORE_PASSWORD) -signedjar "$(PROJECT_NAME).unaligned.apk" "$(PROJECT_NAME).unsigned.apk" $(KEYSTORE_ALIAS)
+
+align-apk: create-apk sign-apk $(PROJECT_NAME).apk
 
 $(PROJECT_NAME).apk:
-	$(JARSIGNER) -keystore $(KEYSTORE_FILE) -storepass $(KEYSTORE_PASSWORD) -keypass $(KEYSTORE_PASSWORD) -signedjar "$(PROJECT_NAME).apk" "$(PROJECT_NAME).unsigned.apk" $(KEYSTORE_ALIAS)
+	$(ZIPALIGN) -f 4 $(PROJECT_NAME).unaligned.apk $(PROJECT_NAME).apk
 
 update-project:
 	$(ANDROID) update project --name "$(PROJECT_NAME)" --target "$(TARGET_ID)" --path $(srcdir)
@@ -57,6 +68,7 @@ dexify:
 clean:
 	$(RM) $(OBJ)/*.class
 	$(RM) $(PROJECT_NAME).unsigned.apk
+	$(RM) $(PROJECT_NAME).unaligned.apk
 	$(RM) $(PROJECT_NAME).apk
 
 compile-native:
@@ -70,6 +82,6 @@ uninstall:
 	$(RM) $(prefix)/bin/$(PROJECT_NAME).apk
 
 Makefile: Makefile.in
-	cd $(top_srcdir) && ./config.status $@
+	cd $(top_srcdir) && ./config.status src/java/$@
 
-.PHONY: clean dexify compile-native all install uninstall create-apk sign-apk
+.PHONY: clean dexify compile-native all install uninstall generate-keystore create-apk sign-apk align-apk

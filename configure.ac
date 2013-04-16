@@ -38,6 +38,10 @@ AC_ARG_ENABLE([android],
   [  --enable-android   compiles android source code.],
   [android_mode=${enableval}],
   [android_mode=no])
+AC_ARG_ENABLE([emulator],
+  [  --enable-emulator  lets you run the APK in an emulator.],
+  [emulator_mode=${enableval}],
+  [emulator_mode=no])
 AC_ARG_WITH([android-boost-lib], 
   [AS_HELP_STRING([--with-android-boost-lib=/path/to/boost/lib	Specify the path to boost libraries for android])], 
   [android_boost_lib_path="$withval"])
@@ -112,6 +116,21 @@ then
 	fi
 
 	AC_SUBST([TATOPARSER_TARGET_ID],[android-17])
+
+	if test "x$emulator_mode" = "xyes"
+	then
+		AC_PATH_PROG([EMULATOR],[emulator],[notfound],[$ANDROID_SDK_PATH:$PATH])
+		if test "x$EMULATOR" = "xnotfound"
+		then
+			AC_MSG_ERROR([Unable to find emulator, this should come with the android sdk.])
+		fi
+
+                AC_PATH_PROG([ADB],[adb],[notfound],[$ANDROID_SDK_PATH:$PATH])
+		if test "x$ADB" = "xnotfound"
+		then
+			AC_MSG_ERROR([Unable to find adb, this should come with the android sdk.])
+		fi
+	fi
 fi
 
 # Checks for libraries.
