@@ -33,6 +33,64 @@ lvh_distance levenshtein_distance( const T & s1, const T & s2 )
 
 // -------------------------------------------------------------------------- //
 
+static
+std::vector<std::string> split( const std::string & s, char delim )
+{
+    std::vector<std::string> elems;
+
+    std::stringstream stream( s );
+    std::string item;
+
+    while( std::getline( stream, item, delim ) )
+        elems.push_back( item );
+    return elems;
+}
+
+// -------------------------------------------------------------------------- //
+
+static
+std::string removePunctuation( const std::string & s )
+{
+    std::ostringstream ret;
+
+    boost::regex rgx("\\w+");
+    for( boost::sregex_iterator it( s.begin(), s.end(), rgx), it_end; it != it_end; ++it )
+        ret << (*it)[0] << ' ';
+
+    return ret.str();
+}
+
+// -------------------------------------------------------------------------- //
+template<class T> static
+lvh_distance levenshtein_distance_word( const T & match, const T & sentence )
+{
+    assert(sentence.size());
+    assert(match.size());
+
+    // split the sentence into words, and we take the smallest levenstein distance
+    std::vector<std::string> words = split( sentence, ' ' );
+    assert(words.size());
+
+    std::vector< lvh_distance > distances;
+    distances.reserve( words.size() );
+
+    // compute the levnshtein distance for each word
+    std::for_each( words.begin(), words.end(),
+                   [&match, &distances]( std::string & word )
+                    {
+                        distances.push_back( levenshtein_distance( match,word ) );
+                    }
+    );
+    assert(distances.size());
+
+    // return the smallest one
+    const auto smallestElement = std::min_element( distances.begin(), distances.end() );
+    assert(distances.end() != smallestElement);
+    return *smallestElement;
+}
+
+// -------------------------------------------------------------------------- //
+
 struct fuzzyFilterOption
 {
     std::string expression;
@@ -72,7 +130,7 @@ struct filterFuzzy : public filter
         assert( m_levenshteinValues.size() == m_keptSentences.size() );
         assert( m_levenshteinValues.capacity() == m_keptSentences.capacity() );
 
-        const lvh_distance distance = levenshtein_distance( m_expression, std::string( _sentence.str() ) );
+        const lvh_distance distance = levenshtein_distance_word( m_expression, removePunctuation( _sentence.str() ) );
 
         // qlog::info << "\tdistance of " << color(green) << _sentence.str() << color() << " and " << color(green) << m_expression << color() << ": " << distance << '\n';
         unsigned int index = 0, maxIndex = 0;
@@ -101,7 +159,7 @@ struct filterFuzzy : public filter
                 }
             }
 
-            if( distance < minDistance )
+            if( distance <= minDistance )
             {
                 // qlog::info << "\treplacing distance: " << m_levenshteinValues[maxIndex]  << " with " << distance << '\n';
                 m_levenshteinValues[maxIndex] = distance;
