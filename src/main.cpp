@@ -185,7 +185,7 @@ int main( int argc, char * argv[] )
 
             keepSentence = true;
 
-            for( auto filter = allFilters.begin(); shouldDisplay && filter != endFilter; ++filter )
+            for( auto filter = allFilters.begin(); keepSentence && filter != endFilter; ++filter )
             {
                 keepSentence &= ( *filter )->parse( sentence );
             }
