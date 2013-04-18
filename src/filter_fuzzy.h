@@ -9,6 +9,7 @@ NAMESPACE_START
 #include <vector>
 
 typedef unsigned int lvh_distance;
+static constexpr lvh_distance INFINITE_DISTANCE = std::numeric_limits<lvh_distance>::max();
 
 // taken from: http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.2B.2B
 template<class T> static
@@ -64,7 +65,9 @@ std::string removePunctuation( const std::string & s )
 template<class T> static
 lvh_distance levenshtein_distance_word( const T & match, const T & sentence )
 {
-    assert(sentence.size());
+    if (!sentence.size())
+        return INFINITE_DISTANCE;
+
     assert(match.size());
 
     // split the sentence into words, and we take the smallest levenstein distance
@@ -131,8 +134,8 @@ struct filterFuzzy : public filter
         assert( m_levenshteinValues.capacity() == m_keptSentences.capacity() );
 
         const lvh_distance distance = levenshtein_distance_word( m_expression, removePunctuation( _sentence.str() ) );
-
-        // qlog::info << "\tdistance of " << color(green) << _sentence.str() << color() << " and " << color(green) << m_expression << color() << ": " << distance << '\n';
+        qlog::warning( INFINITE_DISTANCE == distance ) << "Skipping invalid sentence: " << _sentence.getId() << '\t' << _sentence.str() << '\n';
+        //qlog::info << "\tdistance of " << color(green) << _sentence.str() << color() << " and " << color(green) << m_expression << color() << ": " << distance << '\n';
         unsigned int index = 0, maxIndex = 0;
         lvh_distance maxDistance = 0, minDistance = std::numeric_limits<lvh_distance>::max();
 
