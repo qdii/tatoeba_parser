@@ -4,29 +4,36 @@
 NAMESPACE_START
 
 #include "filter.h"
-#include <algorithm> // all_of
+#include <algorithm> // copy_if
 #include <limits> // numeric limits
+#include <iterator> // back_inserter
 #include <vector>
+#include <cctype>
+#include <boost/regex.hpp>
 
 typedef unsigned int lvh_distance;
 static constexpr lvh_distance INFINITE_DISTANCE = std::numeric_limits<lvh_distance>::max();
 
 // taken from: http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.2B.2B
-template<class T> static
-lvh_distance levenshtein_distance( const T & s1, const T & s2 )
+static
+lvh_distance levenshtein_distance( const std::string & s1, const std::string & s2 )
 {
     const size_t len1 = s1.size(), len2 = s2.size();
     std::vector<unsigned int> col( len2+1 ), prevCol( len2+1 );
 
-    for( unsigned int i = 0; i < prevCol.size(); i++ )
+    const size_t prevColSize = prevCol.size();
+    for( unsigned int i = 0; i < prevColSize; i++ )
         prevCol[i] = i;
 
-    for( unsigned int i = 0; i < len1; i++ )
+    for( unsigned int i = 0, j; i < len1; ++i )
     {
         col[0] = i+1;
-        for( unsigned int j = 0; j < len2; j++ )
-            col[j+1] = std::min( std::min( 1 + col[j], 1 + prevCol[1 + j] ),
-                            prevCol[j] + ( s1[i]==s2[j] ? 0 : 1 ) );
+        const char s1i = s1[i];
+        for( j = 0; j < len2; ++j )
+        {
+            const auto minPrev = 1 + std::min( col[j], prevCol[1 + j] );
+            col[j+1] = std::min( minPrev, prevCol[j] + ( static_cast<unsigned int>( s1i != s2[j] ) ) );
+        }
         col.swap( prevCol );
     }
     return prevCol[len2];
@@ -34,17 +41,36 @@ lvh_distance levenshtein_distance( const T & s1, const T & s2 )
 
 // -------------------------------------------------------------------------- //
 
-static
-std::vector<std::string> split( const std::string & s, char delim )
+template < class ContainerT > static
+ContainerT split( const std::string & str, char delimiter = ' ' )
 {
-    std::vector<std::string> elems;
+    ContainerT tokens;
+    typedef typename ContainerT::value_type ValueType;
+    typedef typename ValueType::size_type SizeType;
 
-    std::stringstream stream( s );
-    std::string item;
+    std::string::size_type pos, lastPos = 0;
+    while( true )
+    {
+        pos = str.find( delimiter, lastPos );
+        if TATO_LIKELY( pos != std::string::npos )
+        {
+            if TATO_LIKELY( pos != lastPos )
+                tokens.push_back( ValueType( str.data()+lastPos, static_cast< SizeType >( pos-lastPos ) ) );
+        }
+        else
+        {
+            pos = str.length();
 
-    while( std::getline( stream, item, delim ) )
-        elems.push_back( item );
-    return elems;
+            if TATO_LIKELY( pos != lastPos )
+                tokens.push_back( ValueType( str.data()+lastPos, static_cast< SizeType >( pos-lastPos ) ) );
+
+            break;
+        }
+
+        lastPos = pos + 1;
+    }
+
+    return tokens;
 }
 
 // -------------------------------------------------------------------------- //
@@ -52,27 +78,32 @@ std::vector<std::string> split( const std::string & s, char delim )
 static
 std::string removePunctuation( const std::string & s )
 {
-    std::ostringstream ret;
+    std::string ret;
+    ret.reserve( s.size() );
 
-    boost::regex rgx("\\w+");
-    for( boost::sregex_iterator it( s.begin(), s.end(), rgx), it_end; it != it_end; ++it )
-        ret << (*it)[0] << ' ';
+    std::copy_if(
+        s.begin(), s.end(), std::back_inserter( ret ),
+        []( char c )
+        {
+            return ispunct( static_cast<int>( c ) ) == 0;
+        }
+    );
 
-    return ret.str();
+    return ret;
 }
 
 // -------------------------------------------------------------------------- //
 template<class T> static
 lvh_distance levenshtein_distance_word( const T & match, const T & sentence )
 {
-    if (!sentence.size())
+    if( !sentence.size() )
         return INFINITE_DISTANCE;
 
-    assert(match.size());
+    assert( match.size() );
 
     // split the sentence into words, and we take the smallest levenstein distance
-    std::vector<std::string> words = split( sentence, ' ' );
-    assert(words.size());
+    std::vector<std::string> words = split<std::vector<std::string> >( sentence );
+    assert( words.size() );
 
     std::vector< lvh_distance > distances;
     distances.reserve( words.size() );
@@ -83,12 +114,12 @@ lvh_distance levenshtein_distance_word( const T & match, const T & sentence )
                     {
                         distances.push_back( levenshtein_distance( match,word ) );
                     }
-    );
-    assert(distances.size());
+                 );
+    assert( distances.size() );
 
     // return the smallest one
     const auto smallestElement = std::min_element( distances.begin(), distances.end() );
-    assert(distances.end() != smallestElement);
+    assert( distances.end() != smallestElement );
     return *smallestElement;
 }
 
