@@ -51,6 +51,9 @@ AC_ARG_WITH([android-boost-include],
 AC_ARG_WITH([android-boost-version],
   [AS_HELP_STRING([--with-android-boost-version=1.49	Specify the version of boost for android])],
   [android_boost_version="$withval"])
+AC_ARG_WITH([bootstrap-classpath],
+  [AS_HELP_STRING([--with-bootstrap-classpath=/path/to/rt.jar	Specify the bootstrap class path to use])],
+  [android_bootstrap_classpath="$withval"])
 
 if test "$debug_mode" = "no"
 then
@@ -75,6 +78,7 @@ then
 	AC_SUBST([android_boost_CPPFLAGS])
 	AC_SUBST([android_boost_LIBS])
 	AC_SUBST([android_boost_version])
+	AC_SUBST([android_bootstrap_classpath])
 
 	AC_PATH_PROG([ANDROID],[android],[notfound])
 	if test "x$ANDROID" = "xnotfound"

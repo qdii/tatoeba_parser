@@ -21,7 +21,7 @@ android_boost_LIBS=@android_boost_LIBS@
 android_boost_version=@android_boost_version@
 android_boost_lib="boost_program_options-gcc-mt-$(android_boost_version)"
 
-Android.mk: Makefile.am
+Android.mk: Makefile
 	./androgenizer -:PROJECT tatoparser -:REL_TOP $(top_srcdir) -:ABS_TOP $(abs_top_srcdir)	\
 		       -:SHARED tatoparser \
 		       -:SOURCES $(libtatoparser_la_SOURCES) android.cpp \
