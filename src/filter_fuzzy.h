@@ -44,7 +44,8 @@ lvh_distance levenshtein_distance( const std::string & s1, const std::string & s
 template < class ContainerT > static
 ContainerT split( const std::string & str, char delimiter = ' ' )
 {
-    ContainerT tokens;
+    static ContainerT tokens;
+    tokens.clear();
     typedef typename ContainerT::value_type ValueType;
     typedef typename ValueType::size_type SizeType;
 
