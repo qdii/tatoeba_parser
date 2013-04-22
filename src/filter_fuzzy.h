@@ -171,12 +171,8 @@ struct filterFuzzy : public filter
     }
 
     filterFuzzy( const fuzzyFilterOption & _options )
-        :m_expression( _options.expression )
-        ,m_keptSentences()
-        ,m_levenshteinValues()
+        :filterFuzzy( _options.expression, _options.numberOfMatch )
     {
-        m_keptSentences.reserve( _options.numberOfMatch );
-        m_levenshteinValues.reserve( _options.numberOfMatch );
     }
 
     /**@brief Checks that a sentence is close enough
