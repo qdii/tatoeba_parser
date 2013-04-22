@@ -15,6 +15,11 @@ typedef unsigned int lvh_distance;
 static constexpr lvh_distance INFINITE_DISTANCE = std::numeric_limits<lvh_distance>::max();
 
 // taken from: http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.2B.2B
+
+/**@brief Computes the Levenshtein distance between two strings
+ * @param[in] s1 The first string
+ * @param[in] s2 The second string
+ * @return A levenshtein distance. */
 static
 lvh_distance levenshtein_distance( const std::string & s1, const std::string & s2 )
 {
@@ -41,6 +46,10 @@ lvh_distance levenshtein_distance( const std::string & s1, const std::string & s
 
 // -------------------------------------------------------------------------- //
 
+/**@brief Splits a string according to a delimiter and returns a container of them
+ * @param[in] str The string to split
+ * @param[in] delimiter The delimiter character
+ * @return A container containing the substrings */
 template < class ContainerT > static
 ContainerT split( const std::string & str, char delimiter = ' ' )
 {
@@ -76,6 +85,11 @@ ContainerT split( const std::string & str, char delimiter = ' ' )
 
 // -------------------------------------------------------------------------- //
 
+/**
+ * @desc Replace punctuation with white spaces
+ * @param[in] s The string to remove punctuation signs from
+ * @return A string without punctuation signs
+ */
 static
 std::string removePunctuation( const std::string & s )
 {
@@ -90,10 +104,21 @@ std::string removePunctuation( const std::string & s )
         }
     );
 
+    assert(ret.size() == s.size()); // punctuation signs should have been replaced with white spaces, not deleted
+
     return ret;
 }
 
 // -------------------------------------------------------------------------- //
+/**
+ * @desc Computes the minimum distance from a word to a sentence's words
+ * @param[in] match The word to match
+ * @param[in] sentence A sentence
+ * @return lvh_distance The minimum distance from a word to any of the sentence's words
+ *
+ * A sentence is composed of words. This function computes the distances of a match word to
+ * any of the sentence's words and return the smallest distance.
+ */
 template<class T> static
 lvh_distance levenshtein_distance_word( const T & match, const T & sentence )
 {
