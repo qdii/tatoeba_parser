@@ -17,6 +17,18 @@ LT_INIT()
 
 BOOST_REQUIRE
 
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_INSTALL
+
+# AC_PROG_CXX doesn't let us determine whether a CXX compiler is available
+AC_CHECK_PROG([CXX_COMPILER],[$CXX],[yes],[no])
+if test "x$CXX_COMPILER" = "xno"
+then
+	AC_MSG_ERROR([Unable to find a C++ compiler.])
+fi
+
+
 # Debug mode
 AC_ARG_ENABLE([limit-mem],
   [  --enable-limit-mem    	provides an option to limitate the virtual memory (--limit-mem).],
@@ -64,17 +76,6 @@ if test "$python_mode" = "yes"
 then
   CXXFLAGS="$CXXFLAGS -DUSE_PYTHON_WRAPPER"
 fi	
-
-# Checks for programs.
-AC_PROG_CXX
-AC_PROG_INSTALL
-
-# AC_PROG_CXX doesn't let us determine whether a CXX compiler is available
-AC_CHECK_PROG([CXX_COMPILER],[$CXX],[yes],[no])
-if test "x$CXX_COMPILER" = "xno"
-then
-	AC_MSG_ERROR([Unable to find a C++ compiler, this should come with the android sdk.])
-fi
 
 if test "x$android_mode" = "xyes"
 then
