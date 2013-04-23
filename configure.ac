@@ -119,6 +119,12 @@ then
 		AC_MSG_ERROR([Unable to find zipalign, this should come with the android sdk.])
 	fi
 
+        AC_PATH_PROG([NDKBUILD],[ndk-build],[notfound],[$ANDROID_SDK_PATH:$PATH])
+        if test "x$NDKBUILD" = "xnotfound"
+        then
+		AC_MSG_ERROR([Unable to find ndk-build, this should come with the android sdk.])
+	fi
+
 	AC_SUBST([TATOPARSER_TARGET_ID],[android-17])
 
 	if test "x$emulator_mode" = "xyes"
