@@ -7,6 +7,7 @@ AAPT = @AAPT@
 JARSIGNER = @JARSIGNER@
 ZIPALIGN = @ZIPALIGN@
 KEYTOOL = @KEYTOOL@
+MKDIR_P = @MKDIR_P@
 
 srcdir = @srcdir@
 builddir = @builddir@
@@ -32,7 +33,7 @@ ANDROID_FLAGS = -bootclasspath "$(BOOTSTRAP_CLASSPATH)" -classpath "$(ANDROID_CL
 all: create-obj-directory update-project compile-r-file $(OBJ_FILES) dexify compile-native create-apk generate-keystore sign-apk align-apk
 
 create-obj-directory:
-	mkdir -p $(OBJ)
+	$(MKDIR_P) $(OBJ)
 
 create-apk: $(PROJECT_NAME).unsigned.apk
 
@@ -80,7 +81,7 @@ compile-native:
 	cd $(top_srcdir)/src && $(MAKE) android-ndk
 
 install:
-	install -d $(prefix)/bin
+	$(MKDIR_P) $(prefix)/bin
 	install -m 0755 $(PROJECT_NAME).apk $(prefix)/bin
 
 uninstall:
