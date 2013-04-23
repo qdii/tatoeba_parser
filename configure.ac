@@ -69,6 +69,13 @@ fi
 AC_PROG_CXX
 AC_PROG_INSTALL
 
+# AC_PROG_CXX doesn't let us determine whether a CXX compiler is available
+AC_CHECK_PROG([CXX_COMPILER],[$CXX],[yes],[no])
+if test "x$CXX_COMPILER" = "xno"
+then
+	AC_MSG_ERROR([Unable to find a C++ compiler, this should come with the android sdk.])
+fi
+
 if test "x$android_mode" = "xyes"
 then
 	AC_PROG_JAVAC
