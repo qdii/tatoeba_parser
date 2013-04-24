@@ -31,40 +31,40 @@ fi
 
 # Debug mode
 AC_ARG_ENABLE([limit-mem],
-  [  --enable-limit-mem    	provides an option to limitate the virtual memory (--limit-mem).],
+  AS_HELP_STRING([--enable-limit-mem],[Provides an option to limitate the virtual memory (--limit-mem).]),
   [limit_mem=${enableval}],
   [limit_mem=no])
 AC_ARG_ENABLE([debug],
-  [  --enable-debug	adds asserts and debug code to the build.],
+  AS_HELP_STRING([--enable-debug],[Adds asserts and debug code to the build.]),
   [debug_mode=${enableval}],
   [debug_mode=no])
 AC_ARG_ENABLE([download],
-  [  --enable-download  uses curl to download tatoeba material.],
+  AS_HELP_STRING([--enable-download],[Uses curl to download tatoeba material.]),
   [download_mode=${enableval}],
   [download_mode=no])
 AC_ARG_ENABLE([python],
-  [  --enable-python    adds python wrappers.],
+  AS_HELP_STRING([--enable-python],[Adds python wrappers.]),
   [python_mode=${enableval}],
   [python_mode=no])
 AC_ARG_ENABLE([android],
-  [  --enable-android   compiles android source code.],
+  AS_HELP_STRING([--enable-android],[Enables compiling android source code.]),
   [android_mode=${enableval}],
   [android_mode=no])
 AC_ARG_ENABLE([emulator],
-  [  --enable-emulator  lets you run the APK in an emulator.],
+  AS_HELP_STRING([--enable-emulator],[Lets you run the APK in an emulator.]),
   [emulator_mode=${enableval}],
   [emulator_mode=no])
 AC_ARG_WITH([android-boost-lib], 
-  [AS_HELP_STRING([--with-android-boost-lib=/path/to/boost/lib	Specify the path to boost libraries for android])], 
+  AS_HELP_STRING([--with-android-boost-lib=/path/to/boost/lib],[Specify the path to boost libraries for android.]),
   [android_boost_lib_path="$withval"])
 AC_ARG_WITH([android-boost-include],
-  [AS_HELP_STRING([--with-android-boost-include=/path/to/boost/include  Specify the path to boost includes for android])],
+  AS_HELP_STRING([--with-android-boost-include=/path/to/boost/include],[Specify the path to boost includes for android.]),
   [android_boost_include_path="$withval"])
 AC_ARG_WITH([android-boost-version],
-  [AS_HELP_STRING([--with-android-boost-version=1.49	Specify the version of boost for android])],
+  AS_HELP_STRING([--with-android-boost-version=1.49],[Specify the version of boost for android.]),
   [android_boost_version="$withval"])
 AC_ARG_WITH([bootstrap-classpath],
-  [AS_HELP_STRING([--with-bootstrap-classpath=/path/to/rt.jar	Specify the bootstrap class path to use])],
+  AS_HELP_STRING([--with-bootstrap-classpath=/path/to/rt.jar],[Specify the bootstrap class path to use.]),
   [android_bootstrap_classpath="$withval"])
 
 if test "$debug_mode" = "no"
