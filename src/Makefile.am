@@ -20,7 +20,7 @@ android_boost_CPPFLAGS=@android_boost_CPPFLAGS@
 android_boost_LIBS=@android_boost_LIBS@
 android_boost_version=@android_boost_version@
 android_boost_lib="boost_program_options-gcc-mt-$(android_boost_version)"
-NDKBUILD = @NDKBUILD@
+NDKBUILD = @NDK_BUILD@
 
 Android.mk: Makefile
 	./androgenizer -:PROJECT tatoparser -:REL_TOP $(top_srcdir) -:ABS_TOP $(abs_top_srcdir)	\

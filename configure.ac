@@ -88,66 +88,20 @@ then
 	AC_SUBST([android_boost_version])
 	AC_SUBST([android_bootstrap_classpath])
 
-	AC_PATH_PROG([ANDROID],[android],[notfound])
-	if test "x$ANDROID" = "xnotfound"
-	then
-		AC_MSG_ERROR([Unable to find a program called android, this should come with the android sdk.])
-	else
-		android_sdk_path_=$(dirname "$ANDROID")/..
-		AC_SUBST([ANDROID_SDK_PATH],[$android_sdk_path_])
-	fi
-
-	AC_PATH_PROG([DX],[dx],[notfound],[$ANDROID_SDK_PATH:$PATH])
-	if test "x$DX" = "xnotfound"
-	then
-		AC_MSG_ERROR([Unable to find dx, this should come with the android sdk.])
-	fi
-
-	AC_PATH_PROG([KEYTOOL],[keytool],[notfound],[$ANDROID_SDK_PATH:$PATH])
-	if test "x$KEYTOOL" = "xnotfound"
-	then
-		AC_MSG_ERROR([Unable to find keytool, this should come with the android sdk.])
-	fi
-
-	AC_PATH_PROG([AAPT],[aapt],[notfound],[$ANDROID_SDK_PATH:$PATH])
-        if test "x$AAPT" = "xnotfound"
-	then
-	        AC_MSG_ERROR([Unable to find aapt, this should come with the android sdk.])
-	fi
-
-	AC_PATH_PROG([JARSIGNER],[jarsigner],[notfound],[$ANDROID_SDK_PATH:$PATH])
-	if test "x$JARSIGNER" = "xnotfound"
-	then
-		AC_MSG_ERROR([Unable to find jarsigner, this should come with the android sdk.])
-	fi
-
-	AC_PATH_PROG([ZIPALIGN],[zipalign],[notfound],[$ANDROID_SDK_PATH:$PATH])
-	if test "x$ZIPALIGN" = "xnotfound"
-	then
-		AC_MSG_ERROR([Unable to find zipalign, this should come with the android sdk.])
-	fi
-
-        AC_PATH_PROG([NDKBUILD],[ndk-build],[notfound],[$ANDROID_SDK_PATH:$PATH])
-        if test "x$NDKBUILD" = "xnotfound"
-        then
-		AC_MSG_ERROR([Unable to find ndk-build, this should come with the android sdk.])
-	fi
+	ANDROID_PATH_PROG_ANDROID([],[AC_MSG_ERROR([Unable to find a program called android, this should come with the android sdk.])])
+	ANDROID_PATH_PROG_DX([],[AC_MSG_ERROR([Unable to find dx, this should come with the android sdk.])])
+	ANDROID_PATH_PROG_KEYTOOL([],[AC_MSG_ERROR([Unable to find keytool, this should come with the android sdk.])])
+	ANDROID_PATH_PROG_AAPT([],[AC_MSG_ERROR([Unable to find aapt, this should come with the android sdk.])])
+	ANDROID_PATH_PROG_JARSIGNER([],[AC_MSG_ERROR([Unable to find jarsigner, this should come with the android sdk.])])
+	ANDROID_PATH_PROG_ZIPALIGN([],[AC_MSG_ERROR([Unable to find zipalign, this should come with the android sdk.])])
+	ANDROID_PATH_PROG_NDK_BUILD([],[AC_MSG_ERROR([Unable to find ndk-build, this should come with the android ndk.])])
 
 	AC_SUBST([TATOPARSER_TARGET_ID],[android-17])
 
 	if test "x$emulator_mode" = "xyes"
 	then
-		AC_PATH_PROG([EMULATOR],[emulator],[notfound],[$ANDROID_SDK_PATH:$PATH])
-		if test "x$EMULATOR" = "xnotfound"
-		then
-			AC_MSG_ERROR([Unable to find emulator, this should come with the android sdk.])
-		fi
-
-                AC_PATH_PROG([ADB],[adb],[notfound],[$ANDROID_SDK_PATH:$PATH])
-		if test "x$ADB" = "xnotfound"
-		then
-			AC_MSG_ERROR([Unable to find adb, this should come with the android sdk.])
-		fi
+		ANDROID_PATH_PROG_EMULATOR([],[AC_MSG_ERROR([Unable to find emulator, this should come with the android sdk.])])
+		ANDROID_PATH_PROG_ADB([],[AC_MSG_ERROR([Unable to find adb, this should come with the android sdk.])])
 	fi
 fi
 
