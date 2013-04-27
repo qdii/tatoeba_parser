@@ -8,14 +8,15 @@
 ////////////////////////////////////////////
 //           EXPORTED FUNCTIONS           //
 ////////////////////////////////////////////
-JNIEXPORT void JNICALL Java_com_qdii_tatoparser_tatoparser_init( JNIEnv*, jobject )
+extern "C" {
+JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1init(JNIEnv*, jobject)
 {
     init( NONE );
 }
-
-JNIEXPORT void JNICALL Java_com_qdii_tatoparser_tatoparser_finish(JNIEnv*, jobject )
+JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1terminate(JNIEnv*, jobject )
 {
     terminate();
+}
 }
 
 NAMESPACE_START

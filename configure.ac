@@ -20,6 +20,9 @@ BOOST_REQUIRE
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_INSTALL
+AC_PROG_MKDIR_P
+AC_PROG_LN_S
+AC_PROG_SED
 
 # AC_PROG_CXX doesn't let us determine whether a CXX compiler is available
 AC_CHECK_PROG([CXX_COMPILER],[$CXX],[yes],[no])

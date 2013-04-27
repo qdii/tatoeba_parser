@@ -8,6 +8,8 @@ JARSIGNER = @JARSIGNER@
 ZIPALIGN = @ZIPALIGN@
 KEYTOOL = @KEYTOOL@
 MKDIR_P = @MKDIR_P@
+LN_S = @LN_S@
+INSTALL = @INSTALL@
 
 srcdir = @srcdir@
 builddir = @builddir@
@@ -46,7 +48,7 @@ $(PROJECT_NAME).keystore:
 	$(KEYTOOL) -genkeypair -v -keystore $(KEYSTORE_FILE) -alias $(KEYSTORE_ALIAS) -keyalg RSA -keysize 2048 -validity 20000 -storepass $(KEYSTORE_PASSWORD)
 
 $(PROJECT_NAME).unsigned.apk:
-	$(AAPT) package -M $(srcdir)/AndroidManifest.xml -S $(srcdir)/res -I $(ANDROID_CLASSPATH) -F $@ $(OBJ)
+	$(AAPT) package -v -M $(srcdir)/AndroidManifest.xml -S $(srcdir)/res -I $(ANDROID_CLASSPATH) -F $@ $(OBJ)
 
 sign-apk: $(PROJECT_NAME).unsigned.apk $(PROJECT_NAME).unaligned.apk
 
@@ -77,12 +79,14 @@ clean:
 	$(RM) $(PROJECT_NAME).apk
 	$(RM) $(OBJ)/classes.dex
 
-compile-native:
-	cd $(top_srcdir)/src && $(MAKE) android-ndk
+compile-native: $(srcdir)/libs/armeabi/lib$(PROJECT_NAME).so
+
+$(srcdir)/libs/armeabi/lib$(PROJECT_NAME).so:
+	cd $(top_srcdir)/src && $(MAKE) android-ndk && cd java && $(INSTALL) -v $(srcdir)/../libs/armeabi/lib$(PROJECT_NAME).so $(srcdir)/libs/armeabi
 
 install:
 	$(MKDIR_P) $(prefix)/bin
-	install -m 0755 $(PROJECT_NAME).apk $(prefix)/bin
+	$(INSTALL) $(PROJECT_NAME).apk $(prefix)/bin
 
 uninstall:
 	$(RM) $(prefix)/bin/$(PROJECT_NAME).apk
