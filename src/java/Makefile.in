@@ -20,6 +20,7 @@ RDNS = "com/qdii/$(PROJECT_NAME)"
 RRDNS = $(srcdir)/src/$(RDNS)
 OBJ = $(builddir)/obj
 LIB = $(srcdir)/libs
+NATIVE_LIB_PATH = $(OBJ)/lib/armeabi
 BOOTSTRAP_CLASSPATH = @android_bootstrap_classpath@
 TARGET_ID = @TATOPARSER_TARGET_ID@
 TARGET_VM = 1.6
@@ -35,10 +36,11 @@ ANDROID_FLAGS = -bootclasspath "$(BOOTSTRAP_CLASSPATH)" -classpath "$(ANDROID_CL
 SOURCE_FILES = $(RRDNS)/ActivitySearch.java	$(RRDNS)/Sentence.java
 OBJ_FILES = $(SOURCE_FILES:.java=.class)
 
-all: create-obj-directory update-project compile-r-file $(OBJ_FILES) dexify compile-native create-apk generate-keystore sign-apk align-apk
+all: create-obj-directory update-project compile-r-file $(OBJ_FILES) dexify create-apk generate-keystore sign-apk align-apk
 
 create-obj-directory:
 	$(MKDIR_P) $(OBJ)
+	$(MKDIR_P) $(NATIVE_LIB_PATH)
 
 create-apk: $(PROJECT_NAME).unsigned.apk
 
@@ -47,7 +49,7 @@ generate-keystore: $(PROJECT_NAME).keystore
 $(PROJECT_NAME).keystore:
 	$(KEYTOOL) -genkeypair -v -keystore $(KEYSTORE_FILE) -alias $(KEYSTORE_ALIAS) -keyalg RSA -keysize 2048 -validity 20000 -storepass $(KEYSTORE_PASSWORD)
 
-$(PROJECT_NAME).unsigned.apk:
+$(PROJECT_NAME).unsigned.apk: $(NATIVE_LIB_PATH)/lib$(PROJECT_NAME).so
 	$(AAPT) package -v -M $(srcdir)/AndroidManifest.xml -S $(srcdir)/res -I $(ANDROID_CLASSPATH) -F $@ $(OBJ)
 
 sign-apk: $(PROJECT_NAME).unsigned.apk $(PROJECT_NAME).unaligned.apk
@@ -69,20 +71,22 @@ update-project:
 compile-r-file: $(srcdir)/gen/$(RDNS)/R.class	$(srcdir)/gen/$(RDNS)/BuildConfig.class
 
 dexify:
-	$(DX) --dex --verbose --output=$(OBJ)/classes.dex $(OBJ) $(LIB)
+	$(DX) --dex --verbose --output=$(OBJ)/classes.dex $(OBJ)
 
 clean:
 	$(RM) $(OBJ_FILES)
 	$(RM) $(OBJ)/*.class
+	$(RM) $(NATIVE_LIB_PATH)/lib$(PROJECT_NAME).so
 	$(RM) $(PROJECT_NAME).unsigned.apk
 	$(RM) $(PROJECT_NAME).unaligned.apk
 	$(RM) $(PROJECT_NAME).apk
 	$(RM) $(OBJ)/classes.dex
 
-compile-native: $(srcdir)/libs/armeabi/lib$(PROJECT_NAME).so
+$(NATIVE_LIB_PATH)/lib$(PROJECT_NAME).so: $(srcdir)/../libs/armeabi/lib$(PROJECT_NAME).so
+	$(INSTALL) -v $(srcdir)/../libs/armeabi/lib$(PROJECT_NAME).so $(NATIVE_LIB_PATH)
 
-$(srcdir)/libs/armeabi/lib$(PROJECT_NAME).so:
-	cd $(top_srcdir)/src && $(MAKE) android-ndk && cd java && $(INSTALL) -v $(srcdir)/../libs/armeabi/lib$(PROJECT_NAME).so $(srcdir)/libs/armeabi
+$(srcdir)/../libs/armeabi/lib$(PROJECT_NAME).so:
+	cd .. && make android-ndk && cd java
 
 install:
 	$(MKDIR_P) $(prefix)/bin
@@ -94,4 +98,4 @@ uninstall:
 Makefile: Makefile.in
 	cd $(top_srcdir) && ./config.status src/java/$@
 
-.PHONY: clean dexify compile-native all install uninstall generate-keystore create-apk sign-apk align-apk
+.PHONY: clean dexify all install uninstall generate-keystore create-apk sign-apk align-apk

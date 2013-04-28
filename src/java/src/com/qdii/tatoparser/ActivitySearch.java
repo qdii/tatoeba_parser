@@ -48,6 +48,7 @@ public class ActivitySearch extends Activity {
         );
         
         // start the library
+        tatoparser_init();
     }
     
 

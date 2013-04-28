@@ -40,6 +40,9 @@
 #   include <boost/config.hpp>
 #endif
 #include "tatoparser/namespace.h"
+#ifdef TATO_ANDROID
+#   include <jni.h>
+#endif
 
 // ___________________________ COMPATIBILITY ___________________________________
 

@@ -1,6 +1,6 @@
 #ifdef TATO_ANDROID
-#include <jni.h>
 #include "prec_library.h"
+#include <jni.h>
 #include "tatoparser/sentence.h"
 #include "tatoparser/interface_lib.h"
 #include "tatoparser/namespace.h"
@@ -9,6 +9,10 @@
 //           EXPORTED FUNCTIONS           //
 ////////////////////////////////////////////
 extern "C" {
+JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1init(JNIEnv *, jobject);
+JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1terminate(JNIEnv *, jobject);
+}
+
 JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1init(JNIEnv*, jobject)
 {
     init( NONE );
@@ -16,7 +20,6 @@ JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1init(
 JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1terminate(JNIEnv*, jobject )
 {
     terminate();
-}
 }
 
 NAMESPACE_START
