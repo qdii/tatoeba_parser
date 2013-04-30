@@ -32,6 +32,7 @@ Android.mk: Makefile
 		       		"LOCAL_CXXFLAGS	:= -std=c++0x" \
 				"LOCAL_C_INCLUDES	:= $(top_srcdir) $(top_srcdir)/include $(top_srcdir)/src $(includedir)" \
 				"LOCAL_CPPFLAGS	:= $(android_boost_CPPFLAGS) -DTATO_ANDROID" "LOCAL_CPP_FEATURES	:= exceptions rtti" \
+				"LOCAL_LDLIBS := -llog" \
 				"LOCAL_LDFLAGS := -l$(android_boost_lib) $(android_boost_LIBS)"> $@
 
 android-ndk: Android.mk

@@ -279,6 +279,10 @@
 #   define QLOG_ASSERT(a);
 #endif
 
+#ifdef QLOG_USE_ANDROID
+#   include <android/log.h>
+#endif
+
 #ifdef QLOG_MULTITHREAD_PTHREAD
 #   include <pthread.h>
 #   ifndef QLOG_MULTITHREAD
@@ -322,7 +326,10 @@
 #endif
 namespace QLOG_NAMESPACE
 {
-
+// -------------------------------------------------------------------------- //
+// hack to catch std::endl;
+typedef std::basic_ostream<char, std::char_traits<char> > cout_type;
+typedef cout_type & ( *standard_endline )( cout_type & );
 // -------------------------------------------------------------------------- //
 
 // mutex
@@ -435,13 +442,6 @@ void * get_console_function( char * name )
 typedef BOOL ( WINAPI * console_function )( HANDLE hConsoleOutput, WORD attr );
 #endif
 
-// -------------------------------------------------------------------------- //
-// hack to catch std::endl;
-typedef std::basic_ostream<char, std::char_traits<char> > cout_type;
-typedef cout_type & ( *standard_endline )( cout_type & );
-
-// -------------------------------------------------------------------------- //
-
 /**
  * @cond GENERATE_INTERNAL_DOCUMENTATION
  * @struct user_global_settings
@@ -457,7 +457,13 @@ struct user_global_settings
     static HANDLE console_handle;
     static console_function set_text_attribute;
 #endif
+
+#ifdef QLOG_USE_ANDROID
+    static const char * module; // the name of the executable
+#endif
 };
+
+// -------------------------------------------------------------------------- //
 
 /** @endcond */
 // -------------------------------------------------------------------------- //
@@ -485,6 +491,19 @@ console_function user_global_settings<T>::set_text_attribute = 0;
 #endif
 
 typedef user_global_settings<int> settings;
+
+
+// -------------------------------------------------------------------------- //
+#ifdef QLOG_USE_ANDROID
+template<typename T>
+const char * user_global_settings<T>::module = "";
+
+inline
+void setModuleName( const char * _moduleName )
+{
+    settings::module = _moduleName;
+}
+#endif //QLOG_USE_ANDROID
 
 #ifdef __GNUC__
 #   define QLOG_SUPPRESS_NOT_USED_WARN __attribute__ ((unused))
@@ -745,7 +764,13 @@ struct logger
             if( _first_part )
                 m_prepend.apply_all( *m_output );
 
+#           ifdef QLOG_USE_ANDROID
+            std::ostringstream transformer;
+            transformer << _message;
+            __android_log_write( getPriority(), settings::module, transformer.str().c_str() );
+#           else
             ( *m_output ) << _message;
+#           endif
         }
     }
 
@@ -894,6 +919,33 @@ private:
     static mutex * m_mutex;
 #   endif
 
+#   ifdef QLOG_USE_ANDROID
+    enum android_LogPriority getPriority() const
+    {
+        enum android_LogPriority ret = ANDROID_LOG_DEFAULT;
+        switch (level)
+        {
+            case loglevel::debug:
+            case loglevel::trace:
+                ret = ANDROID_LOG_DEBUG;
+                break;
+            case loglevel::info:
+                ret = ANDROID_LOG_INFO;
+                break;
+            case loglevel::warning:
+                ret = ANDROID_LOG_WARN;
+                break;
+            case loglevel::error:
+                ret = ANDROID_LOG_ERROR;
+                break;
+            default:
+                assert(0);
+                break;
+        }
+
+        return ret;
+    }
+#   endif
 private:
     /**@brief Helper function to check that the logger can output messages
      * @cond GENERATE_INTERNAL_DOCUMENTATION

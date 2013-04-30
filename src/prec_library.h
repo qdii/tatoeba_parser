@@ -65,6 +65,10 @@
 
 #define QLOG_USE_ASSERTS
 #define QLOG_NAMESPACE llog
+#ifdef TATO_ANDROID
+#   define QLOG_USE_ANDROID
+#endif
+
 #include "qlog.hpp"
 
 #endif // PREC_H

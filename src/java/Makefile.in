@@ -51,7 +51,7 @@ $(PROJECT_NAME).keystore:
 	$(KEYTOOL) -genkeypair -v -keystore $(KEYSTORE_FILE) -alias $(KEYSTORE_ALIAS) -keyalg RSA -keysize 2048 -validity 20000 -storepass $(KEYSTORE_PASSWORD)
 
 $(PROJECT_NAME).unsigned.apk: $(NATIVE_LIB_PATH)/lib$(PROJECT_NAME).so
-	$(AAPT) package -v -M $(srcdir)/AndroidManifest.xml -S $(srcdir)/res -I $(ANDROID_CLASSPATH) -F $@ $(OBJ)
+	$(AAPT) package -f -M $(srcdir)/AndroidManifest.xml -S $(srcdir)/res -I $(ANDROID_CLASSPATH) -F $@ $(OBJ)
 
 sign-apk: $(PROJECT_NAME).unsigned.apk $(PROJECT_NAME).unaligned.apk
 
@@ -76,7 +76,7 @@ $(OBJ)/$(RDNS)/%.class: $(srcdir)/src/$(RDNS)/%.java
 	$(JAVAC) $(ANDROID_FLAGS) $<
 
 dexify:
-	$(DX) --dex --verbose --output=$(OBJ)/classes.dex $(OBJ)
+	$(DX) --dex --output=$(OBJ)/classes.dex $(OBJ)
 
 clean:
 	$(RM) $(OBJ)/$(RDNS)/*.class

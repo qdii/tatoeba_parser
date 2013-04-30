@@ -266,6 +266,10 @@ void startLogging( bool verbose )
 {
     using namespace llog;
 
+#   ifdef TATO_ANDROID
+    llog::setModuleName("tatoparser");
+#   endif
+
     // prepend markers
     llog::info.prepend() << "[..] ";
     llog::warning.prepend() << "[" << color( green ) << "ww" << color() << "] ";
@@ -289,6 +293,7 @@ int init( ParserFlag _flags )
 
     llog::init();
     llog::set_output( std::cerr );
+
     startLogging( isFlagSet( VERBOSE ) );
 
     return EXIT_SUCCESS;

@@ -15,10 +15,12 @@ JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1termi
 
 JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1init(JNIEnv*, jobject)
 {
-    init( NONE );
+    init( VERBOSE );
+    llog::info << "Initializing libtatoparser\n";
 }
 JNIEXPORT void JNICALL Java_com_qdii_tatoparser_ActivitySearch_tatoparser_1terminate(JNIEnv*, jobject )
 {
+    llog::info << "Terminating libtatoparser\n";
     terminate();
 }
 
