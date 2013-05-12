@@ -31,8 +31,12 @@ struct fastDetailedParser
     /**@brief Estimate the number of lines in the buffer*/
     size_t          countLinesFast() const;
 
+    /**@brief Cancels a parsing operation */
+    void abort() { m_abort = true; }
+
 private:
     iterator m_begin, m_end;
+    volatile bool m_abort;
 };
 
 // -------------------------------------------------------------------------- //
@@ -40,6 +44,7 @@ template<typename iterator>
 fastDetailedParser<iterator>::fastDetailedParser( iterator _begin, iterator _end )
     :m_begin( _begin )
     ,m_end( _end )
+    ,m_abort( false )
 {
 }
 
@@ -67,7 +72,7 @@ size_t fastDetailedParser<iterator>::start( dataset & _data ) TATO_NO_THROW
     dataset temporarySentenceContainer;
     bool parsingFailed = false;
 
-    while( true )
+    while( !m_abort )
     {
         if( qi::parse( begin, end, (
             // grammar for a single line of CSV

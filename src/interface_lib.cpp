@@ -21,6 +21,16 @@ NAMESPACE_START
 static ParserFlag                   g_parserFlags = 0;
 static std::unique_ptr<fileMapper>  g_sentenceMap = nullptr;
 
+static fastDetailedParser<char *>*   g_detailedParser = nullptr;
+static fastLinkParser<char *>*       g_fastLinkParser = nullptr;
+static fastSentenceParser<char *>*   g_sentenceParser = nullptr;
+static fastTagParser<char *>*        g_tagParser = nullptr;
+static fastListParser<char *>*       g_listParser = nullptr;
+
+// -------------------------------------------------------------------------- //
+
+static bool                         g_quit = false; // leave on abort
+
 // -------------------------------------------------------------------------- //
 
 static
@@ -90,6 +100,8 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
             g_sentenceMap->end()
         );
 
+        g_sentenceParser = &sentenceParser;
+
         // allocate memory for the sentence structure
         _info_.m_nbSentences = sentenceParser.countLinesFast();
 
@@ -105,6 +117,7 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
         }
         catch( const std::bad_alloc & )
         {
+            g_sentenceParser = nullptr;
             llog::error << "Not enough memory.\n";
             return ret;
         }
@@ -124,6 +137,7 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
         llog::info << "highest id: " << sentenceOfHighestId.getId() << '\n';
         _info_.m_highestId = sentenceOfHighestId.getId();
 
+        g_sentenceParser = nullptr;
         ret = EXIT_SUCCESS;
     }
 
@@ -146,6 +160,7 @@ int parseLinks( const std::string & _linksPath, datainfo & _info_, linkset & all
         {
             // we create the parser
             fastLinkParser<char *> linkParser( linksMap->begin(), linksMap->end() );
+            g_fastLinkParser = &linkParser;
 
             // we allocate memory for the structure that will store the links
             _info_.m_nbLinks = linkParser.countLines();
@@ -154,10 +169,12 @@ int parseLinks( const std::string & _linksPath, datainfo & _info_, linkset & all
             // we parse the file and store the data
             linkParser.start( allLinks_ );
 
+            g_fastLinkParser = nullptr;
             ret = EXIT_SUCCESS;
         }
         catch( const std::bad_alloc & )
         {
+            g_fastLinkParser = nullptr;
             llog::error << "Out of memory\n";
         }
     }
@@ -179,11 +196,14 @@ int parseTags( const std::string & _tagPath, datainfo &, tagset & allTags_ )
         try
         {
             fastTagParser<char *> tagParser( tagMap->begin(), tagMap->end() );
+            g_tagParser = &tagParser;
             tagParser.start( allTags_ );
+            g_tagParser = nullptr;
             ret = EXIT_SUCCESS;
         }
         catch( const std::bad_alloc & )
         {
+            g_tagParser =nullptr;
             llog::error << "An error occurred while parsing file " << _tagPath << std::endl;
         }
     }
@@ -205,6 +225,7 @@ int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, datase
     {
         // create the parser
         fastDetailedParser<char *> detailedParser( g_sentenceMap->begin(), g_sentenceMap->end() );
+        g_detailedParser = &detailedParser;
 
         // allocate memory for the sentence structure
         _info_.m_nbSentences = detailedParser.countLinesFast();
@@ -221,11 +242,13 @@ int parseDetailed( const std::string & _sentencesPath, datainfo & _info_, datase
         }
         catch( const std::bad_alloc & )
         {
+            g_detailedParser = nullptr;
             llog::error << "Not enough memory.\n";
             return ret;
         }
 
         _info_.m_nbSentences = detailedParser.start( allSentences_ );
+        g_detailedParser = nullptr;
 
         // retrieve the sentence of highest id so as to be able to create containers
         // of the right size to store links and tags
@@ -253,7 +276,9 @@ int parseLists( const std::string & _listPath, datainfo & _info, listset & allLi
     if ( nullptr != linksMap )
     {
         fastListParser<char*> parser( linksMap->begin(), linksMap->end() );
+        g_listParser = &parser;
         parser.start( allLists_ );
+        g_listParser = nullptr;
         ret = EXIT_SUCCESS;
     }
 
@@ -357,16 +382,16 @@ int parse( dataset & allSentences_,
                          parseSentences( _sentencePath, info, allSentences_ );
     }
 
-    if( parsingSuccess != EXIT_FAILURE && _linksPath.size() && !isFlagSet( NO_LINKS ) )
+    if( parsingSuccess != EXIT_FAILURE && _linksPath.size() && !isFlagSet( NO_LINKS ) && !g_quit )
         parsingSuccess = parseLinks( _linksPath, info, allLinks_ );
 
-    if( parsingSuccess != EXIT_FAILURE && _tagPath.size() && !isFlagSet( NO_TAGS ) )
+    if( parsingSuccess != EXIT_FAILURE && _tagPath.size() && !isFlagSet( NO_TAGS ) && !g_quit)
         parsingSuccess = parseTags( _tagPath, info, allTags_ );
 
-    if( parsingSuccess != EXIT_FAILURE && _listPath.size() && !isFlagSet( NO_LISTS ) )
+    if( parsingSuccess != EXIT_FAILURE && _listPath.size() && !isFlagSet( NO_LISTS ) && !g_quit)
         parsingSuccess = parseLists( _listPath, info, allLists_ );
 
-    if( parsingSuccess == EXIT_SUCCESS )
+    if( parsingSuccess == EXIT_SUCCESS && !g_quit)
     {
         const sentence::id highestLinkId = allLinks_.getHighestSentenceId();
         if( highestLinkId > info.m_highestId )
@@ -384,7 +409,22 @@ int parse( dataset & allSentences_,
         }
     }
 
+    g_quit = false;
+
     return parsingSuccess;
+}
+
+// -------------------------------------------------------------------------- //
+
+void cancel()
+{
+    if (g_detailedParser != nullptr) g_detailedParser->abort();
+    if (g_fastLinkParser != nullptr) g_fastLinkParser->abort();
+    if (g_sentenceParser != nullptr) g_sentenceParser->abort();
+    if (g_tagParser      != nullptr) g_tagParser->abort();
+    if (g_listParser     != nullptr) g_listParser->abort();
+
+    g_quit = true;
 }
 
 

@@ -34,6 +34,10 @@
 #		define TATO_USE_DELETE
 #	endif
 #endif
+
+#if HAVE_SIGNAL_H == 1
+#   include <signal.h>
+#endif
 // ___________________________ COMPATIBILITY ___________________________________
 
 

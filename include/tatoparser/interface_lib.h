@@ -86,6 +86,10 @@ int parse( dataset & allSentences_,
  * @return EXIT_SUCCESS on success */
 int terminate();
 
+
+/**@brief Aborts a parsing operation. */
+void cancel();
+
 NAMESPACE_END
 
 #endif // TATOPARSER_INTERFACE_LIB_H

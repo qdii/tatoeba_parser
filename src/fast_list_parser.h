@@ -21,6 +21,7 @@ struct fastListParser
     fastListParser( iterator _begin, iterator _end )
         : m_begin( _begin )
         , m_end( _end )
+        , m_abort( false )
     {
     }
 
@@ -32,8 +33,12 @@ struct fastListParser
     /**@brief Counts the lines in the file */
     size_t countLines() const;
 
+    /**@brief Cancels a parsing operation */
+    void abort() { m_abort = true; }
+
 private:
     iterator m_begin, m_end;
+    volatile bool m_abort;
 };
 
 // -------------------------------------------------------------------------- //
@@ -59,7 +64,7 @@ size_t fastListParser<iterator>::start( listset & TATO_RESTRICT allLists_ ) TATO
     iterator current_pos, name_begin;
     char c;
 
-    for( current_pos = m_begin; current_pos != m_end; ++current_pos )
+    for( current_pos = m_begin; current_pos != m_end && !m_abort; ++current_pos )
     {
         c = *current_pos;
         if( ( c != '\t' ) && ( c != '\n' ) )

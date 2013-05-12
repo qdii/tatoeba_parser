@@ -21,6 +21,7 @@ struct fastLinkParser
     fastLinkParser( iterator _begin, iterator _end )
         : m_begin( _begin )
         , m_end( _end )
+        , m_abort( false )
     {
     }
 
@@ -32,8 +33,12 @@ struct fastLinkParser
     /**@brief Counts the lines in the file */
     size_t countLines() const;
 
+    /**@brief Cancels a parsing operation */
+    void abort() { m_abort = true; }
+
 private:
     iterator m_begin, m_end;
+    volatile bool m_abort;
 };
 
 // -------------------------------------------------------------------------- //
@@ -62,7 +67,7 @@ size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO
     sentence::id id = 0;
     register char c;
 
-    while( ptr != ptrEnd )
+    while( ptr != ptrEnd && !m_abort)
     {
         c = *ptr++;
 

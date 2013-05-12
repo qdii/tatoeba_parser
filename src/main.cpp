@@ -37,6 +37,46 @@ void displaySentence( userOptions & _options, dataset & _allSentences, linkset &
 bool downloadIf( bool _condition, std::string _url, std::string _destinationFile );
 #endif
 
+static volatile bool quit = false;
+
+// -------------------------------------------------------------------------- //
+#ifdef HAVE_SIGNAL_H
+extern "C"
+{
+void uponSignal(int);
+}
+
+void uponSignal(int)
+{
+    qlog::info << "Signal received, exiting.\n";
+
+    // halts libtatoparser in case it was parsing
+    cancel();
+
+    // exit
+    quit = true;
+}
+
+static
+void installSignalHandler()
+{
+    qlog::info << "Installing signal handlers\n";
+
+    // initialize the signal handler
+    static struct sigaction sighandler;
+    memset( &sighandler, 0, sizeof(struct sigaction) );
+    sighandler.sa_handler = uponSignal;
+
+    // install it
+    int ret = sigaction( SIGINT, &sighandler, nullptr );
+    qlog::warning( ret == -1 ) << "An error occurred while installing signal handler for SIGINT\n";
+
+    ret = sigaction( SIGTERM, &sighandler, nullptr );
+    qlog::warning( ret == -1 ) << "An error occurred while installing signal handler for SIGTERM\n";
+}
+#endif
+// -------------------------------------------------------------------------- //
+
 /// How does it work?
 ///
 /// Basically, we check the options the user set through the different program
@@ -48,6 +88,7 @@ int main( int argc, char * argv[] )
 {
     qlog::initializer log_init;
     startLog( false );
+
     FilterVector allFilters; ///< the filter list
     ///< to select sentences based on the user options)
 
@@ -75,8 +116,12 @@ int main( int argc, char * argv[] )
         return EXIT_FAILURE;
     }
 
-
     startLog( options.isVerbose() );
+
+#   ifdef HAVE_SIGNAL_H
+    installSignalHandler();
+#   endif
+
     options.treatConfigFile();
     const std::string csvPath = options.getCsvPath();
 
@@ -180,6 +225,9 @@ int main( int argc, char * argv[] )
 
         for( const sentence & sentence : allSentences )
         {
+            if (quit)
+                break;
+
             if( sentence.getId() == sentence::INVALID_ID )
                 continue;
 
@@ -202,6 +250,9 @@ int main( int argc, char * argv[] )
         /////////////////////////////////////
         for( const sentence * sentence : filteredSentences )
         {
+            if (quit)
+                break;
+
             assert(nullptr != sentence);
 
             if( sentence->getId() == sentence::INVALID_ID )

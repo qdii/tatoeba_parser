@@ -19,8 +19,12 @@ struct fastTagParser
     int start( tagset & _tagset ) TATO_NO_THROW;
     size_t countTags();
 
+    /**@brief Cancels a parsing operation */
+    void abort() { m_abort = true; }
+
 private:
     iterator m_begin, m_end;
+    bool m_abort;
 };
 
 // -------------------------------------------------------------------------- //
@@ -44,7 +48,7 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
     char * tagName = nullptr;
     tagset temporaryTagContainer;
 
-    while( cursor != end )
+    while( cursor != end && !m_abort )
     {
         sentenceId = static_cast<sentence::id>( *cursor++ - '0' );
 

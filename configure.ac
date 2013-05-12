@@ -155,6 +155,7 @@ fi
 
 # Checks for mmap
 AC_CHECK_HEADERS([sys/mman.h], ,[AC_MSG_WARN([mman.h was not found on your computer. Parsing will be slower.])])
+AC_CHECK_HEADERS([signal.h], ,[AC_MSG_WARN([signal.h was not found: signals will not be handled properly.])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 #AC_CHECK_HEADER_STDBOOL

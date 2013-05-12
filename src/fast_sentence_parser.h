@@ -34,8 +34,12 @@ struct fastSentenceParser
     /**@brief Estimate the number of lines in the buffer*/
     size_t          countLinesFast() const;
 
+    /**@brief Cancels a parsing operation */
+    void abort() { m_abort = true; }
+
 private:
     iterator m_begin, m_end;
+    bool    m_abort;
 };
 
 // -------------------------------------------------------------------------- //
@@ -44,6 +48,7 @@ template<typename iterator>
 fastSentenceParser<iterator>::fastSentenceParser( iterator _begin, iterator _end )
     :m_begin( _begin )
     ,m_end( _end )
+    ,m_abort( false )
 {
 }
 
@@ -93,7 +98,7 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
 
     dataset temporarySentenceContainer;
 
-    while( true )
+    while( !m_abort )
     {
         // try to parse a sentence... (note: it will simply fail when at the
         // end of file)
