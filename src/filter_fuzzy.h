@@ -104,7 +104,7 @@ std::string removePunctuation( const std::string & s )
         }
     );
 
-    assert(ret.size() == s.size()); // punctuation signs should have been replaced with white spaces, not deleted
+    assert(ret.size() <= s.size()); // punctuation signs are now deleted, if any
 
     return ret;
 }

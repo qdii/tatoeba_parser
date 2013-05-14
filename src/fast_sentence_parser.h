@@ -138,7 +138,7 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
             llog::warning << "Failed to parse sentence from line " << line << std::endl;
 
             // skip over the nearest \n and try again.
-            while( *( begin++ ) != '\n' );
+            while ( ++begin != end && *begin != '\n' );
         }
         else
         {

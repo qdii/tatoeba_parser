@@ -67,8 +67,7 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
         tagName = cursor;
 
         // skip to the end of the string
-        while( *++cursor != '\n' )
-            ;
+        while ( ++cursor != end && *cursor != '\n' );
 
         assert( cursor < end );
 

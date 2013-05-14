@@ -128,7 +128,7 @@ size_t fastDetailedParser<iterator>::start( dataset & _data ) TATO_NO_THROW
             llog::warning << "Failed to parse sentence from line " << line << std::endl;
 
             // skip over the nearest \n and try again.
-            while( *( begin++ ) != '\n' );
+            while ( ++begin != end && *begin != '\n' );
         }
         else
         {
