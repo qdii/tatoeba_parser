@@ -365,6 +365,7 @@ void displaySentence( userOptions & _options, dataset & _allSentences, linkset &
 {
     using namespace qlog;
     const std::string & separator = _options.getSeparator();
+    const bool useColors = _options.isColored();
     std::string translationLanguage = _options.getFirstTranslationLanguage();
 
     // option -n
@@ -373,11 +374,21 @@ void displaySentence( userOptions & _options, dataset & _allSentences, linkset &
 
     // option -i
     if( _options.displayIds() )
-        qlog::cout << ( _options.isColored() ? color( yellow ) : color() ) << _sentence.getId() << color() << separator;
+    {
+        if ( useColors )
+            qlog::cout << color( yellow ) << _sentence.getId() << color() << separator;
+        else
+            qlog::cout << _sentence.getId() << separator;
+    }
 
     // option --display-lang
     if( _options.displayLanguages() )
-        qlog::cout << ( _options.isColored() ? color( red ) : color() ) << _sentence.lang() << color() << separator;
+    {
+        if ( useColors )
+            qlog::cout << color( red ) << _sentence.lang() << color() << separator;
+        else
+            qlog::cout << _sentence.lang() << separator;
+    }
 
     // display the sentence
     qlog::cout << _sentence.str();
@@ -398,7 +409,10 @@ void displaySentence( userOptions & _options, dataset & _allSentences, linkset &
                 && _allSentences[firstTranslationId] )
         {
             // display the translation
-            qlog::cout << separator << ( _options.isColored() ? color( cyan ) : color() ) << _allSentences[firstTranslationId]->str() << color();
+            if ( useColors )
+                qlog::cout << separator << color( cyan ) << _allSentences[firstTranslationId]->str() << color();
+            else
+                qlog::cout << separator << _allSentences[firstTranslationId]->str();
         }
     }
 
