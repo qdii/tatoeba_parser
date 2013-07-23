@@ -39,6 +39,8 @@ static const ParserFlag NO_LISTS   = 1<<4;
 // the rest of the data
 static const ParserFlag DETAILED   = 1<<5;
 
+// use more than one thread to parse
+static const ParserFlag PARALLEL   = 1<<6;
 
 // -------------------------------------------------------------------------- //
 

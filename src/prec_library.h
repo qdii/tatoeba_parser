@@ -35,7 +35,9 @@
 #include <assert.h>
 #include <new>
 #include <sstream>
-#include <assert.h>
+#include <thread>
+#include <utility>
+#include <future>
 #if HAVE_BOOST_CONFIG_HPP == 1
 #   include <boost/config.hpp>
 #endif

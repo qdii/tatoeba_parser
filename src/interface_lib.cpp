@@ -24,6 +24,7 @@ static std::unique_ptr<fileMapper>  g_sentenceMap = nullptr;
 static fastDetailedParser<char *>*   g_detailedParser = nullptr;
 static fastLinkParser<char *>*       g_fastLinkParser = nullptr;
 static fastSentenceParser<char *>*   g_sentenceParser = nullptr;
+static fastSentenceParser<char *>*   g_sentenceParserParallel = nullptr;
 static fastTagParser<char *>*        g_tagParser = nullptr;
 static fastListParser<char *>*       g_listParser = nullptr;
 
@@ -83,6 +84,110 @@ std::unique_ptr<fileMapper> mapFileToMemory( const std::string & _file )
 }
 
 // -------------------------------------------------------------------------- //
+// This function treats half a deck, when the parser is run in multi-core mod
+// it returns the nb of lines which have been parsed and the id of the senten
+// which id was the highest
+static
+std::pair<size_t, sentence::id> treatHalf(
+     char * const begin, char * const end, dataset & allSentences_)
+{
+    fastSentenceParser<char *> parser( begin, end );
+
+    // this is ugly and buggy but that's okay: the race condition it can creat
+    // on extreme cases will just cause the program to take an extra 0.5 s to sto
+    if (g_sentenceParser)
+        g_sentenceParserParallel = &parser;
+    else
+        g_sentenceParser = &parser;
+
+    const size_t nbLinesParsed  = parser.start( allSentences_ );
+    const sentence & sentenceOfHighestId =
+        *std::max_element(
+                allSentences_.begin(), allSentences_.end(),
+                []( const sentence & _a, const sentence & _b ) { return _a.getId() < _b.getId(); }
+        );
+
+    if (g_sentenceParser == &parser)
+        g_sentenceParser = nullptr;
+    else if (g_sentenceParserParallel == &parser)
+        g_sentenceParserParallel = nullptr;
+
+    return std::pair<size_t, sentence::id>( nbLinesParsed, sentenceOfHighestId.getId() );
+}
+
+static
+int parseSentencesParallel( const std::string & _sentencesPath, datainfo & _info_, dataset & allSentences_ )
+{
+    llog::info << "starting parallel parsing\n";
+    g_sentenceMap = mapFileToMemory( _sentencesPath );
+    if( g_sentenceMap == nullptr )
+        return EXIT_FAILURE;
+
+    // we want to know the number of lines the file contains
+    // to split the work load into different threads. We cannot
+    // just split the file in the middle as we might break a
+    // sentence in two parts.
+    size_t estimatedNbLines = 0;
+    {
+        fastSentenceParser<const char *> lineCounter(
+            g_sentenceMap->begin(),
+            g_sentenceMap->end()
+        );
+        estimatedNbLines = lineCounter.countLinesFast();
+        llog::info << "estimated number of sentences: " << estimatedNbLines << '\n';
+    }
+
+    // if the file is empty, then we have nothing to do.
+    if (estimatedNbLines == 0)
+    {
+        llog::warning << _sentencesPath << " is empty.\n";
+        return EXIT_SUCCESS;
+    }
+
+    // we need to find the position just after the first
+    // half of the set of sentences.
+    char * splitPosition = reinterpret_cast<char*>( (reinterpret_cast<uint64_t>(g_sentenceMap->begin())/2) + (reinterpret_cast<uint64_t>(g_sentenceMap->end())/ 2) );
+
+    // we adjust the position so that it falls after the end of a line
+    while( *splitPosition++ != '\n' )
+    {
+        assert( splitPosition != g_sentenceMap->end() );
+    }
+    llog::info << "split pos: " << static_cast<void*>(splitPosition) << '\n';
+
+    // when we arrive here, we should be just after a '\n' character, otherwi
+    // we are in the middle of a senten
+    assert( *(splitPosition-1) == '\n' );
+
+    // we need a dataset so that each thread writes in its own memory space.
+    dataset secondHalfSentences;
+    secondHalfSentences.allocate( estimatedNbLines / 2 );
+
+    // allSentences_ will actually contain all the lines in the end
+    allSentences_.allocate( 2 * estimatedNbLines );
+
+    std::future< std::pair< size_t, sentence::id > > futureResultTop =
+        std::async( std::launch::async, treatHalf, g_sentenceMap->begin(), splitPosition, std::ref(allSentences_) );
+
+    std::pair< size_t, sentence::id > resultBottom = treatHalf( splitPosition, g_sentenceMap->end(), std::ref(secondHalfSentences) );
+
+    // in addition to computing the highest id, this will ensure that
+    // the two threads are done executing
+    std::pair<size_t, sentence::id> resultTop = futureResultTop.get();
+
+    const sentence::id highestIdOfTop = resultTop.second;
+    const sentence::id highestIdOfBottom = resultBottom.second;
+    _info_.m_highestId = highestIdOfTop > highestIdOfBottom ? highestIdOfTop : highestIdOfBottom;
+    llog::info << "highest id: " << _info_.m_highestId << '\n';
+
+    _info_.m_nbSentences = resultTop.first + resultBottom.first;
+    llog::info << "parsed " << _info_.m_nbSentences << "sentences.\n";
+
+    // concatenate both containers
+    allSentences_.merge( std::move( secondHalfSentences ));
+
+    return EXIT_SUCCESS;
+}
 
 static
 int parseSentences( const std::string & _sentencesPath, datainfo & _info_, dataset & allSentences_ )
@@ -100,6 +205,8 @@ int parseSentences( const std::string & _sentencesPath, datainfo & _info_, datas
             g_sentenceMap->end()
         );
 
+        // we need to set a global reference to the parser so that a signal can stop it
+        // this can happen if the user presses CTRL-C
         g_sentenceParser = &sentenceParser;
 
         // allocate memory for the sentence structure
@@ -378,8 +485,10 @@ int parse( dataset & allSentences_,
     if( _sentencePath.size() )
     {
         parsingSuccess = isFlagSet( DETAILED ) ?
-                         parseDetailed( _sentencePath, info, allSentences_ ):
-                         parseSentences( _sentencePath, info, allSentences_ );
+                         parseDetailed( _sentencePath, info, allSentences_ ) :
+                            isFlagSet( PARALLEL ) ?
+                                parseSentencesParallel( _sentencePath, info, allSentences_ ) :
+                                parseSentences        ( _sentencePath, info, allSentences_);
     }
 
     if( parsingSuccess != EXIT_FAILURE && _linksPath.size() && !isFlagSet( NO_LINKS ) && !g_quit )
@@ -421,6 +530,7 @@ void cancel()
     if (g_detailedParser != nullptr) g_detailedParser->abort();
     if (g_fastLinkParser != nullptr) g_fastLinkParser->abort();
     if (g_sentenceParser != nullptr) g_sentenceParser->abort();
+    if (g_sentenceParserParallel != nullptr) g_sentenceParserParallel->abort();
     if (g_tagParser      != nullptr) g_tagParser->abort();
     if (g_listParser     != nullptr) g_listParser->abort();
 

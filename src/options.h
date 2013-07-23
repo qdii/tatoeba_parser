@@ -80,6 +80,9 @@ struct userOptions
     /**@brief This is debug, only the parsing is done */
     bool justParse() const;
 
+    /**@brief Tells if the user wants to disable parallel processing */
+    bool disableParallel() const;
+
     /**@brief Gets the separator character */
     std::string getSeparator() const;
 
@@ -290,6 +293,12 @@ std::string userOptions::getListName() const
 {
     return m_vm.count( "in-list" ) > 0 ? m_vm[ "in-list" ].as<std::string>() : "";
 }
+// -------------------------------------------------------------------------- //
 
+inline
+bool userOptions::disableParallel() const
+{
+    return m_vm.count( "disable-parallel" ) > 0;
+}
 NAMESPACE_END
 #endif //TATOPARSER_OPTIONS_H

@@ -59,6 +59,7 @@ userOptions::userOptions()
         ( "verbose,v", "Displays more info." )
         ( "csv-path", po::value<std::string>(), "Sets the path where sentences.csv, links.csv and tags.csv will be found." )
         ( "config-path", po::value<std::string>(), "Sets the path of the config file. ~/.tatoparser will be used by default." )
+        ( "disable-parallel", "Use only one core to process the file." )
 #ifdef HAVE_CURL_CURL_H
         ( "download", "Download necessary csv files if not found." )
 #endif

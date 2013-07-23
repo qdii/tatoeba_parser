@@ -16,9 +16,15 @@ dataset::dataset()
 
 void dataset::allocate( const datainfo & _info )
 {
-    assert( _info.m_nbSentences > 0 );
-    m_allSentences.reserve( _info.m_nbSentences );
+    allocate( _info.m_nbSentences );
+}
 
+// -------------------------------------------------------------------------- //
+
+void dataset::allocate( const size_t _nbSentences )
+{
+    assert( _nbSentences != 0 );
+    m_allSentences.reserve( _nbSentences );
     llog::info << "Allocated " << ( m_allSentences.capacity() * sizeof( sentence ) )/ ( 1024*1024 )<< " MB for sentences.\n";
 }
 
@@ -39,5 +45,18 @@ void dataset::prepare( const datainfo & _info ) TATO_RESTRICT
 }
 
 // -------------------------------------------------------------------------- //
-
+//
+void dataset::merge( dataset && _other )
+{
+    m_allSentences.insert(
+        m_allSentences.end(),
+        std::make_move_iterator( _other.m_allSentences.begin() ),
+        std::make_move_iterator( _other.m_allSentences.end() )
+    );
+    m_fastAccess.insert(
+        m_fastAccess.end(),
+        std::make_move_iterator( _other.m_fastAccess.begin() ),
+        std::make_move_iterator( _other.m_fastAccess.end() )
+    );
+}
 NAMESPACE_END

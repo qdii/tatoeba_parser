@@ -39,6 +39,10 @@ struct dataset
 
 public:
     void allocate( const datainfo & _info );
+    void allocate( size_t _nbSentences );
+
+    // includes all the contents of the other container into this one
+    void merge( dataset && _other );
 
 public:
     iterator begin()
@@ -130,7 +134,7 @@ void dataset::addSentence( sentence::id _id, const char * _lang, const char * _d
                            const char * _creationDate,
                            const char * _lastModifiedDate )
 {
-    m_allSentences.push_back( sentence( _id, _lang, _data, _author, _creationDate, _lastModifiedDate ) );
+    m_allSentences.emplace_back( _id, _lang, _data, _author, _creationDate, _lastModifiedDate );
 }
 
 NAMESPACE_END

@@ -165,7 +165,8 @@ int main( int argc, char * argv[] )
             ( options.isItNecessaryToParseTagFile() ? 0 : NO_TAGS ) |
             ( options.isVerbose() ? VERBOSE : 0 ) |
             ( options.isItNecessaryToParseDetailedFile() ? DETAILED : 0 ) |
-            ( options.isItNecessaryToParseListFile() ? 0 : NO_LISTS )
+            ( options.isItNecessaryToParseListFile() ? 0 : NO_LISTS ) |
+            ( options.disableParallel() ? 0 : PARALLEL )
         );
 
     if( libraryInit == EXIT_SUCCESS )
