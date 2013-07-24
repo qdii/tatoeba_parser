@@ -129,6 +129,9 @@ size_t fastDetailedParser<iterator>::start( dataset & _data ) TATO_NO_THROW
 
             // skip over the nearest \n and try again.
             while ( ++begin != end && *begin != '\n' );
+
+            // skip the '\n' character
+            ++begin;
         }
         else
         {

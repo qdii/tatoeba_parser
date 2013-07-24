@@ -139,6 +139,10 @@ size_t fastSentenceParser<iterator>::start( dataset & TATO_RESTRICT _data ) TATO
 
             // skip over the nearest \n and try again.
             while ( ++begin != end && *begin != '\n' );
+
+            // we skip the '\n'
+            if (*begin == '\n' && begin != end)
+                ++begin;
         }
         else
         {
