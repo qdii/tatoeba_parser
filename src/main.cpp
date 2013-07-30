@@ -9,6 +9,7 @@
 #include "filter_tag.h"
 #include "filter_regex.h"
 #include "filter_fuzzy.h"
+#include "display.h"
 #include <iostream>
 #include <fstream>
 
@@ -31,7 +32,7 @@ static const char TAG_URL[] = "http://tatoeba.org/files/downloads/tags.csv";
 static const char LIST_URL[] = "http://tatoeba.org/files/downloads/lists.csv";
 
 void startLog( bool _verbose );
-void displaySentence( userOptions & _options, dataset & _allSentences, linkset & _allLinks, const sentence & _sentence, unsigned _lineNumber );
+void displaySentence( userOptions & _options, dataset & _allSentences, linkset & _allLinks, const sentence & _sentence, unsigned _lineNumber, display & _out );
 
 #ifdef HAVE_CURL_CURL_H
 bool downloadIf( bool _condition, std::string _url, std::string _destinationFile );
@@ -124,6 +125,13 @@ int main( int argc, char * argv[] )
 
     options.treatConfigFile();
     const std::string csvPath = options.getCsvPath();
+
+    display * const out = new cout_display{ options.isColored(), options.getSeparator() };
+    if ( !out )
+    {
+        qlog::error << "Could not create display, aborting.\n";
+        return EXIT_FAILURE;
+    }
 
     linkset allLinks;
     tagset allTags;
@@ -267,7 +275,7 @@ int main( int argc, char * argv[] )
 
             if( shouldDisplay )
             {
-                displaySentence( options, allSentences, allLinks, *sentence, ++printedLineNumber );
+                displaySentence( options, allSentences, allLinks, *sentence, ++printedLineNumber, *out );
             }
         }
     }
@@ -362,41 +370,32 @@ bool downloadIf( bool _condition, std::string _url, std::string _filename )
 
 // -------------------------------------------------------------------------- //
 
-void displaySentence( userOptions & _options, dataset & _allSentences, linkset & _allLinks, const sentence & _sentence, unsigned _lineNumber )
+void displaySentence( userOptions & _options, dataset & _allSentences, linkset & _allLinks, const sentence & _sentence, unsigned _lineNumber, display & _out )
 {
     using namespace qlog;
-    const std::string & separator = _options.getSeparator();
     const bool useColors = _options.isColored();
     std::string translationLanguage = _options.getFirstTranslationLanguage();
 
+    display::flag options { display::DISPLAY_NONE };
+
     // option -n
     if( _options.displayLineNumbers() )
-        qlog::cout << _lineNumber << separator;
+        options |= display::DISPLAY_LINE_NUMBER;
 
     // option -i
     if( _options.displayIds() )
-    {
-        if ( useColors )
-            qlog::cout << color( yellow ) << _sentence.getId() << color() << separator;
-        else
-            qlog::cout << _sentence.getId() << separator;
-    }
+        options |= display::DISPLAY_IDS;
 
     // option --display-lang
     if( _options.displayLanguages() )
-    {
-        if ( useColors )
-            qlog::cout << color( red ) << _sentence.lang() << color() << separator;
-        else
-            qlog::cout << _sentence.lang() << separator;
-    }
+        options |= display::DISPLAY_LANGUAGES;
 
-    // display the sentence
-    qlog::cout << _sentence.str();
-
-    // display a translation if it was requested
+    // find the first-translation sentence, if necessary
+    sentence * firstTranslation = nullptr;
     if( _options.displayFirstTranslation() )
     {
+        options |= display::DISPLAY_FIRST_TRANSL;
+
         // find a suitable translation
         const sentence::id firstTranslationId =
             getFirstSentenceTranslation(
@@ -408,14 +407,9 @@ void displaySentence( userOptions & _options, dataset & _allSentences, linkset &
 
         if( firstTranslationId != sentence::INVALID_ID
                 && _allSentences[firstTranslationId] )
-        {
-            // display the translation
-            if ( useColors )
-                qlog::cout << separator << color( cyan ) << _allSentences[firstTranslationId]->str() << color();
-            else
-                qlog::cout << separator << _allSentences[firstTranslationId]->str();
-        }
+            firstTranslation = _allSentences[firstTranslationId];
     }
 
-    qlog::cout << '\n';
+    // display the sentence
+    _out.writeSentence( _sentence, options, _lineNumber, firstTranslation );
 }
