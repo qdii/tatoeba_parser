@@ -49,6 +49,10 @@ AC_ARG_ENABLE([python],
   AS_HELP_STRING([--enable-python],[Adds python wrappers.]),
   [python_mode=${enableval}],
   [python_mode=no])
+AC_ARG_ENABLE([ncurses],
+  AS_HELP_STRING([--enable-ncurses],[Adds ncurses support.]),
+  [ncurses_mode=${enableval}],
+  [ncurses_mode=no])
 AC_ARG_ENABLE([android],
   AS_HELP_STRING([--enable-android],[Enables compiling android source code.]),
   [android_mode=${enableval}],
@@ -130,7 +134,10 @@ fi
 AS_IF([test "x$download_mode" = "xyes"], [
   PKG_CHECK_MODULES([CURL], [libcurl])
 ])
-
+# NCURSES
+AS_IF([test "x$ncurses_mode" = "xyes"], [
+   PKG_CHECK_MODULES([NCURSES], [ncurses])
+ ])
 # ICU
 PKG_CHECK_MODULES([ICUUC], [icu-uc])
 LDFLAGS="$LDFLAGS $ICUUC_LIBS $CURL_LIBS"

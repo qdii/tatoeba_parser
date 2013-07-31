@@ -13,9 +13,9 @@ libtatoparser_la_CPPFLAGS = -iquote $(top_srcdir)/include -iquote $(top_srcdir)/
 libtatoparser_la_CFLAGS = @CFLAGS_PYTHON@
 bin_PROGRAMS = tatoparser
 tatoparser_SOURCES =  main.cpp options.cpp display.cpp
-tatoparser_LDADD = libtatoparser.la $(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS)
-tatoparser_LDFLAGS = $(BOOST_REGEX_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS)
-tatoparser_CPPFLAGS = -iquote $(top_srcdir) -I $(top_srcdir)/include $(BOOST_CPPFLAGS)
+tatoparser_LDADD = libtatoparser.la $(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(NCURSES_LIBS)
+tatoparser_LDFLAGS = $(BOOST_REGEX_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(NCURSES_LDFLAGS)
+tatoparser_CPPFLAGS = -iquote $(top_srcdir) -I $(top_srcdir)/include $(BOOST_CPPFLAGS) $(NCURSES_CPPFLAGS)
 
 android_boost_CPPFLAGS=@android_boost_CPPFLAGS@
 android_boost_LIBS=@android_boost_LIBS@

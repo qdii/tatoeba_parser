@@ -100,6 +100,7 @@ userOptions::userOptions()
         ( "display-lang", "Displays the language of the sentence." )
         ( "separator", po::value<std::string>( &m_separator ), "Sets the separator character ('\\t' by default)." )
         ( "color,c", "Add color to the output." )
+        ( "ncurses", "Use ncurses output." )
     ;
     m_desc.add( displayOptions );
     m_visibleOptions.add( displayOptions );

@@ -57,4 +57,24 @@ void cout_display::writeSentence(
     }
     qlog::cout << '\n';
 }
+
+// ------------------------------------------------------------------------- //
+
+ncurses_display::ncurses_display()
+    : m_window { initscr() }
+{
+    if ( !m_window )
+        throw cannot_write();
+}
+
+ncurses_display::~ncurses_display() noexcept(true)
+{
+    endwin();
+}
+
+void ncurses_display::writeSentence(
+        const sentence & _sentence, const display::flag _flags, const unsigned _lineNumber,
+        const sentence * _translation )
+{
+}
 NAMESPACE_END

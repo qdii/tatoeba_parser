@@ -91,6 +91,10 @@ struct userOptions
 
     /**@brief Adds filters for a particular command that retrieves direct and indirect translations */
     void treatTranslations( const linkset & _allLinks, FilterVector & allFilters_ );
+
+    /**@brief Whether the output should be ncurses */
+    bool useNcurses() const;
+
 public:
     void printHelp();
     void printVersion();
@@ -300,5 +304,14 @@ bool userOptions::disableParallel() const
 {
     return m_vm.count( "disable-parallel" ) > 0;
 }
+
+// -------------------------------------------------------------------------- //
+
+inline
+bool userOptions::useNcurses() const
+{
+    return m_vm.count( "ncurses" ) > 0;
+}
+
 NAMESPACE_END
 #endif //TATOPARSER_OPTIONS_H

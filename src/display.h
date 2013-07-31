@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <curses.h>
 
 NAMESPACE_START
 
@@ -26,7 +27,7 @@ struct display
     /**
      * @brief destructs a display
      */
-    virtual ~display() = default;
+    virtual ~display() noexcept(true) = default;
 
     /**
      * @param[in] _sentence The sentence to write on the device
@@ -55,6 +56,7 @@ struct display
  * @desc A display that writes on std::cout */
 struct cout_display : public display
 {
+    virtual ~cout_display() noexcept(true) = default;
     /**
      * @brief Constructs a cout_display
      * @param[in] _colored Whether colors should be added to the output
@@ -76,6 +78,34 @@ private:
     const std::string m_separator;
 };
 
+/**
+ * @struct ncurses_display
+ * @author qdii
+ * @desc A display that writes on a ncurses-based terminal */
+struct ncurses_display : public display
+{
+    /**
+     * @brief Constructs a ncurses_display
+     * @throw cannot_write if the display cannot be initialized */
+    ncurses_display();
+
+    /**
+     * @brief Destructs a ncurses_display */
+    virtual ~ncurses_display() noexcept(true);
+
+    /**
+     * @brief Writes a sentence to a terminal
+     * @param[in] _sentence The sentence to write
+     * @param[in] _flags Information on what data to write
+     * @param[in] _lineNumber Which line should the sentence be output at
+     * @param[in] _translation A translation to display, or nullptr */
+    virtual void writeSentence( const sentence & _sentence, display::flag _flags,
+                                unsigned _lineNumber,
+                                const sentence * _translation ) override final;
+
+private:
+    WINDOW * m_window;
+};
 NAMESPACE_END
 
 #endif
