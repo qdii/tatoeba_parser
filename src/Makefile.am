@@ -16,24 +16,3 @@ tatoparser_SOURCES =  main.cpp options.cpp display.cpp
 tatoparser_LDADD = libtatoparser.la $(BOOST_REGEX_LIBS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(NCURSES_LIBS)
 tatoparser_LDFLAGS = $(BOOST_REGEX_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(NCURSES_LDFLAGS)
 tatoparser_CPPFLAGS = -iquote $(top_srcdir) -I $(top_srcdir)/include $(BOOST_CPPFLAGS) $(NCURSES_CPPFLAGS)
-
-android_boost_CPPFLAGS=@android_boost_CPPFLAGS@
-android_boost_LIBS=@android_boost_LIBS@
-android_boost_version=@android_boost_version@
-android_boost_lib="boost_program_options-gcc-mt-$(android_boost_version)"
-NDKBUILD = @NDK_BUILD@
-
-Android.mk: Makefile
-	./androgenizer -:PROJECT tatoparser -:REL_TOP $(top_srcdir) -:ABS_TOP $(abs_top_srcdir)	\
-		       -:SHARED tatoparser \
-		       -:SOURCES $(libtatoparser_la_SOURCES) android.cpp \
-		       -:LDFLAGS $(libtestlib_la_LDFLAGS) \
-		       -:PASSTHROUGH \
-		       		"LOCAL_CXXFLAGS	:= -std=c++0x" \
-				"LOCAL_C_INCLUDES	:= $(top_srcdir) $(top_srcdir)/include $(top_srcdir)/src $(includedir)" \
-				"LOCAL_CPPFLAGS	:= $(android_boost_CPPFLAGS) -DTATO_ANDROID" "LOCAL_CPP_FEATURES	:= exceptions rtti" \
-				"LOCAL_LDLIBS := -llog" \
-				"LOCAL_LDFLAGS := -l$(android_boost_lib) $(android_boost_LIBS)"> $@
-
-android-ndk: Android.mk
-	$(NDKBUILD) NDK_PROJECT_PATH=$(top_srcdir)/src APP_BUILD_SCRIPT=$(top_srcdir)/src/Android.mk APP_STL=gnustl_static V=1

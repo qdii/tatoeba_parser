@@ -53,26 +53,6 @@ AC_ARG_ENABLE([ncurses],
   AS_HELP_STRING([--enable-ncurses],[Adds ncurses support.]),
   [ncurses_mode=${enableval}],
   [ncurses_mode=no])
-AC_ARG_ENABLE([android],
-  AS_HELP_STRING([--enable-android],[Enables compiling android source code.]),
-  [android_mode=${enableval}],
-  [android_mode=no])
-AC_ARG_ENABLE([emulator],
-  AS_HELP_STRING([--enable-emulator],[Lets you run the APK in an emulator.]),
-  [emulator_mode=${enableval}],
-  [emulator_mode=no])
-AC_ARG_WITH([android-boost-lib], 
-  AS_HELP_STRING([--with-android-boost-lib=/path/to/boost/lib],[Specify the path to boost libraries for android.]),
-  [android_boost_lib_path="$withval"])
-AC_ARG_WITH([android-boost-include],
-  AS_HELP_STRING([--with-android-boost-include=/path/to/boost/include],[Specify the path to boost includes for android.]),
-  [android_boost_include_path="$withval"])
-AC_ARG_WITH([android-boost-version],
-  AS_HELP_STRING([--with-android-boost-version=1.49],[Specify the version of boost for android.]),
-  [android_boost_version="$withval"])
-AC_ARG_WITH([bootstrap-classpath],
-  AS_HELP_STRING([--with-bootstrap-classpath=/path/to/rt.jar],[Specify the bootstrap class path to use.]),
-  [android_bootstrap_classpath="$withval"])
 
 if test "$debug_mode" = "no"
 then
@@ -101,34 +81,6 @@ then
   AC_SUBST([INCLUDE_PYTHON], [$INCLUDE_PYTHON_])
   AC_SUBST([CPPFLAGS_PYTHON], [$CPPFLAGS_PYTHON_])
 fi	
-
-if test "x$android_mode" = "xyes"
-then
-	AC_PROG_JAVAC
-	android_boost_CPPFLAGS="-I $android_boost_include_path"
-	android_boost_LIBS="-L $android_boost_lib_path"
-	android_boost_version=${android_boost_version/./_}
-	AC_SUBST([android_boost_CPPFLAGS])
-	AC_SUBST([android_boost_LIBS])
-	AC_SUBST([android_boost_version])
-	AC_SUBST([android_bootstrap_classpath])
-
-	ANDROID_PATH_PROG_ANDROID([],[AC_MSG_ERROR([Unable to find a program called android, this should come with the android sdk.])])
-	ANDROID_PATH_PROG_DX([],[AC_MSG_ERROR([Unable to find dx, this should come with the android sdk.])])
-	ANDROID_PATH_PROG_KEYTOOL([],[AC_MSG_ERROR([Unable to find keytool, this should come with the android sdk.])])
-	ANDROID_PATH_PROG_AAPT([],[AC_MSG_ERROR([Unable to find aapt, this should come with the android sdk.])])
-	ANDROID_PATH_PROG_JARSIGNER([],[AC_MSG_ERROR([Unable to find jarsigner, this should come with the android sdk.])])
-	ANDROID_PATH_PROG_ZIPALIGN([],[AC_MSG_ERROR([Unable to find zipalign, this should come with the android sdk.])])
-	ANDROID_PATH_PROG_NDK_BUILD([],[AC_MSG_ERROR([Unable to find ndk-build, this should come with the android ndk.])])
-
-	AC_SUBST([TATOPARSER_TARGET_ID],[android-17])
-
-	if test "x$emulator_mode" = "xyes"
-	then
-		ANDROID_PATH_PROG_EMULATOR([],[AC_MSG_ERROR([Unable to find emulator, this should come with the android sdk.])])
-		ANDROID_PATH_PROG_ADB([],[AC_MSG_ERROR([Unable to find adb, this should come with the android sdk.])])
-	fi
-fi
 
 # Checks for libraries.
 AS_IF([test "x$download_mode" = "xyes"], [
@@ -174,9 +126,8 @@ AC_TYPE_UINT16_T
 # Checks for library functions.
 AC_CONFIG_FILES([Makefile
                  src/Makefile
-		 src/java/Makefile
-		 include/Makefile
-		 unittests/Makefile])
+                 include/Makefile
+                 unittests/Makefile])
 AC_OUTPUT
 
 echo \
