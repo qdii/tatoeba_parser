@@ -1,0 +1,34 @@
+# binary files
+*.o
+*.a
+*.lo
+
+# data files
+*.csv
+
+# precompiled header
+*.h.gch
+*.h.gch.debug
+*.h.gch.release
+
+# autoconf generated
+config.h
+config.h.in
+autom4te.cache
+missing
+ltmain.sh
+test-driver
+stamp-h1
+m4/*
+
+# code lite specific
+*.clang
+*.mk
+*.project
+
+# makefiles
+Makefile
+Makefile.in
+src/Makefile
+src/Makefile.in
+unittests/Makefile.in
