@@ -32,8 +32,13 @@ fileMapper::fileMapper( const std::string & _filename, bool _rdOnly )
         if( ret == -1 )
             throw invalid_file( _filename );
 
-        m_size = st.st_size;
+        m_size = static_cast<size_t>( st.st_size );
 
+        // size is given in off_t but mmap takes size_t
+        // so if size_t is smaller, there is a chance that only
+        // the first part of the file is mapped.
+        if ( static_cast<uint64_t>( st.st_size ) != static_cast<uint64_t>( m_size ) )
+            throw map_failed();
 
         // map the region
         m_region =
