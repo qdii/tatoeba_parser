@@ -29,6 +29,7 @@ struct fileMapper
     /**@brief Constructs a fileMapper by setting up the mapping
      * @throw invalid_file If the file can’t be opened, map_failed if mapping
      * the file fails. */
+    explicit
     fileMapper( const std::string & _fileName, bool _rdOnly = false );
 
     /**@brief Unset a mapping */
