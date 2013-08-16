@@ -18,7 +18,7 @@ linkset::linkset()
 void linkset::allocate( const datainfo & _datainfo )
 {
     // prepare link array
-    m_links.resize( _datainfo.m_nbLinks + _datainfo.m_nbLinks/100, 0 );
+    m_links.resize( static_cast<size_t>( _datainfo.m_nbLinks + _datainfo.m_nbLinks/100, 0 ) );
 
     // prepare ptrs array
     m_offsets.resize( _datainfo.m_highestId + 1 );

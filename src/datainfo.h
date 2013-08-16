@@ -3,6 +3,7 @@
 
 #include "tatoparser/namespace.h"
 #include "tatoparser/sentence.h"
+#include "fast_link_parser.h"
 
 NAMESPACE_START
 
@@ -14,7 +15,7 @@ struct datainfo
 
 
     // number of lines in links.csv
-    size_t m_nbLinks;
+    typename fastLinkParser<char *>::nb_of_lines m_nbLinks;
 
     // the id which had the greatest value out of all the parsed sentences
     sentence::id m_highestId;

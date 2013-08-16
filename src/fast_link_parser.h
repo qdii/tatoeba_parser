@@ -3,18 +3,20 @@
 
 #include <algorithm>
 #include "tatoparser/namespace.h"
+#include "tatoparser/linkset.h"
 
 #pragma GCC visibility push(hidden)
 
 NAMESPACE_START
-
-struct linkset;
 
 /**@struct fastLinkParser
  * @tparam iterator An input iterator to read into a buffer */
 template<typename iterator>
 struct fastLinkParser
 {
+    /**@brief The POD type that contains the number of lines returned by countLines */
+    typedef typename std::iterator_traits<iterator>::difference_type nb_of_lines;
+
     /**@brief Constructs a fastLinkParser
      * @param[in] _begin An iterator to the beginning of the buffer to parse
      * @param[in] _end An iterator to the end of the buffer to parse */
@@ -28,10 +30,10 @@ struct fastLinkParser
     /**@brief Parses the file
      * @return The number of links parsed
      * @param[in] allLinks_ A container that will be filled with the links */
-    size_t start( linkset & allLinks_ ) TATO_NO_THROW;
+    nb_of_lines start( linkset & allLinks_ ) TATO_NO_THROW;
 
     /**@brief Counts the lines in the file */
-    size_t countLines() const;
+    nb_of_lines countLines() const;
 
     /**@brief Cancels a parsing operation */
     void abort() { m_abort = true; }
@@ -44,18 +46,19 @@ private:
 // -------------------------------------------------------------------------- //
 
 template<typename iterator> inline
-size_t fastLinkParser<iterator>::countLines() const
+typename fastLinkParser<iterator>::nb_of_lines
+fastLinkParser<iterator>::countLines() const
 {
-#   pragma warning "fix this in the next major version"
-    return static_cast<size_t>( std::count( m_begin, m_end, '\n' ) );
+    return std::count( m_begin, m_end, '\n' );
 }
 
 // -------------------------------------------------------------------------- //
 
 template<typename iterator>
-size_t fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO_NO_THROW
+typename fastLinkParser<iterator>::nb_of_lines
+fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO_NO_THROW
 {
-    size_t nbLinks = 0;
+    nb_of_lines nbLinks = 0;
     register iterator ptr = m_begin;
     iterator ptrEnd = m_end;
     linkset temporaryLinkContainer;
