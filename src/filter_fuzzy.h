@@ -189,7 +189,7 @@ struct filterFuzzy : public filter
         const lvh_distance distance = levenshtein_distance_word( m_expression, removePunctuation( _sentence.str() ) );
         qlog::warning( INFINITE_DISTANCE == distance ) << "Skipping invalid sentence: " << _sentence.getId() << '\t' << _sentence.str() << '\n';
         //qlog::info << "\tdistance of " << color(green) << _sentence.str() << color() << " and " << color(green) << m_expression << color() << ": " << distance << '\n';
-        unsigned int index = 0, maxIndex = 0;
+        unsigned int maxIndex = 0;
         lvh_distance maxDistance = 0, minDistance = std::numeric_limits<lvh_distance>::max();
 
         // if the top N values have not been computed then we add one more
@@ -201,7 +201,7 @@ struct filterFuzzy : public filter
         }
         else
         {
-            for( ; index <  m_levenshteinValues.size() ; ++index )
+            for( unsigned int index = 0 ; index <  m_levenshteinValues.size() ; ++index )
             {
                 if( m_levenshteinValues[index] > maxDistance )
                 {

@@ -46,10 +46,9 @@ int fastTagParser<iterator>::start( tagset & TATO_RESTRICT _tagset ) TATO_NO_THR
     register iterator const end = m_end;
 
     sentence::id sentenceId = sentence::INVALID_ID;
-    char * tagName = nullptr;
     tagset temporaryTagContainer;
 
-    while( cursor != end && !m_abort )
+    for ( char * tagName = nullptr; cursor != end && !m_abort; )
     {
         sentenceId = static_cast<sentence::id>( *cursor++ - '0' );
 
