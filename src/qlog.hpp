@@ -555,6 +555,7 @@ struct text_decoration : public decoration
 
     text_decoration( text_decoration & _copy )
         :m_txt( _copy.m_txt )
+        ,m_nb( _copy.m_nb )
     {
     }
 

@@ -13,6 +13,7 @@ struct fastTagParser
     fastTagParser( iterator _begin, iterator _end )
         :m_begin( _begin )
         ,m_end( _end )
+        ,m_abort( false )
     {
     }
 
