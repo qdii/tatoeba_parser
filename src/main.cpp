@@ -373,7 +373,6 @@ bool downloadIf( bool _condition, std::string _url, std::string _filename )
 void displaySentence( userOptions & _options, dataset & _allSentences, linkset & _allLinks, const sentence & _sentence, unsigned _lineNumber, display & _out )
 {
     using namespace qlog;
-    const bool useColors = _options.isColored();
     std::string translationLanguage = _options.getFirstTranslationLanguage();
 
     display::flag options { display::DISPLAY_NONE };
