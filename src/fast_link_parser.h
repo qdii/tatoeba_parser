@@ -68,9 +68,8 @@ fastLinkParser<iterator>::start( linkset & TATO_RESTRICT allLinks_ ) TATO_NO_THR
 
     sentence::id firstId = 0;
     sentence::id id = 0;
-    register char c;
 
-    while( ptr != ptrEnd && !m_abort)
+    for (register char c; ptr != ptrEnd && !m_abort;)
     {
         c = *ptr++;
 
